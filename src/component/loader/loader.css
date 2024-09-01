@@ -1,0 +1,78 @@
+body {
+  margin: 0;
+}
+
+.cen {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 620px;
+}
+.main {
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  animation: anim 2s linear forwards;
+  opacity: 0;
+  position: absolute;
+  z-index: 100;
+  background-color: red;
+  display: block;
+}
+@keyframes anim {
+  0% {
+    overflow: hidden;
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+    overflow: auto;
+  }
+  100% {
+    display: none;
+    opacity: 0;
+  }
+}
+
+.mar {
+  top: 30px;
+  left: 30px;
+  position: relative;
+  animation: marAnim 1s normal;
+  transform: scaleX(-1);
+  width: 600px;
+  rotate: -90deg;
+}
+@keyframes marAnim {
+  from {
+    left: -100vw;
+    rotate: 400deg;
+  }
+  to {
+    left: 30px;
+    /* rotate: 300deg; */
+  }
+}
+
+@keyframes fauxAnim {
+  from {
+    left: 100vw;
+    rotate: -360deg;
+  }
+  to {
+    rotate: 0deg;
+    left: 0px;
+  }
+}
+
+.fau {
+  width: 620px;
+  position: absolute;
+  animation: fauxAnim 1s normal;
+  rotate: 0deg;
+}

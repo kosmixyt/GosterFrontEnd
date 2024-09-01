@@ -1,0 +1,7 @@
+.line-render:hover>.swip-btn {
+  opacity: 0.8;
+}
+
+.swiper-wrapper {
+  width: 100vw;
+}
