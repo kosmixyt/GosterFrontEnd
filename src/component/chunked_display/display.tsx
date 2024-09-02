@@ -8,7 +8,7 @@ export const chunk_size = window.innerWidth > 1000 ? 6 : window.innerWidth > 600
 export const ChunkDisplay = (props: { items: SKINNY_RENDER[]; hidden?: boolean }) => {
   const [items, setItems] = React.useState<SKINNY_RENDER[]>(props.items.slice(0, chunk_size * 4));
   useEffect(() => {
-    setItems(_.take(props.items, chunk_size * 4));
+    setItems(_.take(props.items, chunk_size * 10));
   }, [props.items]);
   return (
     <InfiniteScroll

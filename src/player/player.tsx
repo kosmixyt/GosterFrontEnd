@@ -1,13 +1,8 @@
 import React, { useEffect } from "react";
-import { NavigateFunction, Params, useLoaderData, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { NavigateFunction, Params, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { app_url } from "..";
-import { FormatRuntime, MovieItem } from "../render/render";
 import Hls from "hls.js";
 import "./play.css";
-import { toast } from "react-toastify";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import pause from "./icons/pause-svgrepo-com.svg";
 import play from "./icons/play-svgrepo-com.svg";
 import fullscren from "./icons/full-screen-svgrepo-com.svg";
@@ -21,8 +16,7 @@ import { createPortal } from "react-dom";
 import livestream from "./icons/play-stream-svgrepo-com.svg";
 import unlock from "./icons/lock-keyhole-minimalistic-unlocked-svgrepo-com.svg";
 import lock from "./icons/lock-keyhole-minimalistic-svgrepo-com.svg";
-import { bytesToSize } from "../torrent";
-import { BrowserView, isMobile, MobileView } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { DisplayTask } from "../component/taskdisplay/taskdisplay";
 import { PlatformManager } from "../cordova/platform";
 import { TranscodeDATA } from "../cordova/electron/electronTranscoder";
@@ -88,22 +82,24 @@ class NewPlayer extends React.Component<PlayerProps> {
   }
   componentDidMount(): void {
     document.addEventListener("keydown", this.onkeydown.bind(this));
-    this.hls = this.props.data.create_hls(this.video.current!, () => {
-      return {
-        trackIndex: this.state.currentTrack.Index,
-        currentQualityName: this.state.currentQuality.Name,
-        currentTime: this.state.currentTime.toString(),
-      };
-    });
+    console.log("mount", this.props.data.isBrowserPlayable);
+    if (!this.props.data.isBrowserPlayable) {
+      this.hls = this.props.data.create_hls(this.video.current!, () => {
+        return {
+          trackIndex: this.state.currentTrack.Index,
+          currentQualityName: this.state.currentQuality.Name,
+          currentTime: this.state.currentTime.toString(),
+        };
+      });
+    } else {
+      this.video.current!.src = this.props.data.manifest;
+    }
   }
   shouldComponentUpdate(nextProps: Readonly<PlayerProps>, nextState: Readonly<{}>, nextContext: any): boolean {
     return true;
   }
   onkeydown(e: KeyboardEvent) {
     if (this.state.controlsLocked) return;
-    // if (e.key === " ") {
-    //   this.playPause();
-    // }
     switch (e.key) {
       case " ":
         this.playPause();
@@ -119,7 +115,7 @@ class NewPlayer extends React.Component<PlayerProps> {
   componentDidUpdate(prevProps: Readonly<PlayerProps>, prevState: Readonly<{}>, snapshot?: any): void {}
   componentWillUnmount(): void {
     document.removeEventListener("keydown", this.onkeydown.bind(this));
-    this.props.data.unload(this.hls);
+    if (!this.props.data.isBrowserPlayable) this.props.data.unload(this.hls);
   }
   GetCurrentIndex(): number {
     // hls_time = 2
@@ -270,27 +266,18 @@ class NewPlayer extends React.Component<PlayerProps> {
   }
   backward(e: React.MouseEvent<HTMLDivElement> | null) {
     if (e) e.stopPropagation();
-    // this.video.current!.currentTime -= 10;
     var time = this.video.current!.currentTime - 10;
-    // this.hls.startLoad(time);
     this.video.current!.currentTime = time;
   }
   forward(e: React.MouseEvent<HTMLDivElement> | null) {
     if (e) e.stopPropagation();
-    // this.video.current!.currentTime += 10;
     var time = this.video.current!.currentTime + 10;
-    // this.hls.startLoad(time);
     this.video.current!.currentTime = time;
   }
 
   render() {
     return (
-      <div
-        onMouseMove={this.on_leave.bind(this)}
-        onMouseEnter={this.on_enter.bind(this)}
-        onMouseLeave={this.on_leave.bind(this)}
-        ref={this.Container}
-      >
+      <div onMouseMove={this.on_leave.bind(this)} onMouseEnter={this.on_enter.bind(this)} onMouseLeave={this.on_leave.bind(this)} ref={this.Container}>
         <video
           onPlay={() => {
             this.setState({ playing: true });

@@ -18,19 +18,19 @@ export function DisplayTask(props: { task_id: string; className?: string; hidden
   const [autoScroll, setAutoScroll] = useState(true);
   const [text, setText] = useState("");
   useEffect(() => {
-    const inter = setInterval(() => {
-      fetch(app_url + `/task?taskid=${props.task_id}`, {
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then((data: TaskData) => {
-          setText(data.logs.replaceAll("\n", "<br>"));
-
-          //   container.current?.scrollTo(0, container.current.scrollHeight);
-        });
-    }, 1000);
+    const event = new EventSource(app_url + `/task?taskid=${props.task_id}`, { withCredentials: true });
+    event.addEventListener("log", (e) => {
+      setText((text) => text + e.data.replaceAll("\n", "<br>"));
+      if (container.current && autoScroll) {
+        container.current.scrollTop = container.current.scrollHeight;
+      }
+    });
+    event.addEventListener("error", (e) => {
+      event.close();
+    });
     return () => {
-      clearInterval(inter);
+      //   clearInterval(inter);
+      event.close();
     };
   }, []);
   useEffect(() => {
@@ -43,7 +43,7 @@ export function DisplayTask(props: { task_id: string; className?: string; hidden
       ref={container}
       hidden={props.hidden}
       dangerouslySetInnerHTML={{ __html: text }}
-      className="max-w-full max-h-[90%] overflow-auto text-black font-bold bg-white opacity-50"
+      className="max-w-full max-h-[90%] text-left overflow-auto text-black font-bold bg-white opacity-50"
     ></div>
   );
 }

@@ -9,6 +9,7 @@ export const QUALITYS = ["1080p", "720p", "480p", "360p", "240p"];
 export interface ConvertInfo {
   Qualities: QUALITY[];
   AudioTracks: Track[];
+  Paths: string[];
 }
 
 export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE; hidden: boolean; close: () => void }) {
@@ -19,6 +20,7 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
   const [convertInfo, setConvertInfo] = useState<ConvertInfo | null>(null);
   const [qualityIndex, setQualityIndex] = useState(0);
   const [audioIndex, setAudioIndex] = useState(0);
+  const [pathIndex, setPathIndex] = useState(0);
   useEffect(() => {
     var t = toast.info("Loading Convert Info", { autoClose: false });
     fetch(`${app_url}/transcode/options?file_id=${props.file.ID}`, { credentials: "include" })
@@ -26,6 +28,8 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
       .then((body) => {
         setConvertInfo(body);
         toast.update(t, { render: "Convert Info Loaded", type: "success", autoClose: 2000 });
+        setAudioIndex(body.AudioTracks[0].Index);
+        setPathIndex(0);
         toast.dismiss(t);
       });
   }, []);
@@ -85,9 +89,22 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
                 </option>
               ))}
             </select>
+            <select
+              value={pathIndex}
+              onChange={(e) => setPathIndex(parseInt(e.target.value))}
+              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
+            >
+              {convertInfo.Paths.map((path, i) => (
+                <option key={i} value={i}>
+                  {path}
+                </option>
+              ))}
+            </select>
             <button
               onClick={() => {
-                post_convert(newFileName, props.file.ID, convertInfo.Qualities[qualityIndex].Resolution, audioIndex).then(props.close);
+                post_convert(newFileName, props.file.ID, convertInfo.Qualities[qualityIndex].Resolution, audioIndex, convertInfo.Paths[pathIndex]).then(
+                  props.close
+                );
               }}
               className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
             >
@@ -100,10 +117,11 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
     document.body
   );
 }
-export async function post_convert(newFileName: string, file_id: number, qualityRes: number, audioTrackIndex: number) {
+export async function post_convert(newFileName: string, file_id: number, qualityRes: number, audioTrackIndex: number, path: string) {
+  console.log(audioTrackIndex);
   const t = toast.info("Converting", { autoClose: false });
   const req = await fetch(
-    `${app_url}/transcode/convert?file_id=${file_id}&audio_track_index=${audioTrackIndex}&quality_res=${qualityRes}&filename=${newFileName}`,
+    `${app_url}/transcode/convert?file_id=${file_id}&audio_track_index=${audioTrackIndex}&quality_res=${qualityRes}&filename=${newFileName}&path=${path}`,
     {
       credentials: "include",
     }

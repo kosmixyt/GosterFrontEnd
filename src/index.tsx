@@ -26,7 +26,8 @@ import Torrent from "./torrent";
 import { Head } from "./component/layout/layout";
 import { dragger_loader, DragPage } from "./metadata/dragger";
 import { Updater } from "./metadata/updater";
-export const app_url = "https://xxxxvideos.kosmix.fr/api";
+// export const app_url = "https://xxxxvideos.kosmix.fr/api";
+export const app_url = "http://localhost:90/api";
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 var globalMute = false;
 export const setMute = (mute: boolean) => {

@@ -244,6 +244,7 @@ export async function electron_get_transcode_data(uri: string): Promise<Transcod
     qualitys: [],
     tracks: [],
     subtitles: [],
+    isBrowserPlayable: false,
     download_url: "",
     manifest: "m3u8",
     task_id: "",
@@ -295,6 +296,7 @@ export interface TranscodeDATA {
   tracks: Track[];
   subtitles: Subtitle[];
   download_url: string;
+  isBrowserPlayable: boolean;
   manifest: string;
   task_id: string;
   current: number;

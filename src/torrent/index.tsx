@@ -12,11 +12,13 @@ import { IoIosCloseCircle } from "react-icons/io";
 import { createPortal } from "react-dom";
 import { PlatformManager } from "../cordova/platform";
 
-export function bytesToSize(bytes: number) {
+export function bytesToSize(bytes: number, decimals = 2) {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   if (bytes === 0) return "0 Byte";
-  const i = parseInt(String(Math.floor(Math.log(bytes) / Math.log(1024))));
-  return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
+  //   const i = parseInt(String(Math.floor(Math.log(bytes) / Math.log(1024))));
+  //   return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 var smpl = {
@@ -362,7 +364,7 @@ function RenderLineArray(props: { torrent: typeof smpl }) {
                   </a>
                 </div>
                 <div>Creator : {showed.data.creator}</div>
-                <div>Date De creation {new Date(showed.data.creation_date * 1000).toLocaleDateString()}</div>
+                <div>Date De creation {new Date(showed.data.creation_date).toLocaleDateString()}</div>
                 <div>Commentaire : {showed.data.comment}</div>
                 <div>Ajouté le {new Date(showed.data.added * 1000).toLocaleDateString()}</div>
                 <div>
@@ -589,19 +591,25 @@ export interface ParsedBencode {
   );
 }
 
+export function GetStorages(): Promise<string[]> {
+  return fetch(`${app_url}/torrents/storage`, {
+    credentials: "include",
+  })
+    .then((e) => e.json())
+    .then((e) => {
+      return e.paths;
+    });
+}
+
 function MoveTargetStorage(props: { item: typeof smpl; show: boolean; oncancel: () => void }) {
   const [availableStorage, setAvailableStorage] = useState<string[]>([]);
   const [target, setTarget] = useState("");
   console.log("render", target);
   useEffect(() => {
-    fetch(`${app_url}/torrents/storage`, {
-      credentials: "include",
-    })
-      .then((e) => e.json())
-      .then((e) => {
-        setAvailableStorage(e.paths);
-        setTarget(e.paths[0]);
-      });
+    GetStorages().then((e) => {
+      setAvailableStorage(e);
+      setTarget(e[0]);
+    });
     document.body.classList.add("overflow-hidden");
     return () => {
       document.body.classList.remove("overflow-hidden");
@@ -651,15 +659,6 @@ function MoveTargetStorage(props: { item: typeof smpl; show: boolean; oncancel: 
                     eventSource.close();
                     props.oncancel();
                   });
-                  //   fetch(`${app_url}/torrents/move?torrent_id=${props.item.id}&target=${target}`, {
-                  //     credentials: "include",
-                  //     method: "GET",
-                  //   })
-                  //     .then((e) => e.json())
-                  //     .then((e) => {
-                  //       toast.info(e.status);
-                  //       props.oncancel();
-                  //     });
                 }}
               >
                 Move
@@ -718,6 +717,10 @@ export function AddModal(props: {
     if (props.preload?.search !== "" && props.preload?.search != null) {
       searchButton.current!.click();
     }
+    document.body.style.overflowY = "hidden";
+    return () => {
+      document.body.style.overflowY = "auto";
+    };
   }, []);
   if (torrentId == null) {
     return (

@@ -21,7 +21,7 @@ export const Head = (props: {}) => {
   const nav = useNavigate();
   const [isSearch, setSearch] = useState(false);
   const buttonStyle = "text-2xl cursor-pointer electron-no-draggable";
-  if (document.location.href.includes("/player")) {
+  if (document.location.href.includes("/player") || document.location.href.includes("/pty")) {
     return (
       <>
         <ToastContainer />

@@ -13,6 +13,8 @@ import { SwiperSlide, Swiper } from "swiper/react";
 import { PlatformManager } from "../cordova/platform";
 import { BackDrop } from "../component/backdrop/backdrop";
 import { ConvertModal } from "../convert/convert";
+import { ChooseStorage } from "../component/choosestorage/choosestorage";
+import { RequestModal } from "../requests/requests";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -123,6 +125,8 @@ export interface RenderState {
   season: number;
   addModal: boolean;
   convertModal: boolean;
+  ChooseStorage: File | null;
+  requestModal: boolean;
 }
 
 class Renderer extends React.Component<RendereProps> {
@@ -135,7 +139,9 @@ class Renderer extends React.Component<RendereProps> {
     item: {} as MovieItem | TVItem,
     convertModal: false,
     season: 0,
+    requestModal: false,
     addModal: false,
+    ChooseStorage: null,
   };
   constructor(props: RendereProps) {
     super(props);
@@ -217,6 +223,10 @@ class Renderer extends React.Component<RendereProps> {
   private on_drag_over(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
   }
+  public on_choosedStorage(storage: string) {
+    console.log("Storage choosed", storage, this.state.ChooseStorage);
+    post_file(this.state.ChooseStorage as File, this.state.item.TYPE, this.state.item.ID, storage);
+  }
   private on_drop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     if (e.dataTransfer.items) {
@@ -225,31 +235,8 @@ class Renderer extends React.Component<RendereProps> {
       if (file.name.endsWith(".torrent")) {
         return post_file_torrent(file, this.state.item.TYPE, this.state.item, -1);
       }
-      var form = new FormData();
-      form.append("file", file);
-      form.append("type", this.state.item.TYPE);
-      form.append("id", this.state.item.ID);
-      const xhr = new XMLHttpRequest();
-      this.toastId = toast.info("Upload en cours", {
-        autoClose: false,
-      });
-      xhr.upload.onprogress = (e) => {
-        toast.update(this.toastId, {
-          render: `Upload en cours ${Number((e.loaded / e.total) * 100).toFixed(1)}%`,
-        });
-      };
-      xhr.onload = (e) => {
-        const json = JSON.parse(xhr.responseText);
-        xhr.status == 200 ? toast.success("Upload terminé") : toast.error(`Erreur lors de l'upload : ${json.error}`);
-      };
-      xhr.onerror = (e) => {
-        toast.error("Erreur lors de l'upload");
-      };
-      xhr.open("POST", `${app_url}/upload`, true);
-      xhr.withCredentials = true;
-      xhr.send(form);
-    } else {
-      toast.error("Aucun fichier selectionné");
+      this.setState({ ChooseStorage: file });
+      return;
     }
   }
 
@@ -278,12 +265,21 @@ class Renderer extends React.Component<RendereProps> {
           ) : (
             <></>
           )}
+          {this.state.ChooseStorage && <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />}
           {this.state.convertModal && this.state.item.TYPE === "movie" && (
             <ConvertModal
               close={() => this.setState({ convertModal: false })}
               file={this.currentFile}
               item={this.state.item}
               hidden={!this.state.convertModal}
+            />
+          )}
+          {this.state.requestModal && (
+            <RequestModal
+              itemId={this.state.item.ID}
+              type={this.state.item.TYPE}
+              seasonId={this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].ID.toString() : ""}
+              close={() => this.setState({ requestModal: false })}
             />
           )}
 
@@ -328,6 +324,9 @@ class Renderer extends React.Component<RendereProps> {
                           </div>
                           <div className="cursor-pointer" onClick={() => this.setState({ convertModal: true })}>
                             Convert
+                          </div>
+                          <div className="cursor-pointer" onClick={() => this.setState({ requestModal: true })}>
+                            Request When Available
                           </div>
                         </div>
                       </div>
@@ -406,8 +405,19 @@ class Renderer extends React.Component<RendereProps> {
                                           width: GetProgress(e.WATCH),
                                         }}
                                       ></div>
-                                      <div className="text-center font-semibold">
-                                        {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                                      <div className="text-center font-semibold flex justify-between">
+                                        <div>
+                                          {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                                        </div>
+                                        <div
+                                          className="cursor-pointer"
+                                          onClick={(event) => {
+                                            this.epDl(event, e, -1);
+                                          }}
+                                        >
+                                          Télécharger
+                                        </div>
+                                        <div className="mr-4">({e.FILES.length})</div>
                                       </div>
                                     </div>
                                   </div>
@@ -589,4 +599,32 @@ export function GetProgress(p: WATCH_DATA): string {
     return "0%";
   }
   return `${(p.CURRENT / p.TOTAL) * 100}%`;
+}
+
+export async function post_file(file: File, type: string, id: string, path: string) {
+  var form = new FormData();
+  console.log(file);
+  form.append("file", file);
+  form.append("type", type);
+  form.append("id", id);
+  form.append("path", path);
+  const xhr = new XMLHttpRequest();
+  var toastId = toast.info("Upload en cours", {
+    autoClose: false,
+  });
+  xhr.upload.onprogress = (e) => {
+    toast.update(toastId, {
+      render: `Upload en cours ${Number((e.loaded / e.total) * 100).toFixed(1)}%`,
+    });
+  };
+  xhr.onload = (e) => {
+    const json = JSON.parse(xhr.responseText);
+    xhr.status == 200 ? toast.success("Upload terminé") : toast.error(`Erreur lors de l'upload : ${json.error}`);
+  };
+  xhr.onerror = (e) => {
+    toast.error("Erreur lors de l'upload");
+  };
+  xhr.open("POST", `${app_url}/upload`, true);
+  xhr.withCredentials = true;
+  xhr.send(form);
 }
