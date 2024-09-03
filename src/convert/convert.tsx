@@ -28,7 +28,6 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
       .then((body) => {
         setConvertInfo(body);
         toast.update(t, { render: "Convert Info Loaded", type: "success", autoClose: 2000 });
-        setAudioIndex(body.AudioTracks[0].Index);
         setPathIndex(0);
         toast.dismiss(t);
       });
@@ -43,6 +42,7 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
     return <></>;
   }
 
+  console.log(audioIndex)
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -84,8 +84,8 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
               className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
             >
               {convertInfo.AudioTracks.map((audio, i) => (
-                <option key={i} value={audio.Index}>
-                  {audio.Name}
+                <option key={i} value={i}>
+                  {audio.Name} {i}
                 </option>
               ))}
             </select>

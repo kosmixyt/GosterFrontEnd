@@ -73,7 +73,7 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
             </div>
           ) : (
             <div onClick={props.close} className={`flex flex-wrap gap-5 justify-center h-5/6 overflow-auto`}>
-              {data?.elements.map((element, i) => {
+                {data?.elements.slice(0, 20).map((element, i) => {
                 return <PosterRenderer InheritGo={props.onselect} key={i} {...element} />;
               })}
             </div>

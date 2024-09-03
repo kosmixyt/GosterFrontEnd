@@ -56,8 +56,8 @@ export async function RequestItem(maxsize: number, itemId: string, seasonId: str
     credentials: "include",
   });
   const data = await res.json();
-  if (data.status === "error") {
-    toast.update(info, { render: data.message, type: "error" });
+  if (data.status === "error" || typeof data.error === "string") {
+    toast.update(info, { render: data.error, type: "error" });
   }
   if (data.status === "success") {
     toast.update(info, { render: data.message, type: "success" });

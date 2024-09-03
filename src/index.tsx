@@ -24,7 +24,7 @@ import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
 import Torrent from "./torrent";
 import { Head } from "./component/layout/layout";
-import { dragger_loader, DragPage } from "./metadata/dragger";
+import { Dragger, dragger_loader } from "./metadata/dragger";
 import { Updater } from "./metadata/updater";
 // export const app_url = "https://xxxxvideos.kosmix.fr/api";
 export const app_url = "http://localhost:90/api";
@@ -67,6 +67,14 @@ const router = createBrowserRouter([
         element: <Torrent />,
       },
       {
+        path: "/me",
+        element: <UserLanding />
+      },
+      {
+        path: "/metadata",
+        element: <Dragger />,
+      },
+      {
         path: "/converts",
         element: <Converts />,
       },
@@ -87,11 +95,6 @@ const router = createBrowserRouter([
         element: <PlayerRender />,
       },
       {
-        loader: dragger_loader,
-        path: "/dragger",
-        element: <DragPage />,
-      },
-      {
         path: "/pty",
         element: <PTY />,
       },
@@ -101,4 +104,5 @@ const router = createBrowserRouter([
 root.render(<RouterProvider router={router} />);
 
 import { Buffer } from "buffer";
-import { Converts } from "./convert";
+import { Converts } from "./convert"; import { UserLanding } from "./me/landing";
+
