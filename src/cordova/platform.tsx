@@ -1,7 +1,6 @@
 import { M } from "vite/dist/node/types.d-aGj9QkWt";
 import { DownloadWeb, get_transcode_data } from "./web";
 import { EPISODE, FileItem, MovieItem, TVItem } from "../render/render";
-import { Episode } from "../metadata/dragger";
 import "./electron/electron";
 import { electron_load_cache, electron_save_cache, ElectronDownload } from "./electron/electron";
 import { app } from "electron";
@@ -35,7 +34,7 @@ export class PlatformManager {
         break;
     }
   }
-  static async DispatchCache(item: string, type: string) {
+  static async DispatchCache(item: string, type: string): Promise<MovieItem | TVItem> {
     if (item == "undefined" || (type !== "movie" && type !== "tv")) throw new Error("Invalid item");
     var render = null;
     render = CacheManager.GetCache(item, type);

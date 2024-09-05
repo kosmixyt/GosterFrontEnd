@@ -50,6 +50,10 @@ const router = createBrowserRouter([
         element: <LoginComp />,
       },
       {
+        path: "/dragger",
+        element: <Dragger />,
+      },
+      {
         path: "/",
         element: <Landing />,
         loader: landing_loader,
@@ -68,7 +72,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/me",
-        element: <UserLanding />
+        element: <UserLanding />,
       },
       {
         path: "/metadata",

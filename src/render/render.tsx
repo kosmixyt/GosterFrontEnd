@@ -112,6 +112,7 @@ export interface FileItem {
   DOWNLOAD_URL: string;
   TRANSCODE_URL: string;
   CURRENT: number;
+  SIZE: number;
 }
 export interface PROVIDER {
   PROVIDER_ID: number;
@@ -265,7 +266,9 @@ class Renderer extends React.Component<RendereProps> {
           ) : (
             <></>
           )}
-          {this.state.ChooseStorage && <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />}
+          {this.state.ChooseStorage && (
+            <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />
+          )}
           {this.state.convertModal && this.state.item.TYPE === "movie" && (
             <ConvertModal
               close={() => this.setState({ convertModal: false })}
@@ -322,7 +325,11 @@ class Renderer extends React.Component<RendereProps> {
                           <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
                             Manualy add torrent
                           </div>
-                          <div className="cursor-pointer" onClick={() => this.setState({ convertModal: true })}>
+                          <div
+                            className="cursor-pointer"
+                            hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                            onClick={() => this.setState({ convertModal: true })}
+                          >
                             Convert
                           </div>
                           <div className="cursor-pointer" onClick={() => this.setState({ requestModal: true })}>
