@@ -15,6 +15,7 @@ import { BackDrop } from "../component/backdrop/backdrop";
 import { ConvertModal } from "../convert/convert";
 import { ChooseStorage } from "../component/choosestorage/choosestorage";
 import { RequestModal } from "../requests/requests";
+import { ShareModal } from "../me/landing";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -127,6 +128,7 @@ export interface RenderState {
   addModal: boolean;
   convertModal: boolean;
   ChooseStorage: File | null;
+  shareModal: FileItem | null;
   requestModal: boolean;
 }
 
@@ -139,6 +141,7 @@ class Renderer extends React.Component<RendereProps> {
   public state: RenderState = {
     item: {} as MovieItem | TVItem,
     convertModal: false,
+    shareModal: null,
     season: 0,
     requestModal: false,
     addModal: false,
@@ -285,7 +288,7 @@ class Renderer extends React.Component<RendereProps> {
               close={() => this.setState({ requestModal: false })}
             />
           )}
-
+          {this.state.shareModal != null && <ShareModal file_item={this.state.shareModal} close={() => this.setState({ shareModal: null })} />}
           <BrowserView>
             <div
               style={{
@@ -332,8 +335,25 @@ class Renderer extends React.Component<RendereProps> {
                           >
                             Convert
                           </div>
-                          <div className="cursor-pointer" onClick={() => this.setState({ requestModal: true })}>
+                          <div
+                            className="cursor-pointer"
+                            hidden={
+                              (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
+                              (this.state.item.TYPE === "tv" &&
+                                this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
+                                  return p + c.FILES.length;
+                                }, 0) > 0)
+                            }
+                            onClick={() => this.setState({ requestModal: true })}
+                          >
                             Request When Available
+                            {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
+                          </div>
+                          <div
+                            onClick={() => this.setState({ shareModal: this.currentFile })}
+                            hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                          >
+                            Share
                           </div>
                         </div>
                       </div>

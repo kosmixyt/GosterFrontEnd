@@ -4,6 +4,8 @@ import { nanoid } from "nanoid";
 import { RiCompassDiscoverFill } from "react-icons/ri";
 import { MdMovieCreation } from "react-icons/md";
 import { Outlet } from "react-router-dom";
+import { MdAccountCircle } from "react-icons/md";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CgWebsite } from "react-icons/cg";
@@ -54,6 +56,10 @@ export const Head = (props: {}) => {
           <div className={buttonStyle} onClick={() => setSearch(!isSearch)}>
             <FaSearch size={iconSize} />
             {showName ? <div className="block text-xs text-center">Search</div> : <></>}
+          </div>
+          <div className={buttonStyle} onClick={() => nav("/me")}>
+            <MdAccountCircle size={iconSize} />
+            {showName ? <div className="block text-xs text-center">Me</div> : <></>}
           </div>
           {/* <button onClick={() => CacheManager.Clear()}>Clear cahe</button> */}
         </div>

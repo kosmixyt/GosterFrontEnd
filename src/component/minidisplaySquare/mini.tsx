@@ -33,7 +33,7 @@ export function MiniDisplay(props: { children: React.ReactNode; itemId: string; 
             bg-slate-800
             rounded-lg w-72 flex items-center border-2 border-black`}
           >
-            <img className="rounded-lg w-32 h-40 ml-4 " src={data.POSTER} alt="poster" />
+            <img className="rounded-lg w-32 h-40 ml-4 mt-2 mb-2 " src={data.POSTER} alt="poster" />
             <div className="text-left ml-2">
               <div className="text-lg capitalize font-bold text-white">{data.DISPLAY_NAME}</div>
               <div className="flex gap-1">
