@@ -79,10 +79,6 @@ const router = createBrowserRouter([
         element: <Dragger />,
       },
       {
-        path: "/converts",
-        element: <Converts />,
-      },
-      {
         path: "/watchlist",
         element: <Navigate replace to={"/browse?action=watchlist"} />,
       },
@@ -108,5 +104,5 @@ const router = createBrowserRouter([
 root.render(<RouterProvider router={router} />);
 
 import { Buffer } from "buffer";
-import { Converts } from "./convert"; import { UserLanding } from "./me/landing";
+import { UserLanding } from "./me/landing";
 

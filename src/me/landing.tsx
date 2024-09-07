@@ -1,5 +1,5 @@
 import { random } from "lodash";
-import { bytesToSize } from "../torrent";
+import { bytesToSize, TorrentItem } from "../torrent";
 import { app_url } from "..";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,10 +28,6 @@ export function UserLanding() {
       <div className="font-semibold text-2xl ml-4 underline underline-offset-4">Requete de téléchargement</div>
       <Swiper slidesPerView={"auto"}>
         {me.requests.map((req) => {
-          const currentDate = new Date();
-          const lastUpdate = new Date(req.Last_Update);
-          const diff = currentDate.getTime() - lastUpdate.getTime();
-          const ecoule = new Date(diff).toLocaleTimeString();
           return (
             <SwiperSlide
               onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}
@@ -39,7 +35,7 @@ export function UserLanding() {
               style={{ width: "fit-content" }}
               className="flex justify-center cursor-pointer"
             >
-              <div className="flex flex-col w-96  bg-gray-800 rounded-lg p-4 m-4">
+              <div className="flex flex-col min-w-96  bg-gray-800 rounded-lg p-4 m-4">
                 <div className="items-center font-semibold underline flex justify-between">
                   <div>
                     <div className="text-lg">{req.Media_Name}</div>
@@ -52,7 +48,6 @@ export function UserLanding() {
                         setMe({ ...me, requests: me.requests.filter((r) => r.ID !== req.ID) });
                       });
                     }}
-                    // hidden={req.Status !== "finished"}
                     src={req.Status !== "finished" ? close : check}
                     alt=""
                     className="w-6 h-6"
@@ -61,7 +56,7 @@ export function UserLanding() {
                 <img src={req.Render.BACKDROP} alt="" className="w-72 mt-2 mb-2 rounded-lg" />
                 <div className="text-sm">Max Size: {bytesToSize(req.MaxSize)}</div>
                 <div className="text-sm">Status: {req.Status}</div>
-                <div className="text-sm">Last Update: {ecoule}</div>
+                <div className="text-sm">Last Update: {req.Last_Update}sec ago</div>
               </div>
             </SwiperSlide>
           );
@@ -111,6 +106,32 @@ export function UserLanding() {
           );
         })}
       </Swiper>
+      <div hidden={me.Torrents.length == 0} className="font-semibold text-2xl ml-4 underline underline-offset-4">
+        Torrents
+      </div>
+      <Swiper slidesPerView={"auto"}>
+        {me.Torrents.map((torrent) => {
+          return (
+            <SwiperSlide
+              onClick={() => nav(`/render/${torrent.mediaOutput}/${torrent.mediaOutputUuid}`)}
+              key={torrent.id}
+              style={{ width: "fit-content" }}
+              className="flex justify-center cursor-pointer"
+            >
+              <div className="flex flex-col min-w-96  bg-gray-800 rounded-lg p-4 m-4">
+                <div className="items-center font-semibold underline flex justify-between">
+                  <div>
+                    <div className="text-lg">{torrent.name}</div>
+                  </div>
+                </div>
+                {/* <img src={torrent.backdrop} alt="" className="w-72 mt-2 mb-2 rounded-lg" /> */}
+                <div className="text-sm">Size: {bytesToSize(torrent.size)}</div>
+                <div className="text-sm">Status: {torrent.status}</div>
+              </div>
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
     </div>
   );
 }
@@ -127,6 +148,7 @@ interface Me {
   allowed_transcode: number;
   current_transcode: number;
   shares: Me_Share[];
+  Torrents: TorrentItem[];
 }
 
 interface MeNotification {
@@ -136,10 +158,10 @@ interface MeNotification {
 
 interface MeRequest {
   ID: number;
-  Created: string;
+  Created: number;
   Type: string;
   Status: string;
-  Last_Update: Date;
+  Last_Update: number;
   MaxSize: number;
   Interval: number;
   Media_Name: string;
@@ -224,4 +246,32 @@ export function ShareModal(props: { file_item: FileItem; close: () => void }) {
     </div>,
     document.body
   );
+}
+export type TaskStatus = "ERROR" | "PENDING" | "RUNNING" | "FINISHED" | "CANCELLED";
+interface ConvertProgress {
+  SOURCE_FILE_ID: number;
+  SOURCE_FILE_NAME: string;
+  OUTPUT_FILE_NAME: string;
+  TaskStatus: TaskStatus;
+  TaskError: string;
+  Task_id: number;
+  Quality: string;
+  AudioTrackIndex: number;
+  Running: boolean;
+  Progress: {
+    Frame: number;
+    Fps: number;
+    Stream_0_0_q: number;
+    Bitrate: number;
+    Total_size: number;
+    Out_time_us: number;
+    Out_time_ms: number;
+    Out_time: string;
+    Dup_frames: number;
+    Drop_frames: number;
+    Speed: number;
+    Progress: "progress" | "end";
+    TotalProgress: number;
+  };
+  Start: number;
 }

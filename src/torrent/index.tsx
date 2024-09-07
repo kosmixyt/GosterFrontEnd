@@ -21,21 +21,23 @@ export function bytesToSize(bytes: number, decimals = 2) {
   return parseFloat((bytes / Math.pow(1024, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
-var smpl = {
-  id: 10,
-  name: "Ubuntu 20.04",
-  size: 100000,
-  peers: 10,
-  paused: false,
-  maxpeers: 100,
-  mediaOutput: "tv",
-  status: "download",
-  totalDownloaded: 1000000,
-  totalUploaded: 1000000,
-  mediaOutputUuid: "db@10",
-  progress: 0.5,
-  added: Date.now(),
-};
+
+export interface TorrentItem {
+  id: number;
+  name: string;
+  size: number;
+  peers: number;
+  paused: boolean;
+  maxpeers: number;
+  mediaOutput: "tv" | "movie";
+  status: "download" | "upload";
+  totalDownloaded: number;
+  totalUploaded: number;
+  mediaOutputUuid: string;
+  progress: number;
+  added: number;
+}
+
 var skinny_peer = {
   adress: "82.65.99.194:10010",
   id: 0,
@@ -133,7 +135,7 @@ function DisplayList() {
   );
 }
 
-function RenderLineArray(props: { torrent: typeof smpl }) {
+function RenderLineArray(props: { torrent: TorrentItem }) {
   const nav = useNavigate();
   const [deleted, setDeleted] = useState(false);
   const [showed, setshowed] = useState<{
@@ -253,7 +255,7 @@ function RenderLineArray(props: { torrent: typeof smpl }) {
           </ToolTip>
           {showed.moveTargetStorage ? (
             <MoveTargetStorage
-              item={props.torrent as typeof smpl}
+              item={props.torrent as TorrentItem}
               oncancel={() => {
                 setshowed({
                   ...showed,
@@ -325,8 +327,8 @@ function RenderLineArray(props: { torrent: typeof smpl }) {
                 </div>
                 <div>Time to 1% : {Math.round(showed.data?.time_to_1_percent)}s</div>
                 <div>
-                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) ({bytesToSize(showed.data.session_total_uploaded)} this
-                  session)
+                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) (
+                  {bytesToSize(showed.data.session_total_uploaded)} this session)
                 </div>
                 <div>
                   Progression : <progress value={showed.data.progress * 100} max={100}></progress>
@@ -337,7 +339,9 @@ function RenderLineArray(props: { torrent: typeof smpl }) {
                 <div>Type de Média de Sortie : {showed.data.mediaoutput.toString()}</div>
                 <div>
                   Média de sortie : &nbsp;
-                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>{showed.data.media_output_uuid}</button>
+                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>
+                    {showed.data.media_output_uuid}
+                  </button>
                 </div>
               </div>
               <div className="w-3/12 text-left text-sm">
@@ -601,7 +605,7 @@ export function GetStorages(): Promise<string[]> {
     });
 }
 
-function MoveTargetStorage(props: { item: typeof smpl; show: boolean; oncancel: () => void }) {
+function MoveTargetStorage(props: { item: TorrentItem; show: boolean; oncancel: () => void }) {
   const [availableStorage, setAvailableStorage] = useState<string[]>([]);
   const [target, setTarget] = useState("");
   console.log("render", target);
