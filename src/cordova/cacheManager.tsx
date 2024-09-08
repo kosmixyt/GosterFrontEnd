@@ -13,6 +13,7 @@ export class CacheManager {
 
   public static AddCachedMovie = (movie: MovieItem) => {
     var prov = [];
+
     for (const provider of movie.PROVIDERS) {
       prov.push(provider.PROVIDER_ID);
       CacheManager.providers.set(provider.PROVIDER_ID, provider);

@@ -36,6 +36,7 @@ export interface TorrentItem {
   mediaOutputUuid: string;
   progress: number;
   added: number;
+  SKINNY: SKINNY_RENDER;
 }
 
 var skinny_peer = {

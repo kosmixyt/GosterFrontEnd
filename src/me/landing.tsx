@@ -19,13 +19,27 @@ export function UserLanding() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const nav = useNavigate();
   useEffect(() => {
+    document.body.style.overflowX = "hidden";
+
     fetch(`${app_url}/me`, { credentials: "include" }).then((res) => res.json().then(setMe));
+    return () => {
+      document.body.style.overflowX = "auto";
+    };
   }, []);
   if (!me) return <div>Loading...</div>;
   return (
-    <div className="flex flex-col justify-center mt-12 h-full">
-      <div className="text-3xl text-center underline font-semibold">Me</div>
-      <div className="font-semibold text-2xl ml-4 underline underline-offset-4">Requete de téléchargement</div>
+    <div className="flex flex-col justify-center mt-12 h-full max-w-full">
+      <div className="text-3xl text-center mt-4 font-semibold">
+        Bienvenue {me.username} | {me.current_upload_number}/{me.allowed_upload_number} uploads
+      </div>
+      <div className="flex justify-center mt-6">
+        <div className="bg-zinc-900 text-center text-2xl w-48 rounded-lg p-2">
+          <div className="font-semibold">Upload</div>
+          <div className="font-semibold">{bytesToSize(me.current_upload_size) + "/" + bytesToSize(me.allowed_upload_size)}</div>
+        </div>
+      </div>
+      <div className="font-semibold text-2xl underline underline-offset-4">Requete de téléchargement</div>
+
       <Swiper slidesPerView={"auto"}>
         {me.requests.map((req) => {
           return (
@@ -35,12 +49,10 @@ export function UserLanding() {
               style={{ width: "fit-content" }}
               className="flex justify-center cursor-pointer"
             >
-              <div className="flex flex-col min-w-96  bg-gray-800 rounded-lg p-4 m-4">
-                <div className="items-center font-semibold underline flex justify-between">
-                  <div>
-                    <div className="text-lg">{req.Media_Name}</div>
-                    <span className="opacity-50 text-sm"> {req.Status == "finished" ? "(" + req.Torrent_Name + ")" : ""}</span>
-                  </div>
+              <div className="flex flex-col w-80 min-h-72  bg-zinc-900 rounded-lg p-4 m-4">
+                <div className="items-center font-semibold underline flex justify-around">
+                  <div className="text-lg">{req.Media_Name}</div>
+                  <span className="opacity-50 text-sm"> {req.Status == "finished" ? "(" + req.Torrent_Name + ")" : ""}</span>
                   <img
                     onClick={(e) => {
                       e.stopPropagation();
@@ -53,16 +65,18 @@ export function UserLanding() {
                     className="w-6 h-6"
                   />
                 </div>
-                <img src={req.Render.BACKDROP} alt="" className="w-72 mt-2 mb-2 rounded-lg" />
-                <div className="text-sm">Max Size: {bytesToSize(req.MaxSize)}</div>
-                <div className="text-sm">Status: {req.Status}</div>
-                <div className="text-sm">Last Update: {req.Last_Update}sec ago</div>
+                <img src={req.Render.BACKDROP} alt="" className="w-full mt-2 mb-2 rounded-lg" />
+                <div className="opacity-50">
+                  <div className="text-base">
+                    Max {bytesToSize(req.MaxSize)} | {req.Status.toUpperCase()} | checked {req.Interval}s ago
+                  </div>
+                </div>
               </div>
             </SwiperSlide>
           );
         })}
       </Swiper>
-      <div hidden={me.requests.length == 0} className="font-semibold text-2xl ml-4 underline underline-offset-4">
+      {/* <div hidden={me.requests.length == 0} className="font-semibold text-2xl underline underline-offset-4">
         Shares
       </div>
       <Swiper slidesPerView={"auto"}>
@@ -93,7 +107,8 @@ export function UserLanding() {
                 </div>
                 <div className="text-sm">Size: {bytesToSize(share.FILE.SIZE)}</div>
                 <div
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     document.location.href = `${app_url}/share/get?id=${share.ID}`;
                   }}
                   className="text-sm opacity-50"
@@ -105,8 +120,8 @@ export function UserLanding() {
             </SwiperSlide>
           );
         })}
-      </Swiper>
-      <div hidden={me.Torrents.length == 0} className="font-semibold text-2xl ml-4 underline underline-offset-4">
+      </Swiper> */}
+      {/* <div hidden={me.Torrents.length == 0} className="font-semibold text-2xl underline underline-offset-4">
         Torrents
       </div>
       <Swiper slidesPerView={"auto"}>
@@ -118,20 +133,21 @@ export function UserLanding() {
               style={{ width: "fit-content" }}
               className="flex justify-center cursor-pointer"
             >
-              <div className="flex flex-col min-w-96  bg-gray-800 rounded-lg p-4 m-4">
-                <div className="items-center font-semibold underline flex justify-between">
-                  <div>
-                    <div className="text-lg">{torrent.name}</div>
+              <div className="p-4 m-4 bg-gray-800 w-80 rounded-lg">
+                <div style={{ width: Math.round(torrent.progress * 100) + "%" }} className={`bg-green-700 h-1 rounded-t-lg`}></div>
+                <div className="flex flex-col">
+                  <div className="w-full">
+                    <img src={torrent.SKINNY.BACKDROP} alt="" className="rounded-b-lg" />
+                    <div className="text-lg max-w-full font-semibold text-white flex justify-center text-center mt-2">
+                      <div>{torrent.SKINNY.NAME}</div>&nbsp;-&nbsp;<div>{bytesToSize(torrent.size)}</div>
+                    </div>
                   </div>
                 </div>
-                {/* <img src={torrent.backdrop} alt="" className="w-72 mt-2 mb-2 rounded-lg" /> */}
-                <div className="text-sm">Size: {bytesToSize(torrent.size)}</div>
-                <div className="text-sm">Status: {torrent.status}</div>
               </div>
             </SwiperSlide>
           );
         })}
-      </Swiper>
+      </Swiper> */}
     </div>
   );
 }

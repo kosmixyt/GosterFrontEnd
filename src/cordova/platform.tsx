@@ -43,7 +43,7 @@ export class PlatformManager {
       if (res.status != 200) {
         throw new Error("Failed to fetch data");
       }
-      render = (await res.json()).item;
+      render = await res.json();
       CacheManager.SetCache(item, type, { ...render });
     }
     return render;
