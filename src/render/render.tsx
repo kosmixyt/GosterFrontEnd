@@ -269,9 +269,7 @@ class Renderer extends React.Component<RendereProps> {
           ) : (
             <></>
           )}
-          {this.state.ChooseStorage && (
-            <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />
-          )}
+          {this.state.ChooseStorage && <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />}
           {this.state.convertModal && this.state.item.TYPE === "movie" && (
             <ConvertModal
               close={() => this.setState({ convertModal: false })}
@@ -424,6 +422,7 @@ class Renderer extends React.Component<RendereProps> {
                               {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
                                 <SwiperSlide style={{ width: "max-content" }}>
                                   <div onClick={(event) => this.epStr(event, e, -1)} className={`flex flex-col w-44 xl:w-72 `}>
+                                    <div className=" w-full h-full bg-red-400"></div>
                                     <div className="w-44 xl:w-72">
                                       <img src={e.STILL} className="w-44 xl:w-72 h-auto rounded-lg" />
                                       <div

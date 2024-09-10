@@ -7,9 +7,6 @@ import { createPortal } from "react-dom";
 import { CgSearchLoading } from "react-icons/cg";
 import useFetch from "react-fetch-hook";
 
-interface SearchResults {
-  elements: SKINNY_RENDER[];
-}
 
 export const SearchClass = "rounded-lg h-12 max-w-128 w-128 text-4xl pl-2 pb-2 pt-2";
 export function SearchRender(props: { headTitle?: string; specificType?: string; title: string; close: () => void; onselect?: InheritGo }) {
@@ -17,7 +14,7 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const nav = useNavigate();
   const [currentQueryParameters, setSearchParams] = useSearchParams();
-  const [data, setData] = useState<SearchResults | undefined>(undefined);
+  const [data, setData] = useState<SKINNY_RENDER[] | undefined>(undefined);
   const [timeout, setTm] = useState<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
     inputRef.current?.focus();
@@ -46,9 +43,9 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
     const on_key = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         if (props.onselect) {
-          props.onselect?.(e as any, data?.elements[0] as SKINNY_RENDER);
+          props.onselect?.(e as any, data![0] as SKINNY_RENDER);
         } else {
-          nav(`/render/${data?.elements[0].TYPE}/${data?.elements[0].ID}`);
+          nav(`/render/${data![0].TYPE}/${data![0].ID}`);
         }
         return props.close();
       }
@@ -81,13 +78,13 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
               </div>
             </div>
           </div>
-          {data?.elements == undefined ? (
+          {data! == undefined ? (
             <div className="text-4xl flex justify-center align-middle">
               <CgSearchLoading size={257} />
             </div>
           ) : (
             <div onClick={props.close} className={`flex flex-wrap gap-5 justify-center h-5/6 overflow-auto`}>
-              {data?.elements.slice(0, 20).map((element, i) => {
+              {data!.slice(0, 20).map((element, i) => {
                 return <PosterRenderer InheritGo={props.onselect} key={i} {...element} />;
               })}
             </div>

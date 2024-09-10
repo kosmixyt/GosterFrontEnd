@@ -22,6 +22,20 @@ export function bytesToSize(bytes: number, decimals = 2) {
 }
 
 
+
+
+var skinny_peer = {
+  adress: "82.65.99.194:10010",
+  id: 0,
+  download_speed: 1000000,
+};
+export var skinny_file = {
+  name: "Ubuntu 20.04.iso",
+  path: ".",
+  size: 2000000000,
+  progress: 0.5,
+  priority: 1,
+};
 export interface TorrentItem {
   id: number;
   name: string;
@@ -30,6 +44,7 @@ export interface TorrentItem {
   paused: boolean;
   maxpeers: number;
   mediaOutput: "tv" | "movie";
+  files: (typeof skinny_file)[];
   status: "download" | "upload";
   totalDownloaded: number;
   totalUploaded: number;
@@ -38,19 +53,6 @@ export interface TorrentItem {
   added: number;
   SKINNY: SKINNY_RENDER;
 }
-
-var skinny_peer = {
-  adress: "82.65.99.194:10010",
-  id: 0,
-  download_speed: 1000000,
-};
-var skinny_file = {
-  name: "Ubuntu 20.04.iso",
-  path: ".",
-  size: 2000000000,
-  progress: 0.5,
-  priority: 1,
-};
 var skinny_torrent = {
   id: 0,
   name: "Ubuntu 20.04",

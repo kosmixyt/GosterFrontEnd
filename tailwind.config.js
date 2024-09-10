@@ -3,6 +3,9 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
+    fontFamily: {
+      roboto: ["Roboto", "sans-serif"],
+    },
     extend: {
       borderRadius: {
         inherit: "inherit",
@@ -23,12 +26,10 @@ module.exports = {
           from: {
             transform: "scale(1)",
             zIndex: 40,
-            // background: "#fff",
           },
           to: {
             transform: "scale(1.5)",
             zIndex: 40,
-            // background: "#181818",
           },
         },
         zoomWithSpin: {
@@ -41,35 +42,6 @@ module.exports = {
             zIndex: 40,
           },
         },
-        zoomUnzoom: {
-          from: {
-            transform: "scale(1)",
-          },
-          to: {
-            transform: "scale(1.5)",
-          },
-        },
-        fromLeft: {
-          from: {
-            transform: "translateX(-100%)",
-            zIndex: 0,
-            background: "#fff",
-          },
-          to: {
-            transform: "translateX(0)",
-            background: "#181818",
-          },
-        },
-        fromTop: {
-          from: {
-            transform: "translateY(-100%)",
-            zIndex: 0,
-            background: "#fff",
-          },
-          to: {
-            transform: "translateY(0)",
-          },
-        },
         MiniaOp: {
           "0%": {
             opacity: 1,
@@ -78,14 +50,20 @@ module.exports = {
             opacity: 0,
           },
         },
+        unscale: {
+          from: {
+            transform: "scale(100)",
+          },
+          to: {
+            transform: "scale(1)",
+          },
+        },
       },
       animation: {
-        fromLeft: "fromLeft 0.4s forwards",
-        fromTop: "fromTop 0.4s forwards",
         zoomIn: "zoomIn 0.4s forwards 0.7s",
         zoomInNoDelay: "zoomWithSpin 0.4s ease-in-out forwards",
         miniaAnim: "MiniaOp 3s forwards 0.7s",
-        // reduceOpacity: "reduceOpacity 0.4s forwards 0.7s",
+        unscale: "unscale 0.4s forwards",
       },
     },
   },
