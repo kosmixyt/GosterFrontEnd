@@ -1,28 +1,21 @@
-import { random } from "lodash";
 import { bytesToSize, TorrentItem } from "../torrent";
 import { app_url } from "..";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MiniDisplay } from "../component/minidisplaySquare/mini";
 import { FileItem } from "../render/render";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { SKINNY_RENDER } from "../component/poster";
-import { BackDrop } from "../component/backdrop/backdrop";
-import check from "./check.svg";
 import { toast } from "react-toastify";
-import close from "../requests/close.svg";
 import { createPortal } from "react-dom";
-import { Modal } from "../player/player";
-import dl from "./download.gif";
-import { FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
-import { IoIosMore } from "react-icons/io";
+import { FaArrowAltCircleRight, FaArrowCircleDown, FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 export function UserLanding() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const nav = useNavigate();
+  const [flexModeTorrent, setFlexModeTorrent] = useState(true);
+  const [flexModeRequest, setFlexModeRequest] = useState(true);
   useEffect(() => {
     document.body.style.overflowX = "hidden";
-
     fetch(`${app_url}/me`, { credentials: "include" }).then((res) => res.json().then(setMe));
     return () => {
       document.body.style.overflowX = "auto";
@@ -30,65 +23,133 @@ export function UserLanding() {
   }, []);
   if (!me) return <div>Loading...</div>;
   return (
-    <div className="h-full w-full min-h-screen ">
-      <div className="text-3xl text-center mt-4 font-semibold font-roboto">
-        Bienvenue {me.username} | {me.current_upload_number}/{me.allowed_upload_number} uploads
-      </div>
-      <div className="flex justify-center mt-6">
-        <div className="text-center text-2xl w-48 rounded-lg">
-          <div className="font-semibold">Upload</div>
-          <div className="font-semibold">{bytesToSize(me.current_upload_size) + "/" + bytesToSize(me.allowed_upload_size)}</div>
+    <div className="h-full w-full min-h-screen mt-14">
+      <div className="text-3xl text-center mt-4 font-semibold font-roboto">Bienvenue {me.username}</div>
+      <div className="md:flex justify-center">
+        <div
+          className={`w-1/5 min-w-56  h-24 rounded-lg m-4 ${
+            me.current_transcode + 5 > me.allowed_transcode ? "bg-red-900" : "bg-slate-900"
+          }  flex justify-center items-center text-3xl font-semibold`}
+        >
+          <div>
+            <div className="text-center">
+              {me.current_transcode}/{me.allowed_transcode}
+            </div>
+            <div className="text-lg opacity-50 text-center">Allowed Transcode</div>
+          </div>
+        </div>
+        <div
+          className={`w-1/5 min-w-56 h-24 rounded-lg m-4 ${
+            me.current_upload_number + 5 > me.allowed_upload_number ? "bg-red-900" : "bg-slate-900"
+          }  flex justify-center items-center text-3xl font-semibold`}
+        >
+          <div>
+            <div className="text-center">
+              {me.current_upload_number}/{me.allowed_upload_number}
+            </div>
+            <div className="text-lg opacity-50 text-center">Allowed Upload</div>
+          </div>
+        </div>
+        <div
+          className={`w-1/5 min-w-56  h-24 rounded-lg m-4 ${
+            me.current_upload_size + 5 * 1_000_000_000 > me.allowed_upload_size ? "bg-red-900" : "bg-slate-900"
+          }  flex justify-center items-center text-3xl font-semibold`}
+        >
+          <div>
+            <div className="text-center">
+              {bytesToSize(me.current_upload_size)}/{bytesToSize(me.allowed_upload_size)}
+            </div>
+            <div className="text-lg opacity-50 text-center">Allowed Upload Size</div>
+          </div>
         </div>
       </div>
-      <div className="font-semibold text-2xl  ml-4">Requete de téléchargement</div>
-
-      <Swiper slidesPerView={isMobile ? 1 : "auto"}>
-        {me.requests.map((req, i) => {
-          return (
-            <SwiperSlide
-              onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}
-              key={req.ID}
-              style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"}` }}
-              className="flex justify-center cursor-pointer"
-            >
-              <div
-                style={{ background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + req.Render.BACKDROP + ")" }}
-                className="xl:w-[400px] xl:h-[225px] w-[180px] h-[150px] flex justify-center items-center  transition-transform hover:scale-105 rounded-lg p-4 m-4 bg-cover bg-center"
-              >
-                <div className="w-full hidden lg:flex justify-center">
-                  <img src={req.Render.POSTER} alt="" className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg" />
-                </div>
-                <div>
-                  <div className="text-xl font-semibold">{req.Render.NAME}</div>
-                  <div className="opacity-35">Checked {40} sec ago</div>
-                </div>
-              </div>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
-      <div hidden={me.Torrents.length == 0} className="ml-4 font-semibold text-2xl">
-        Torrents
+      <div hidden={me.Torrents.length == 0} className="ml-4 font-semibold text-2xl flex gap-4 items-center">
+        <div> Requete de téléchargement ({me.requests.length})</div>
+        <div className="mt-2" onClick={() => setFlexModeRequest(!flexModeRequest)}>
+          {flexModeRequest ? <FaArrowAltCircleRight /> : <FaArrowCircleDown />}
+        </div>
       </div>
-      <div className="p-4">
-        <Swiper spaceBetween={"30px"} slidesPerView={isMobile ? 1 : "auto"}>
-          {me.Torrents.map((torrent, i) => {
+      {flexModeRequest && (
+        <Swiper slidesPerView={isMobile ? 1 : "auto"}>
+          {me.requests.map((req, i) => {
             return (
-              <SwiperSlide style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"} ` }}>
-                <TorrentItemRender torrent={torrent} />
+              <SwiperSlide
+                onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}
+                key={req.ID}
+                style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"}` }}
+                className="flex justify-center cursor-pointer"
+              >
+                <RequestItem item={req} />
               </SwiperSlide>
             );
           })}
         </Swiper>
+      )}
+      {!flexModeRequest && (
+        <div className="flex flex-wrap justify-center gap-4">
+          {me.requests.map((req, i) => {
+            return (
+              <div>
+                <RequestItem item={req} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div hidden={me.Torrents.length == 0} className="ml-4 font-semibold text-2xl flex gap-4 items-center">
+        <div> Torrents ({me.Torrents.length})</div>
+        <div className="mt-2" onClick={() => setFlexModeTorrent(!flexModeTorrent)}>
+          {flexModeTorrent ? <FaArrowAltCircleRight /> : <FaArrowCircleDown />}
+        </div>
+      </div>
+      <div className="p-4">
+        {!flexModeTorrent && (
+          <Swiper spaceBetween={"30px"} slidesPerView={isMobile ? 1 : "auto"}>
+            {me.Torrents.map((torrent, i) => {
+              return (
+                <SwiperSlide style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"} ` }}>
+                  <TorrentItemRender torrent={torrent} />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        )}
+        {flexModeTorrent && (
+          <div className="flex flex-wrap justify-center gap-4">
+            {me.Torrents.map((torrent, i) => {
+              return (
+                <div>
+                  <TorrentItemRender torrent={torrent} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+function RequestItem(props: { item: MeRequest }) {
+  return (
+    <div
+      style={{ background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + props.item.Render.BACKDROP + ")" }}
+      className="xl:w-[400px] xl:h-[225px] w-[180px] h-[150px] flex justify-center items-center  transition-transform hover:scale-105 rounded-lg p-4 m-4 bg-cover bg-center"
+    >
+      <div className="w-full hidden lg:flex justify-center">
+        <img src={props.item.Render.POSTER} alt="" className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg" />
+      </div>
+      <div>
+        <div className="text-xl font-semibold">{props.item.Render.NAME}</div>
+        <div className="opacity-35">Checked {props.item.Last_Update} sec ago</div>
       </div>
     </div>
   );
 }
 
-function Multiplicate(t: TorrentItem): TorrentItem {
+function Multiplicate<T>(t: T[]): T[] {
   for (let i = 0; i < 4; i++) {
     // res.push(t);
-    t.files.push(t.files[0]);
+    t.push(t[0]);
   }
 
   return t;
@@ -246,7 +307,7 @@ interface ConvertProgress {
 function TorrentItemRender(props: { torrent: TorrentItem }) {
   const nav = useNavigate();
   const [pause, setPause] = useState(props.torrent.paused);
-
+  const overlayPanel = useRef(null);
   return (
     <div>
       <div
@@ -257,9 +318,12 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
         w-[200px] h-72
         md:w-[350px] md:h-52
         2xl:w-[450px] 2xl:h-64  
+        relative
         rounded-lg cursor-pointer bg-cover  bg-center"
       >
-        <div className="absolute h-full  w-full rounded-lg hover:opacity-100 hover:backdrop-blur-md transition-all opacity-0">
+        <div
+          className={`absolute h-full  w-full rounded-lg hover:opacity-100 ${isMobile ? "opacity-100" : "opacity-0"}   hover:backdrop-blur-md transition-all `}
+        >
           <div className="p-2 gap-1  w-full h-full">
             <div className="flex justify-between">
               <div className="flex justify-center items-center gap-2">
@@ -269,9 +333,7 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 >
                   Zip
                 </div>
-                <div className="flex h-[40px] justify-center items-center bg-gray-900 p-4 rounded-lg">
-                  <IoIosMore />
-                </div>
+                <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">{bytesToSize(props.torrent.size)}</div>
               </div>
               <div
                 onClick={() => {
@@ -282,17 +344,17 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 className="flex gap-2"
               >
                 <>
-                  <div className="p-2 flex items-center ml-1 justify-center bg-gray-900 text-white font-bold rounded-lg ">
+                  <div className="p-2 flex h-auto items-center ml-1 justify-center bg-gray-900 text-white font-bold rounded-lg ">
                     {Math.round(props.torrent.progress * 100)}%
                   </div>
                   {!isMobile && pause === false && (
-                    <div className="p-2 hidden lg:flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">
-                      <div className="flex justify-center gap-2 items-center">
-                        <FaCloudDownloadAlt />
+                    <div className="p-2 hidden md:flex items-center justify-center text-sm bg-gray-900 text-white font-bold rounded-lg ">
+                      <div className="flex justify-between gap-2  items-center">
+                        <FaCloudDownloadAlt className="hidden lg:block" />
                         {bytesToSize(props.torrent.totalDownloaded)}&nbsp;/&nbsp;
                       </div>
                       <div className="flex justify-center gap-2 items-center">
-                        <FaCloudUploadAlt />
+                        <FaCloudUploadAlt className="hidden lg:block" />
                         {bytesToSize(props.torrent.totalUploaded)}
                       </div>
                     </div>
@@ -302,7 +364,7 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 </>
               </div>
             </div>
-            <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1">
+            <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1  no-scrollbar">
               {props.torrent.files.map((file, i) => (
                 <div
                   onClick={() => {
@@ -327,9 +389,9 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
           }}
           className="flex justify-center"
         >
-          <img src={props.torrent.SKINNY.POSTER} alt="" className="h-auto w-32 mt-6 mb-2 rounded-lg" />
+          <img src={props.torrent.SKINNY.POSTER} alt="" className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg" />
         </div>
-        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs lg:text-lg">{props.torrent.name}</div>
+        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg">{props.torrent.name.substring(0, 50)}</div>
       </div>
     </div>
   );

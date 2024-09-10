@@ -459,10 +459,10 @@ class Renderer extends React.Component<RendereProps> {
                   </div>
 
                   <div className="mb-8" hidden={this.state.item.SIMILARS.length == 0}>
-                    <div className="underline text-3xl mt-4 font-semibold mb-4">Similars items</div>
+                    <div className="text-2xl opacity-80 mt-4 font-semibold mb-2 font-roboto ">Similars</div>
                     <Swiper spaceBetween={20} loop slidesPerView={"auto"}>
-                      {this.state.item.SIMILARS.map((e) => (
-                        <SwiperSlide style={{ width: "max-content" }}>
+                      {this.state.item.SIMILARS.map((e, i) => (
+                        <SwiperSlide style={{ width: "max-content", marginLeft: `${i === 0 ? "20px" : "0px"}` }}>
                           <Porenderer nav={this.props.navigate} render={e} />
                         </SwiperSlide>
                       ))}
