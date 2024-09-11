@@ -271,7 +271,9 @@ class Renderer extends React.Component<RendereProps> {
           ) : (
             <></>
           )}
-          {this.state.ChooseStorage && <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />}
+          {this.state.ChooseStorage && (
+            <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />
+          )}
           {this.state.convertModal && this.state.item.TYPE === "movie" && (
             <ConvertModal
               close={() => this.setState({ convertModal: false })}
@@ -300,7 +302,7 @@ class Renderer extends React.Component<RendereProps> {
               <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
                 <div className="pl-8 pt-4 w-full">
                   <div className="flex">
-                    <img src={this.state.item.POSTER} className="w-[40%] h-auto rounded-lg aspect-[2/3]" />
+                    <img src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
                     <div className="w-[calc(100%-20%-20px)] ml-[20px]">
                       {this.state.item.LOGO != "" ? (
                         <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
@@ -510,11 +512,41 @@ class Renderer extends React.Component<RendereProps> {
                   </>
                 ))}
               </div>
-              <div className="flex justify-center opacity-35 ">
+              <div className="flex justify-center opacity-35 gap-1">
                 {this.state.item.RUNTIME > 0 ? <div>{FormatRuntime(this.state.item.RUNTIME)}</div> : <></>}&nbsp;
                 {this.state.item.YEAR ? <div className="pl-4">{this.state.item.YEAR}</div> : <></>}&nbsp;
                 {this.state.item.Vote_Average > 0 ? <div>{this.state.item.Vote_Average}</div> : <></>}&nbsp;
                 {this.state.item.AWARDS != "" ? <div>({this.state.item.AWARDS})</div> : <></>}&nbsp;
+                <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
+                  Manualy add torrent
+                </div>
+                <div
+                  className="cursor-pointer"
+                  hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                  onClick={() => this.setState({ convertModal: true })}
+                >
+                  Convert
+                </div>
+                <div
+                  className="cursor-pointer"
+                  hidden={
+                    (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
+                    (this.state.item.TYPE === "tv" &&
+                      this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
+                        return p + c.FILES.length;
+                      }, 0) > 0)
+                  }
+                  onClick={() => this.setState({ requestModal: true })}
+                >
+                  Request When Available
+                  {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
+                </div>
+                <div
+                  onClick={() => this.setState({ shareModal: this.currentFile })}
+                  hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                >
+                  Share
+                </div>
               </div>
               <div>
                 <div className="mt-2 text-sm opacity-50 text-center font-semibold pl-2 pr-2">{this.state.item.DESCRIPTION}</div>
