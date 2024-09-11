@@ -8,7 +8,8 @@ import react from "@vitejs/plugin-react-swc";
 import { AddModal, post_file_torrent } from "../torrent";
 import { Buffer } from "buffer";
 import { createPortal } from "react-dom";
-import { FaPlay } from "react-icons/fa";
+import unavailable from "./unavailable.png";
+import { FaFileAlt, FaPlay } from "react-icons/fa";
 import { SwiperSlide, Swiper } from "swiper/react";
 import { PlatformManager } from "../cordova/platform";
 import { BackDrop } from "../component/backdrop/backdrop";
@@ -16,6 +17,7 @@ import { ConvertModal } from "../convert/convert";
 import { ChooseStorage } from "../component/choosestorage/choosestorage";
 import { RequestModal } from "../requests/requests";
 import { ShareModal } from "../me/landing";
+import { CgUnavailable } from "react-icons/cg";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -298,7 +300,7 @@ class Renderer extends React.Component<RendereProps> {
               <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
                 <div className="pl-8 pt-4 w-full">
                   <div className="flex">
-                    <img src={this.state.item.POSTER} className="w-[20%] h-auto rounded-lg aspect-[2/3]" />
+                    <img src={this.state.item.POSTER} className="w-[40%] h-auto rounded-lg aspect-[2/3]" />
                     <div className="w-[calc(100%-20%-20px)] ml-[20px]">
                       {this.state.item.LOGO != "" ? (
                         <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
@@ -394,58 +396,58 @@ class Renderer extends React.Component<RendereProps> {
                       <div className="mt-4 w-[85%] text-white font-semibold opacity-90">{this.state.item.DESCRIPTION}</div>
                       {this.state.item.TYPE === "tv" ? (
                         <div className="mt-4">
-                          <div className="mt-4 mb-4 font-semibold text-3xl">Saisons : </div>
                           <div className="flex gap-4">
-                            <Swiper slidesPerView={"auto"} spaceBetween={"20px"} style={{ width: "100%" }}>
+                            <select
+                              onChange={(e) => this.setState({ season: parseInt(e.target.value) })}
+                              className="bg-black bg-opacity-50 rounded-lg text-white p-2"
+                            >
                               {this.state.item.SEASONS.map((e, i) => (
-                                <SwiperSlide
-                                  style={{
-                                    width: "max-content",
-                                  }}
-                                >
-                                  <div
-                                    className="cursor-pointer flex justify-center flex-col"
-                                    onClick={() => {
-                                      this.setState({ season: i });
-                                    }}
-                                  >
-                                    <img src={e.BACKDROP} className="w-28 h-36 rounded-lg" />
-                                    <div className="text-center">{e.NAME}</div>
-                                  </div>
-                                </SwiperSlide>
+                                <option key={i} value={i}>
+                                  {e.NAME}
+                                </option>
                               ))}
-                            </Swiper>
+                            </select>
                           </div>
                           <div>
                             <div className="text-2xl font-semibold pb-2 pt-1">Episodes : </div>
                             <Swiper slidesPerView={"auto"} spaceBetween={"10px"}>
                               {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
-                                <SwiperSlide style={{ width: "max-content" }}>
-                                  <div onClick={(event) => this.epStr(event, e, -1)} className={`flex flex-col w-44 xl:w-72 `}>
-                                    <div className=" w-full h-full bg-red-400"></div>
-                                    <div className="w-44 xl:w-72">
-                                      <img src={e.STILL} className="w-44 xl:w-72 h-auto rounded-lg" />
-                                      <div
-                                        className={`bg-red-800 h-1`}
-                                        style={{
-                                          width: GetProgress(e.WATCH),
-                                        }}
-                                      ></div>
-                                      <div className="text-center font-semibold flex justify-between">
-                                        <div>
-                                          {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                                <SwiperSlide style={{ width: "fit-content" }}>
+                                  <div
+                                    onClick={(event) => this.epStr(event, e, -1)}
+                                    className={`flex flex-col w-60 border-2  relative rounded-lg border-transparent hover:border-white cursor-pointer group`}
+                                  >
+                                    <div className="relative w-full h-36">
+                                      <div className="absolute w-full h-full bg-black bg-opacity-50 rounded-lg">
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden group-hover:block h-8 w-8">
+                                          <FaPlay className="w-full h-full" />
                                         </div>
-                                        <div
-                                          className="cursor-pointer"
-                                          onClick={(event) => {
-                                            this.epDl(event, e, -1);
-                                          }}
-                                        >
-                                          Télécharger
+                                        <div className="flex items-center absolute top-1 left-1 gap-1">
+                                          <CgUnavailable className={`${e.FILES.length > 0 ? "hidden" : ""}`} />
                                         </div>
-                                        <div className="mr-4">({e.FILES.length})</div>
+                                      </div>
+                                      <img onError={setFallbackImage} src={e.STILL} className="w-full h-full rounded-lg" />
+                                    </div>
+                                    <div className="text-center flex items-center justify-center">
+                                      <div>
+                                        ({e.EPISODE_NUMBER}) {e.NAME}
                                       </div>
                                     </div>
+                                    <div className="flex justify-between items-center pb-1 mt-1">
+                                      <div
+                                        onClick={(event) => this.epStr(event, e, -1)}
+                                        className="w-[50%] mr-1 ml-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
+                                      >
+                                        Lire
+                                      </div>
+                                      <div
+                                        onClick={(event) => this.epDl(event, e, -1)}
+                                        className="w-[50%] mr-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
+                                      >
+                                        Télécharger
+                                      </div>
+                                    </div>
+                                    <div className="text-left opacity-50 leading-5 max-h-28 overflow-auto no-scrollbar">{e.DESCRIPTION}</div>
                                   </div>
                                 </SwiperSlide>
                               ))}
@@ -653,4 +655,8 @@ export async function post_file(file: File, type: string, id: string, path: stri
   xhr.open("POST", `${app_url}/upload`, true);
   xhr.withCredentials = true;
   xhr.send(form);
+}
+export function setFallbackImage(e: React.SyntheticEvent<HTMLImageElement, Event>) {
+  //   e.currentTarget.src = "/fallback.png";
+  e.currentTarget.src = unavailable;
 }
