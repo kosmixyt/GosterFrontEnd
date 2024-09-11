@@ -175,7 +175,7 @@ export class BackDrop extends React.Component<BackDropProps> {
           this.setState({ contextMenu: e });
           e.preventDefault();
         }}
-        className={`relative ${this.props.className} mt-16 mb-20 w-72 ${
+        className={`relative ${this.props.className} ${rdd.isMobile ? "mt-4 mb-4" : "mt-16 mb-20"} ${rdd.isMobile ? "w-52" : "w-72"} ${
           this.state.contextMenu === null ? "hover:animate-zoomIn focus:animate-zoomIn" : ""
         } rounded-[0.5rem] hover:cursor-pointer hover:bg-[#181818]`}
         onMouseEnter={this.mouseEnter.bind(this)}
@@ -196,7 +196,13 @@ export class BackDrop extends React.Component<BackDropProps> {
           )}
         <img alt="backdrop" ref={this.imgContainer} className="absolute rounded-[0.5rem] w-full aspect-video" src={this.props.BACKDROP} />
         <div className="w-full h-full">
-          <video ref={this.video} className={`object-cover rounded-inherit w-full aspect-video`} muted={this.state.videoMuted} preload="none" loop={true}>
+          <video
+            ref={this.video}
+            className={`object-cover rounded-inherit w-full aspect-video`}
+            muted={this.state.videoMuted}
+            preload="none"
+            loop={true}
+          >
             <source src={this.videoUrl + "#t=10"} type="video/mp4" />
           </video>
         </div>

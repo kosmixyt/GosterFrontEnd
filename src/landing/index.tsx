@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { SKINNY_RENDER } from "../component/poster";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay, FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
 import "./main.css";
 import { LineName } from "../component/lineName/index";
@@ -91,20 +91,17 @@ export const Landing = () => {
   }, []);
   return (
     <div>
-      <Swiper
-        hidden={isMobile}
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
-        navigation={true}
-        modules={[Autoplay]}
-        slidesPerGroup={1}
-        slidesPerView={1}
-      >
-        {loader_data.Recents.Data.map((e, i) => (
-          <SwiperSlide key={i}>
-            <Full i={i} data={e} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+      {!isMobile ? (
+        <Swiper autoplay={{ delay: 5000, disableOnInteraction: false }} navigation={true} modules={[Autoplay]} slidesPerGroup={1} slidesPerView={1}>
+          {loader_data.Recents.Data.map((e, i) => (
+            <SwiperSlide key={i}>
+              <Full i={i} data={e} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      ) : (
+        <></>
+      )}
       <div style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}>
         <InfiniteScroll
           dataLength={DisplayedData.length}
@@ -132,14 +129,39 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
   const [swiper, setSwiper] = React.useState<any>(null);
   const [PreviousHiddenIndex, setPreviousHiddenIndex] = React.useState<boolean>(true);
   if (props.line.Data.length === 0) return <></>;
+  const freeModeOptions = {
+    freeMode: true,
+    freeModeMomentum: true,
+    freeModeMomentumRatio: 0.5,
+    freeModeMomentumBounce: true,
+    freeModeMomentumBounceRatio: 0.5,
+    freeModeMomentumVelocityRatio: 0.5,
+  };
+
   return (
     <div className={`${!isMobile ? "ml-2 mr-2" : ""}`}>
       <LineName className="ml-14" key={k} more="/" lineName={props.line.Title} />
       <div className="line-render flex">
-        <button hidden={PreviousHiddenIndex} className="mt-14 absolute h-36 opacity-0 z-10 bg-transparent left-0 swip-btn" onClick={() => swiper?.slidePrev()}>
+        <button
+          hidden={PreviousHiddenIndex}
+          className="mt-14 absolute h-36 opacity-0 z-10 bg-transparent left-0 swip-btn"
+          onClick={() => swiper?.slidePrev()}
+        >
           <img src={prev} alt="" className="w-8 h-8" />
         </button>
-        <Swiper modules={[Pagination]} className="" slidesPerView={"auto"} spaceBetween={!isMobile ? 5 : 1} onSwiper={(swiper: any) => setSwiper(swiper)}>
+        <Swiper
+          freeMode={{
+            enabled: isMobile,
+            momentum: true,
+            momentumBounce: true,
+            momentumVelocityRatio: 0.1,
+          }}
+          modules={[Pagination, FreeMode]}
+          className=""
+          slidesPerView={"auto"}
+          spaceBetween={!isMobile ? 5 : 1}
+          onSwiper={(swiper: any) => setSwiper(swiper)}
+        >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide
               style={{

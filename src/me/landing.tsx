@@ -74,12 +74,13 @@ export function UserLanding() {
           {me.requests.map((req, i) => {
             return (
               <SwiperSlide
-                onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}
                 key={req.ID}
                 style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"}` }}
                 className="flex justify-center cursor-pointer"
               >
-                <RequestItem item={req} />
+                <div onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}>
+                  <RequestItem item={req} />
+                </div>
               </SwiperSlide>
             );
           })}
