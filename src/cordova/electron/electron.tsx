@@ -6,7 +6,6 @@ import { ipcRenderer } from "electron";
 import fetch from "node-fetch";
 import express from "express";
 import { EPISODE, FileItem, MovieItem, PROVIDER, SEASON, TVItem } from "../../render/render";
-import { Tv } from "../../metadata/dragger";
 import { GENRE, PROVIDERItem } from "../../component/poster";
 //@ts-ignore
 var expressApp: typeof express = null;
