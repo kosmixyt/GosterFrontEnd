@@ -6,7 +6,7 @@ import bencode from "bencode";
 import { Buffer as bufff } from "buffer";
 import { SearchClass, SearchRender } from "../search/search";
 import { SKINNY_RENDER } from "../component/poster";
-import { MovieItem, TVItem } from "../render/render";
+import { MovieItem, SEASON, TVItem } from "../render/render";
 import { ToolTip } from "../component/tooptip/tooltip";
 import { IoIosCloseCircle } from "react-icons/io";
 import { createPortal } from "react-dom";
@@ -20,9 +20,6 @@ export function bytesToSize(bytes: number, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return parseFloat((bytes / Math.pow(1024, i)).toFixed(decimals)) + " " + sizes[i];
 }
-
-
-
 
 var skinny_peer = {
   adress: "82.65.99.194:10010",
@@ -498,21 +495,21 @@ function DropArea(props: { children: React.ReactNode }) {
   if (itemType === "tv" && season === null) {
     console.log("season", item_selected);
     item_selected = item_selected as TVItem;
-    return <SeasonSelector seasons={item_selected.SEASONS.map((e) => e.SEASON_NUMBER)} onselect={setSeason} />;
+    return <SeasonSelector seasons={item_selected.SEASONS} onselect={setSeason} />;
   }
-  if (file != null && item_selected != null && itemType != null) {
+  if (file != null && item_selected != null && itemType != null && season != null) {
     if (itemType === "tv" && season == null) {
       throw new Error("Season is null");
     }
     console.log("post", file, itemType, item_selected, season);
-    post_file_torrent(file, itemType, item_selected, season as number);
+    post_file_torrent(file, itemType, item_selected, season);
     document.location.reload();
   }
 
   return <div></div>;
 }
 
-function SeasonSelector(props: { seasons: number[]; onselect: (e: number) => void }) {
+function SeasonSelector(props: { seasons: SEASON[]; onselect: (index: number) => void }) {
   return (
     <div className={`h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0 `}>
       <div className={`relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-stone-900 h-1/6 w-1/5 rounded-lg`}>
@@ -524,7 +521,7 @@ function SeasonSelector(props: { seasons: number[]; onselect: (e: number) => voi
                 <button
                   className="ml-2 text-2xl hover:underline"
                   onClick={() => {
-                    props.onselect(season);
+                    props.onselect(index);
                   }}
                 >
                   {season}
@@ -550,9 +547,8 @@ export function post_file_torrent(file: File | string, itemType: "tv" | "movie",
   }
   form.append("mediaType", itemType);
   form.append("mediauuid", item.ID.toString());
-  if (itemType === "tv") {
-    form.append("season_number", season_number.toString());
-  }
+  if (itemType === "tv") form.append("season_number", season_number.toString());
+
   console.log(FormData);
   fetch(`${app_url}/torrents/add`, {
     method: "POST",
@@ -828,7 +824,7 @@ export function AddModal(props: {
     );
   }
   if (finalType === "tv" && season === null) {
-    return <SeasonSelector seasons={(item as TVItem).SEASONS.map((e) => e.SEASON_NUMBER)} onselect={setSeason} />;
+    return <SeasonSelector seasons={(item as TVItem).SEASONS} onselect={setSeason} />;
   }
   return <div>You Selected</div>;
 }

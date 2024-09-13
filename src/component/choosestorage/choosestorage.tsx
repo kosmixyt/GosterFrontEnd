@@ -23,7 +23,8 @@ export function ChooseStorage(props: { close: () => void; onsuccess: (c: string)
             <div
               key={e}
               className={`p-2 rounded-lg cursor-pointer`}
-              onClick={() => {
+              onClick={(j) => {
+                j.stopPropagation();
                 props.onsuccess(e);
                 props.close();
               }}

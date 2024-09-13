@@ -536,7 +536,7 @@ const SYNC = {
 
 export function Modal(props: { children: React.ReactNode }) {
   return (
-    <div className="h-screen w-screen z-40 fixed">
+    <div className="h-screen w-screen z-40 fixed top-0 left-0">
       <div className="h-full w-full bg-black bg-opacity-50"></div>
       <div className="bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">{props.children}</div>
     </div>

@@ -226,266 +226,217 @@ class Renderer extends React.Component<RendereProps> {
     }
     this.props.navigate("/player?transcode=" + encodeURIComponent(url));
   }
-  private on_drag_over(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-  }
-  public on_choosedStorage(storage: string) {
-    console.log("Storage choosed", storage, this.state.ChooseStorage);
-    post_file(this.state.ChooseStorage as File, this.state.item.TYPE, this.state.item.ID, storage);
-  }
-  private on_drop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    if (e.dataTransfer.items) {
-      var file = e.dataTransfer.items[0].getAsFile();
-      if (!file) return;
-      if (file.name.endsWith(".torrent")) {
-        return post_file_torrent(file, this.state.item.TYPE, this.state.item, -1);
-      }
-      this.setState({ ChooseStorage: file });
-      return;
+  public on_drop(e: React.DragEvent<HTMLDivElement>) {
+    if (this.state.item.TYPE === "tv") return;
+    const file = e.dataTransfer.files[0];
+    if (!file) toast.error("Erreur lors de la récupération du fichier");
+    if (file.name.endsWith(".torrent")) {
+      post_file_torrent(file, this.state.item.TYPE, this.state.item, -1);
+    } else {
+      post_file(file, "movie", this.state.item.ID, "", -1, -1);
     }
   }
-
   public render() {
     if (typeof this.state.item.ID === "undefined") {
       return <div>Loading...</div>;
     }
     return (
-      <>
-        <div onDrop={this.on_drop.bind(this)} onDragOver={this.on_drag_over.bind(this)} className="w-screen  bg-no-repeat bg-cover text-white">
-          {this.state.addModal ? (
-            createPortal(
-              <AddModal
-                close={() => this.setState({ addModal: false })}
-                preload={{
-                  search: `${this.state.item.DISPLAY_NAME} ${
-                    this.state.item.TYPE === "tv" ? `S0${this.state.item.SEASONS[this.state.season].SEASON_NUMBER}` : `${this.state.item.YEAR}`
-                  }`,
-                  season: this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].SEASON_NUMBER : null,
-                  finalType: this.state.item.TYPE,
-                  item: this.state.item,
-                }}
-              />,
-              document.body
-            )
-          ) : (
-            <></>
-          )}
-          {this.state.ChooseStorage && (
-            <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={this.on_choosedStorage.bind(this)} />
-          )}
-          {this.state.convertModal && this.state.item.TYPE === "movie" && (
-            <ConvertModal
-              close={() => this.setState({ convertModal: false })}
-              file={this.currentFile}
-              item={this.state.item}
-              hidden={!this.state.convertModal}
-            />
-          )}
-          {this.state.requestModal && (
-            <RequestModal
-              itemId={this.state.item.ID}
-              type={this.state.item.TYPE}
-              seasonId={this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].ID.toString() : ""}
-              close={() => this.setState({ requestModal: false })}
-            />
-          )}
-          {this.state.shareModal != null && <ShareModal file_item={this.state.shareModal} close={() => this.setState({ shareModal: null })} />}
-          <BrowserView>
-            <div
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('${this.state.item.BACKDROP}')`,
-                backgroundSize: "cover",
+      <div onDrop={this.on_drop.bind(this)} onDragOver={(e) => e.preventDefault()} className="w-screen  bg-no-repeat bg-cover text-white">
+        {this.state.addModal ? (
+          createPortal(
+            <AddModal
+              close={() => this.setState({ addModal: false })}
+              preload={{
+                search: `${this.state.item.DISPLAY_NAME} ${
+                  this.state.item.TYPE === "tv" ? `S0${this.state.item.SEASONS[this.state.season].SEASON_NUMBER}` : `${this.state.item.YEAR}`
+                }`,
+                season: this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].SEASON_NUMBER : null,
+                finalType: this.state.item.TYPE,
+                item: this.state.item,
               }}
-              className="bg-no-repeat bg-cover overflow-auto text-white min-h-screen"
-            >
-              <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
-                <div className="pl-8 pt-4 w-full">
-                  <div className="flex">
-                    <img src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
-                    <div className="w-[calc(100%-20%-20px)] ml-[20px]">
-                      {this.state.item.LOGO != "" ? (
-                        <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
-                      ) : (
-                        <div className="text-5xl font-bold underline">{this.state.item.DISPLAY_NAME}</div>
-                      )}
+            />,
+            document.body
+          )
+        ) : (
+          <></>
+        )}
+        {this.state.convertModal && this.state.item.TYPE === "movie" && (
+          <ConvertModal
+            close={() => this.setState({ convertModal: false })}
+            file={this.currentFile}
+            item={this.state.item}
+            hidden={!this.state.convertModal}
+          />
+        )}
+        {this.state.requestModal && (
+          <RequestModal
+            itemId={this.state.item.ID}
+            type={this.state.item.TYPE}
+            seasonId={this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].ID.toString() : ""}
+            close={() => this.setState({ requestModal: false })}
+          />
+        )}
+        {this.state.shareModal != null && <ShareModal file_item={this.state.shareModal} close={() => this.setState({ shareModal: null })} />}
+        <BrowserView>
+          <div
+            style={{
+              backgroundImage: `linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('${this.state.item.BACKDROP}')`,
+              backgroundSize: "cover",
+            }}
+            className="bg-no-repeat bg-cover overflow-auto text-white min-h-screen"
+          >
+            <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
+              <div className="pl-8 pt-4 w-full">
+                <div className="flex">
+                  <img src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
+                  <div className="w-[calc(100%-20%-20px)] ml-[20px]">
+                    {this.state.item.LOGO != "" ? (
+                      <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
+                    ) : (
+                      <div className="text-5xl font-bold underline">{this.state.item.DISPLAY_NAME}</div>
+                    )}
 
-                      <div className="opacity-80 mt-4 font-bold text-sm">
-                        <div className="flex">
-                          <div>Tags :</div>&nbsp;
-                          {this.state.item.RUNTIME > 0 ? <div>{FormatRuntime(this.state.item.RUNTIME)}</div> : <></>}
-                          {this.state.item.YEAR ? <div className="pl-4">{this.state.item.YEAR}</div> : <></>}
-                          {this.state.item.Vote_Average > 0 ? <div>{this.state.item.Vote_Average}</div> : <></>}
-                          {this.state.item.AWARDS != "" ? <div>({this.state.item.AWARDS})</div> : <></>}
-                          {this.state.item.DIRECTOR != "" ? <div className="pl-4">Réalisateur : {this.state.item.DIRECTOR}</div> : <></>}
+                    <div className="opacity-80 mt-4 font-bold text-sm">
+                      <div className="flex">
+                        <div>Tags :</div>&nbsp;
+                        {this.state.item.RUNTIME > 0 ? <div>{FormatRuntime(this.state.item.RUNTIME)}</div> : <></>}
+                        {this.state.item.YEAR ? <div className="pl-4">{this.state.item.YEAR}</div> : <></>}
+                        {this.state.item.Vote_Average > 0 ? <div>{this.state.item.Vote_Average}</div> : <></>}
+                        {this.state.item.AWARDS != "" ? <div>({this.state.item.AWARDS})</div> : <></>}
+                        {this.state.item.DIRECTOR != "" ? <div className="pl-4">Réalisateur : {this.state.item.DIRECTOR}</div> : <></>}
+                      </div>
+                      <div className="flex gap-2 ">
+                        {this.state.item.GENRE.map((e, i) => (
+                          <div key={i} onClick={() => this.browseGenre(e.ID, e.NAME)} className="underline cursor-pointer ">
+                            {e.NAME}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
+                          Manualy add torrent
                         </div>
-                        <div className="flex gap-2 ">
-                          {this.state.item.GENRE.map((e, i) => (
-                            <div key={i} onClick={() => this.browseGenre(e.ID, e.NAME)} className="underline cursor-pointer ">
-                              {e.NAME}
-                            </div>
-                          ))}
+                        <div
+                          className="cursor-pointer"
+                          hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                          onClick={() => this.setState({ convertModal: true })}
+                        >
+                          Convert
                         </div>
-                        <div className="flex gap-4">
-                          <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
-                            Manualy add torrent
-                          </div>
-                          <div
-                            className="cursor-pointer"
-                            hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
-                            onClick={() => this.setState({ convertModal: true })}
-                          >
-                            Convert
-                          </div>
-                          <div
-                            className="cursor-pointer"
-                            hidden={
-                              (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
-                              (this.state.item.TYPE === "tv" &&
-                                this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
-                                  return p + c.FILES.length;
-                                }, 0) > 0)
-                            }
-                            onClick={() => this.setState({ requestModal: true })}
-                          >
-                            Request When Available
-                            {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
-                          </div>
-                          <div
-                            onClick={() => this.setState({ shareModal: this.currentFile })}
-                            hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
-                          >
-                            Share
-                          </div>
+                        <div
+                          className="cursor-pointer"
+                          hidden={
+                            (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
+                            (this.state.item.TYPE === "tv" &&
+                              this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
+                                return p + c.FILES.length;
+                              }, 0) > 0)
+                          }
+                          onClick={() => this.setState({ requestModal: true })}
+                        >
+                          Request When Available
+                          {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
+                        </div>
+                        <div
+                          onClick={() => this.setState({ shareModal: this.currentFile })}
+                          hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                        >
+                          Share
                         </div>
                       </div>
-                      {this.state.item.TYPE === "movie" ? (
-                        <>
+                    </div>
+                    {this.state.item.TYPE === "movie" ? (
+                      <>
+                        <select
+                          hidden={this.state.item.FILES.length == 0}
+                          onChange={this.changeFile.bind(this)}
+                          className="mt-4 bg-black bg-opacity-50 rounded-lg text-white p-2"
+                        >
+                          {this.state.item.FILES.map((e, i) => (
+                            <option key={i} value={i}>
+                              {e.FILENAME}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="mt-4 gap-4">
+                          <div className="flex gap-10">
+                            <div
+                              onClick={this.stream.bind(this)}
+                              className="w-44 cursor-pointer flex justify-center items-center gap-2 text-[#181818] bg-white font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
+                            >
+                              <FaPlay />
+                              <div>{this.state.item.WATCH.CURRENT > 0 ? "Reprendre" : "Lire"}</div>
+                            </div>
+                            <div
+                              onClick={this.download.bind(this)}
+                              className="w-44 cursor-pointer flex justify-center items-center gap-2 bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
+                            >
+                              <FaPlay />
+                              <div>Télécharger</div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    <div className="mt-4 font-semibold text-2xl underline">{this.state.item.TAGLINE}</div>
+                    <div className="mt-4 w-[85%] text-white font-semibold opacity-90">{this.state.item.DESCRIPTION}</div>
+                    {this.state.item.TYPE === "tv" ? (
+                      <div className="mt-4">
+                        <div className="flex gap-4">
                           <select
-                            hidden={this.state.item.FILES.length == 0}
-                            onChange={this.changeFile.bind(this)}
-                            className="mt-4 bg-black bg-opacity-50 rounded-lg text-white p-2"
+                            onChange={(e) => this.setState({ season: parseInt(e.target.value) })}
+                            className="bg-black bg-opacity-50 rounded-lg text-white p-2"
                           >
-                            {this.state.item.FILES.map((e, i) => (
+                            {this.state.item.SEASONS.map((e, i) => (
                               <option key={i} value={i}>
-                                {e.FILENAME}
+                                {e.NAME}
                               </option>
                             ))}
                           </select>
-                          <div className="mt-4 gap-4">
-                            <div className="flex gap-10">
-                              <div
-                                onClick={this.stream.bind(this)}
-                                className="w-44 cursor-pointer flex justify-center items-center gap-2 text-[#181818] bg-white font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
-                              >
-                                <FaPlay />
-                                <div>{this.state.item.WATCH.CURRENT > 0 ? "Reprendre" : "Lire"}</div>
-                              </div>
-                              <div
-                                onClick={this.download.bind(this)}
-                                className="w-44 cursor-pointer flex justify-center items-center gap-2 bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
-                              >
-                                <FaPlay />
-                                <div>Télécharger</div>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      <div className="mt-4 font-semibold text-2xl underline">{this.state.item.TAGLINE}</div>
-                      <div className="mt-4 w-[85%] text-white font-semibold opacity-90">{this.state.item.DESCRIPTION}</div>
-                      {this.state.item.TYPE === "tv" ? (
-                        <div className="mt-4">
-                          <div className="flex gap-4">
-                            <select
-                              onChange={(e) => this.setState({ season: parseInt(e.target.value) })}
-                              className="bg-black bg-opacity-50 rounded-lg text-white p-2"
-                            >
-                              {this.state.item.SEASONS.map((e, i) => (
-                                <option key={i} value={i}>
-                                  {e.NAME}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <div className="text-2xl font-semibold pb-2 pt-1">Episodes : </div>
-                            <Swiper slidesPerView={"auto"} spaceBetween={"10px"}>
-                              {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
-                                <SwiperSlide style={{ width: "fit-content" }}>
-                                  <div
-                                    onClick={(event) => this.epStr(event, e, -1)}
-                                    className={`flex flex-col w-60 border-2  relative rounded-lg border-transparent hover:border-white cursor-pointer group`}
-                                  >
-                                    <div className="relative w-full h-36">
-                                      <div className="absolute w-full h-full bg-black bg-opacity-50 rounded-lg">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden group-hover:block h-8 w-8">
-                                          <FaPlay className="w-full h-full" />
-                                        </div>
-                                        <div className="flex items-center absolute top-1 left-1 gap-1">
-                                          <CgUnavailable className={`${e.FILES.length > 0 ? "hidden" : ""}`} />
-                                        </div>
-                                      </div>
-                                      <img onError={setFallbackImage} src={e.STILL} className="w-full h-full rounded-lg" />
-                                    </div>
-                                    <div className="text-center flex items-center justify-center">
-                                      <div>
-                                        ({e.EPISODE_NUMBER}) {e.NAME}
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between items-center pb-1 mt-1">
-                                      <div
-                                        onClick={(event) => this.epStr(event, e, -1)}
-                                        className="w-[50%] mr-1 ml-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
-                                      >
-                                        Lire
-                                      </div>
-                                      <div
-                                        onClick={(event) => this.epDl(event, e, -1)}
-                                        className="w-[50%] mr-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
-                                      >
-                                        Télécharger
-                                      </div>
-                                    </div>
-                                    <div className="text-left opacity-50 leading-5 max-h-28 overflow-auto no-scrollbar">{e.DESCRIPTION}</div>
-                                  </div>
-                                </SwiperSlide>
-                              ))}
-                            </Swiper>
-                          </div>
                         </div>
-                      ) : (
-                        <></>
-                      )}
-                    </div>
+                        <div>
+                          <div className="text-2xl font-semibold pb-2 pt-1">Episodes : </div>
+                          <Swiper slidesPerView={"auto"} spaceBetween={"10px"}>
+                            {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
+                              <SwiperSlide style={{ width: "fit-content" }}>
+                                <EpisodeRender item={this} season_index={this.state.season} i={i} />
+                              </SwiperSlide>
+                            ))}
+                          </Swiper>
+                        </div>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
                   </div>
+                </div>
 
-                  <div className="mb-8" hidden={this.state.item.SIMILARS.length == 0}>
-                    <div className="text-2xl opacity-80 mt-4 font-semibold mb-2 font-roboto ">Similars</div>
-                    <Swiper spaceBetween={20} loop slidesPerView={"auto"}>
-                      {this.state.item.SIMILARS.map((e, i) => (
-                        <SwiperSlide style={{ width: "max-content", marginLeft: `${i === 0 ? "20px" : "0px"}` }}>
-                          <Porenderer nav={this.props.navigate} render={e} />
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-                  </div>
+                <div className="mb-8" hidden={this.state.item.SIMILARS.length == 0}>
+                  <div className="text-2xl opacity-80 mt-4 font-semibold mb-2 font-roboto ">Similars</div>
+                  <Swiper spaceBetween={20} loop slidesPerView={"auto"}>
+                    {this.state.item.SIMILARS.map((e, i) => (
+                      <SwiperSlide style={{ width: "max-content", marginLeft: `${i === 0 ? "20px" : "0px"}` }}>
+                        <Porenderer nav={this.props.navigate} render={e} />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
                 </div>
               </div>
             </div>
-          </BrowserView>
-          <MobileView>
+          </div>
+        </BrowserView>
+        <MobileView>
+          <div
+            style={{
+              backgroundImage: `url('${this.state.item.BACKDROP}')`,
+              backgroundSize: "cover",
+            }}
+            className="bg-no-repeat bg-cover w-screen mt-12 h-64"
+          >
             <div
-              style={{
-                backgroundImage: `url('${this.state.item.BACKDROP}')`,
-                backgroundSize: "cover",
-              }}
-              className="bg-no-repeat bg-cover w-screen mt-12 h-64"
-            >
-              <div
-                className="
+              className="
               bg-gradient-to-b
               from-transparent
               to-[#181818]
@@ -494,156 +445,155 @@ class Renderer extends React.Component<RendereProps> {
               to-100%
               h-full
               w-screen "
+            >
+              {this.state.item.LOGO != "" ? (
+                <img src={this.state.item.LOGO} className="w-[80vw]" />
+              ) : (
+                <div className="text-4xl underline pb-2">{this.state.item.DISPLAY_NAME}</div>
+              )}
+            </div>
+
+            <div className="flex opacity-30 mt-1 justify-center">
+              {this.state.item.GENRE.map((e) => (
+                <>
+                  <div onClick={() => this.browseGenre(e.ID, e.NAME)} className="underline cursor-pointer ">
+                    {e.NAME}
+                  </div>
+                  &nbsp;
+                </>
+              ))}
+            </div>
+            <div className="flex justify-center opacity-35 gap-1">
+              {this.state.item.RUNTIME > 0 ? <div>{FormatRuntime(this.state.item.RUNTIME)}</div> : <></>}&nbsp;
+              {this.state.item.YEAR ? <div className="pl-4">{this.state.item.YEAR}</div> : <></>}&nbsp;
+              {this.state.item.Vote_Average > 0 ? <div>{this.state.item.Vote_Average}</div> : <></>}&nbsp;
+              {this.state.item.AWARDS != "" ? <div>({this.state.item.AWARDS})</div> : <></>}&nbsp;
+              <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
+                Manualy add torrent
+              </div>
+              <div
+                className="cursor-pointer"
+                hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+                onClick={() => this.setState({ convertModal: true })}
               >
-                {this.state.item.LOGO != "" ? (
-                  <img src={this.state.item.LOGO} className="w-[80vw]" />
-                ) : (
-                  <div className="text-4xl underline pb-2">{this.state.item.DISPLAY_NAME}</div>
-                )}
+                Convert
               </div>
-
-              <div className="flex opacity-30 mt-1 justify-center">
-                {this.state.item.GENRE.map((e) => (
-                  <>
-                    <div onClick={() => this.browseGenre(e.ID, e.NAME)} className="underline cursor-pointer ">
-                      {e.NAME}
-                    </div>
-                    &nbsp;
-                  </>
-                ))}
+              <div
+                className="cursor-pointer"
+                hidden={
+                  (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
+                  (this.state.item.TYPE === "tv" &&
+                    this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
+                      return p + c.FILES.length;
+                    }, 0) > 0)
+                }
+                onClick={() => this.setState({ requestModal: true })}
+              >
+                Request When Available
+                {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
               </div>
-              <div className="flex justify-center opacity-35 gap-1">
-                {this.state.item.RUNTIME > 0 ? <div>{FormatRuntime(this.state.item.RUNTIME)}</div> : <></>}&nbsp;
-                {this.state.item.YEAR ? <div className="pl-4">{this.state.item.YEAR}</div> : <></>}&nbsp;
-                {this.state.item.Vote_Average > 0 ? <div>{this.state.item.Vote_Average}</div> : <></>}&nbsp;
-                {this.state.item.AWARDS != "" ? <div>({this.state.item.AWARDS})</div> : <></>}&nbsp;
-                <div className="cursor-pointer" onClick={() => this.setState({ addModal: true })}>
-                  Manualy add torrent
-                </div>
-                <div
-                  className="cursor-pointer"
-                  hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
-                  onClick={() => this.setState({ convertModal: true })}
-                >
-                  Convert
-                </div>
-                <div
-                  className="cursor-pointer"
-                  hidden={
-                    (this.state.item.TYPE === "movie" && this.state.item.FILES.length > 0) ||
-                    (this.state.item.TYPE === "tv" &&
-                      this.state.item.SEASONS[this.state.season].EPISODES.reduce((p, c) => {
-                        return p + c.FILES.length;
-                      }, 0) > 0)
-                  }
-                  onClick={() => this.setState({ requestModal: true })}
-                >
-                  Request When Available
-                  {this.state.item.TYPE == "tv" ? `(Season ${this.state.item.SEASONS[this.state.season].SEASON_NUMBER})` : ""}
-                </div>
-                <div
-                  onClick={() => this.setState({ shareModal: this.currentFile })}
-                  hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
-                >
-                  Share
-                </div>
+              <div
+                onClick={() => this.setState({ shareModal: this.currentFile })}
+                hidden={this.state.item.TYPE === "tv" || this.state.item.FILES.length == 0}
+              >
+                Share
               </div>
-              <div>
-                <div className="mt-2 text-sm opacity-50 text-center font-semibold pl-2 pr-2">{this.state.item.DESCRIPTION}</div>
-                {this.state.item.TYPE === "movie" ? (
-                  <div>
-                    <select
-                      hidden={this.state.item.FILES.length == 0}
-                      onChange={this.changeFile.bind(this)}
-                      className="mt-4  bg-opacity-50 w-screen rounded-lg text-white p-2"
-                    >
-                      {this.state.item.FILES.map((e, i) => (
-                        <option value={i}>{e.FILENAME}</option>
-                      ))}
-                    </select>
-
-                    <div className="mt-4">
-                      <div
-                        onClick={this.stream.bind(this)}
-                        className="cursor-pointer flex justify-center w-[90%] ml-[5%] items-center gap-2 bg-white text-[#181818] font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
-                      >
-                        <FaPlay />
-                        <div>{this.state.item.WATCH.CURRENT > 0 ? "Reprendre" : "Lire"}</div>
-                      </div>
-                      <div
-                        onClick={this.download.bind(this)}
-                        className="cursor-pointer flex mt-4 w-[90%] ml-[5%] justify-center items-center gap-2  bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
-                      >
-                        <FaPlay />
-                        <div>Télécharger</div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
-              {this.state.item.TYPE === "tv" ? (
-                <div className="">
-                  <div className="flex justify-center">
-                    <select
-                      onChange={(e) => this.setState({ season: parseInt(e.target.value) })}
-                      className="bg-black bg-opacity-50 w-1/2 mt-3 rounded-lg text-white p-2"
-                    >
-                      {this.state.item.SEASONS.map((e, i) => (
-                        <option value={i}>{e.NAME}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex justify-center flex-col mt-4">
-                    {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
-                      <div>
-                        <div className="flex w-full text-sm">
-                          <img src={e.STILL} className="w-44 xl:w-72 h-auto rounded-lg ml-2" />
-                          <div className="w-full flex items-center">
-                            <div className="w-full">
-                              <div className=" text-center text-base font-semibold">
-                                {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
-                              </div>
-                              <div className="flex justify-center gap-2 ">
-                                <div hidden={e.FILES.length == 0}>({e.FILES.length})</div>
-                                <div onClick={(event) => this.epDl(event, e, -1)}>Télécharger</div>
-                                <div onClick={(event) => this.epStr(event, e, -1)}>Streamer</div>
-                              </div>
-                              <select
-                                hidden={e.FILES.length == 0}
-                                onChange={(event) => this.epDl(event, e, i)}
-                                className="bg-opacity-50 rounded-lg text-white p-1 w-full"
-                              >
-                                {e.FILES.map((f, i) => (
-                                  <option value={i}>{f.FILENAME}</option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="pl-1 pr-1 text-sm opacity-40 mt-1 mb-4 leading-4">{e.DESCRIPTION}</div>
-                      </div>
+            </div>
+            <div>
+              <div className="mt-2 text-sm opacity-50 text-center font-semibold pl-2 pr-2">{this.state.item.DESCRIPTION}</div>
+              {this.state.item.TYPE === "movie" ? (
+                <div>
+                  <select
+                    hidden={this.state.item.FILES.length == 0}
+                    onChange={this.changeFile.bind(this)}
+                    className="mt-4  bg-opacity-50 w-screen rounded-lg text-white p-2"
+                  >
+                    {this.state.item.FILES.map((e, i) => (
+                      <option value={i}>{e.FILENAME}</option>
                     ))}
+                  </select>
+
+                  <div className="mt-4">
+                    <div
+                      onClick={this.stream.bind(this)}
+                      className="cursor-pointer flex justify-center w-[90%] ml-[5%] items-center gap-2 bg-white text-[#181818] font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
+                    >
+                      <FaPlay />
+                      <div>{this.state.item.WATCH.CURRENT > 0 ? "Reprendre" : "Lire"}</div>
+                    </div>
+                    <div
+                      onClick={this.download.bind(this)}
+                      className="cursor-pointer flex mt-4 w-[90%] ml-[5%] justify-center items-center gap-2  bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
+                    >
+                      <FaPlay />
+                      <div>Télécharger</div>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <></>
               )}
-              <div className="mt-4 ml-1">
-                <div className="mb-2 text-xl opacity-10 pl-4">Similars</div>
-                <Swiper slidesPerView={"auto"} spaceBetween={10}>
-                  {this.state.item.SIMILARS.map((e, i) => (
-                    <SwiperSlide className={`${i == 0 ? "ml-2" : ""}`} style={{ width: "max-content" }}>
-                      <Porenderer nav={this.props.navigate} render={e} />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
             </div>
-          </MobileView>
-        </div>
-      </>
+            {this.state.item.TYPE === "tv" ? (
+              <div className="">
+                <div className="flex justify-center">
+                  <select
+                    onChange={(e) => this.setState({ season: parseInt(e.target.value) })}
+                    className="bg-black bg-opacity-50 w-1/2 mt-3 rounded-lg text-white p-2"
+                  >
+                    {this.state.item.SEASONS.map((e, i) => (
+                      <option value={i}>{e.NAME}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-center flex-col mt-4">
+                  {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
+                    <div>
+                      <div className="flex w-full text-sm">
+                        <img src={e.STILL} className="w-44 xl:w-72 h-auto rounded-lg ml-2" />
+                        <div className="w-full flex items-center">
+                          <div className="w-full">
+                            <div className=" text-center text-base font-semibold">
+                              {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                            </div>
+                            <div className="flex justify-center gap-2 ">
+                              <div hidden={e.FILES.length == 0}>({e.FILES.length})</div>
+                              <div onClick={(event) => this.epDl(event, e, -1)}>Télécharger</div>
+                              <div onClick={(event) => this.epStr(event, e, -1)}>Streamer</div>
+                            </div>
+                            <select
+                              hidden={e.FILES.length == 0}
+                              onChange={(event) => this.epDl(event, e, i)}
+                              className="bg-opacity-50 rounded-lg text-white p-1 w-full"
+                            >
+                              {e.FILES.map((f, i) => (
+                                <option value={i}>{f.FILENAME}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pl-1 pr-1 text-sm opacity-40 mt-1 mb-4 leading-4">{e.DESCRIPTION}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <></>
+            )}
+            <div className="mt-4 ml-1">
+              <div className="mb-2 text-xl opacity-10 pl-4">Similars</div>
+              <Swiper slidesPerView={"auto"} spaceBetween={10}>
+                {this.state.item.SIMILARS.map((e, i) => (
+                  <SwiperSlide className={`${i == 0 ? "ml-2" : ""}`} style={{ width: "max-content" }}>
+                    <Porenderer nav={this.props.navigate} render={e} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </div>
+        </MobileView>
+      </div>
     );
   }
 }
@@ -661,13 +611,19 @@ export function GetProgress(p: WATCH_DATA): string {
   return `${(p.CURRENT / p.TOTAL) * 100}%`;
 }
 
-export async function post_file(file: File, type: string, id: string, path: string) {
+export async function post_file(file: File, type: "tv" | "movie", id: string, path: string, season: number = -1, episode: number = -1) {
   var form = new FormData();
   console.log(file);
   form.append("file", file);
   form.append("type", type);
   form.append("id", id);
   form.append("path", path);
+  if (type == "tv") {
+    if (season == -1 || episode == -1) throw new Error("Season and episode must be provided");
+    form.append("season", season.toString());
+    form.append("episode", episode.toString());
+  }
+
   const xhr = new XMLHttpRequest();
   var toastId = toast.info("Upload en cours", {
     autoClose: false,
@@ -691,4 +647,64 @@ export async function post_file(file: File, type: string, id: string, path: stri
 export function setFallbackImage(e: React.SyntheticEvent<HTMLImageElement, Event>) {
   //   e.currentTarget.src = "/fallback.png";
   e.currentTarget.src = unavailable;
+}
+function EpisodeRender(props: { item: Renderer; season_index: number; i: number }) {
+  const season = (props.item.state.item as TVItem).SEASONS[props.season_index];
+  const e = season.EPISODES[props.i];
+  const [file, setFile] = useState<File | null>(null);
+  const on_choosedStorage = (path: string) => {
+    if (!file) return;
+    console.log(file.name);
+    if (file.name.endsWith(".torrent")) {
+      post_file_torrent(file, props.item.state.item.TYPE, props.item.state.item, props.season_index);
+    } else {
+      post_file(file, "tv", props.item.state.item.ID, path, season.ID, e.ID);
+    }
+  };
+  const on_drop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setFile(e.dataTransfer.files[0]);
+  };
+
+  return (
+    <div
+      onDrop={on_drop}
+      onDragOver={(e) => e.preventDefault()}
+      onClick={(event) => props.item.epStr(event, e, -1)}
+      className={`flex flex-col w-60 border-2  relative rounded-lg border-transparent hover:border-white cursor-pointer group`}
+    >
+      {file && createPortal(<ChooseStorage close={() => setFile(null)} onsuccess={on_choosedStorage} />, document.body)}
+      <div className="relative w-full h-36">
+        <div className="absolute w-full h-full bg-black bg-opacity-50 rounded-lg">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden group-hover:block h-8 w-8">
+            <FaPlay className="w-full h-full" />
+          </div>
+          <div className="flex items-center absolute top-1 left-1 gap-1">
+            <CgUnavailable className={`${e.FILES.length > 0 ? "hidden" : ""}`} />
+          </div>
+        </div>
+        <img onError={setFallbackImage} src={e.STILL} className="w-full h-full rounded-lg" />
+      </div>
+      <div className="text-center flex items-center justify-center">
+        <div>
+          ({e.EPISODE_NUMBER}) {e.NAME}
+        </div>
+      </div>
+      <div className="flex justify-between items-center pb-1 mt-1">
+        <div
+          onClick={(event) => props.item.epStr(event, e, -1)}
+          className="w-[50%] mr-1 ml-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
+        >
+          Lire
+        </div>
+        <div
+          onClick={(event) => props.item.epDl(event, e, -1)}
+          className="w-[50%] mr-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
+        >
+          Télécharger
+        </div>
+      </div>
+      <div className="text-left opacity-50 leading-5 max-h-28 overflow-auto no-scrollbar">{e.DESCRIPTION}</div>
+    </div>
+  );
 }

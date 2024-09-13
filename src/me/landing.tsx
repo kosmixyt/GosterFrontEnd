@@ -2,7 +2,7 @@ import { bytesToSize, TorrentItem } from "../torrent";
 import { app_url } from "..";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileItem } from "../render/render";
+import { EPISODE, FileItem, TVItem } from "../render/render";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { SKINNY_RENDER } from "../component/poster";
 import { toast } from "react-toastify";
@@ -323,7 +323,9 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
         rounded-lg cursor-pointer bg-cover  bg-center"
       >
         <div
-          className={`absolute h-full  w-full rounded-lg hover:opacity-100 ${isMobile ? "opacity-100" : "opacity-0"}   hover:backdrop-blur-md transition-all `}
+          className={`absolute h-full  w-full rounded-lg hover:opacity-100 ${
+            isMobile ? "opacity-100" : "opacity-0"
+          }   hover:backdrop-blur-md transition-all `}
         >
           <div className="p-2 gap-1  w-full h-full">
             <div className="flex justify-between">
@@ -334,7 +336,9 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 >
                   Zip
                 </div>
-                <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">{bytesToSize(props.torrent.size)}</div>
+                <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">
+                  {bytesToSize(props.torrent.size)}
+                </div>
               </div>
               <div
                 onClick={() => {
@@ -392,7 +396,9 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
         >
           <img src={props.torrent.SKINNY.POSTER} alt="" className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg" />
         </div>
-        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg">{props.torrent.name.substring(0, 50)}</div>
+        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg">
+          {props.torrent.name.substring(0, 50)}
+        </div>
       </div>
     </div>
   );
