@@ -8,7 +8,7 @@ import { app_url } from "..";
 import { CacheManager } from "./cacheManager";
 import { QUALITY, Subtitle, Track } from "../player/player";
 import Hls from "hls.js";
-import { electron_get_transcode_data, TranscodeDATA } from "./electron/electronTranscoder";
+import { TranscodeDATA } from "./electron/electronTranscoder";
 
 export type Platform = "web" | "android" | "electron" | "ios";
 export class PlatformManager {
@@ -75,8 +75,6 @@ export class PlatformManager {
       case "web":
         console.log("Web platform not supported");
         return get_transcode_data(transcode_uri);
-      case "electron":
-        return electron_get_transcode_data(transcode_uri);
     }
     throw new Error("Invalid platform");
   }

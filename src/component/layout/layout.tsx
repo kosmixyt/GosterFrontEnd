@@ -33,9 +33,9 @@ export const Head = (props: {}) => {
   }
   return (
     <div>
-      <div className="pl-4 pr-4 fixed z-40">
+      <div className="">
         <ToastContainer />
-        <div className="electron-draggable fixed top-0 left-0 w-screen z-20 h-[51px] bg-stone-900 flex pt-2 pb-2 gap-10 sm:gap-14 align-baseline justify-center overflow-auto">
+        <div className="electron-draggable top-0 left-0 sticky z-20 h-[51px] bg-stone-900 flex pt-2 pb-2 gap-10 sm:gap-14 align-baseline justify-center overflow-auto">
           {isSearch ? <SearchRender title={"Search ..."} close={() => setSearch(false)} /> : <></>}
           <div className={buttonStyle} onClick={() => nav("/")}>
             <RiCompassDiscoverFill size={iconSize} />

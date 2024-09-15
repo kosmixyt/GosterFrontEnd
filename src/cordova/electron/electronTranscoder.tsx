@@ -7,6 +7,7 @@ import { QUALITY, Subtitle, Track } from "@/src/player/player";
 import { CacheManager } from "../cacheManager";
 import { FFPROBE_DATA } from "./types";
 import { EventEmitter } from "events";
+import { SKINNY_RENDER } from "@/src/component/poster";
 //@ts-ignore
 var cp: typeof child_process = null;
 if (window.require) cp = window.require("child_process");
@@ -218,78 +219,6 @@ export class ElectronHlsLoader extends Hls.DefaultConfig.loader {
   }
 }
 
-export async function electron_get_transcode_data(uri: string): Promise<TranscodeDATA> {
-  const Url = new URL(uri);
-  if (!Url.searchParams.get("file")) {
-    console.log("no file param");
-    return get_transcode_data(uri);
-  }
-  if (!Url.searchParams.get("type")) {
-    console.log("no type param");
-    return get_transcode_data(uri);
-  }
-  const fileId = parseInt(Url.searchParams.get("file") as string);
-  if (!electron_has_file(fileId)) {
-    console.log("File not found", fileId);
-    return get_transcode_data(uri);
-  }
-  const file = CacheManager.GetFile(fileId);
-  if (!file) throw new Error("File not found");
-  var item_data = CacheManager.GetItemThroughtFile(fileId);
-  if (!item_data) throw new Error("Item not found");
-  const transcode = new TranscoderUtilisateur(fileId, GetDownloadPath() + get_file_name(item_data.File.ID));
-  const data = await transcode.GetFfprobeData();
-  var transcode_data: TranscodeDATA = {
-    uuid: "",
-    qualitys: [],
-    tracks: [],
-    subtitles: [],
-    isBrowserPlayable: false,
-    download_url: "",
-    manifest: "m3u8",
-    task_id: "",
-    current: 0,
-    total: 0,
-    name: "",
-    poster: "",
-    backdrop: "",
-    isLive: false,
-    unload: (hls: Hls) => {
-      hls.destroy();
-      transcode.destroy();
-    },
-    create_hls: (
-      videoElement: HTMLVideoElement,
-      get_current_playback: () => {
-        trackIndex: number;
-        currentQualityName: string;
-        currentTime: string;
-      }
-    ) => {
-      console.log("create hls");
-      const hls = new Hls({
-        startPosition: 0,
-      });
-      hls.config.loader = ElectronHlsLoader;
-      hls.loadSource("m3u8");
-      hls.attachMedia(videoElement);
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.log("electronjs loader error");
-        console.log(event, data);
-      });
-      videoElement.play();
-      return hls;
-    },
-  };
-  console.log(data);
-  if (item_data?.File.CURRENT) {
-    transcode_data.current = item_data.File.CURRENT;
-  }
-
-  return transcode_data;
-}
-
 export interface TranscodeDATA {
   uuid: string;
   qualitys: QUALITY[];
@@ -300,6 +229,7 @@ export interface TranscodeDATA {
   manifest: string;
   task_id: string;
   current: number;
+  next: SKINNY_RENDER;
   total: number;
   name: string;
   poster: string;

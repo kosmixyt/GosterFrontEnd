@@ -1,5 +1,4 @@
 import { ScrollRestoration, UNSAFE_useScrollRestoration, useLoaderData, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import "./browse.css";
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { PosterRenderer, SKINNY_RENDER } from "../component/poster";

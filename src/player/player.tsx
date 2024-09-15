@@ -13,6 +13,7 @@ import close from "./icons/close-square-svgrepo-com.svg";
 import pip from "./icons/pip-2-svgrepo-com.svg";
 import settings from "./icons/settings-minimalistic-svgrepo-com.svg";
 import { createPortal } from "react-dom";
+import next from "./icons/skip-next-svgrepo-com.svg";
 import livestream from "./icons/play-stream-svgrepo-com.svg";
 import unlock from "./icons/lock-keyhole-minimalistic-unlocked-svgrepo-com.svg";
 import lock from "./icons/lock-keyhole-minimalistic-svgrepo-com.svg";
@@ -20,6 +21,7 @@ import { isMobile } from "react-device-detect";
 import { DisplayTask } from "../component/taskdisplay/taskdisplay";
 import { PlatformManager } from "../cordova/platform";
 import { TranscodeDATA } from "../cordova/electron/electronTranscoder";
+import { FormatRuntime } from "../render/render";
 interface ProgressEvent {
   eventName: string;
   data: string;
@@ -35,7 +37,7 @@ export const PlayerRender = (props: {}) => {
     PlatformManager.DispatchTranscodeData(searchParams.get("transcode") ?? "")
       .then(setPlayerData)
       .catch(setError);
-  }, []);
+  }, [searchParams.get("transcode")]);
   if (error) return <div>{error}</div>;
   if (!playerData) return <div>Load</div>;
   return <NewPlayer data={playerData} nav={nav} params={params} />;
@@ -65,6 +67,7 @@ class NewPlayer extends React.Component<PlayerProps> {
     currentTrack: Track;
     controlsLocked: boolean;
     currentSubtitle: Subtitle | null;
+    displayTimeMode: "until" | "total";
   } = {
     fullscreen: false,
     currentTime: 0,
@@ -76,11 +79,13 @@ class NewPlayer extends React.Component<PlayerProps> {
     currentTrack: this.Tracks[0],
     showSettings: false,
     currentSubtitle: null,
+    displayTimeMode: "until",
   };
   constructor(props: PlayerProps) {
     super(props);
   }
   componentDidMount(): void {
+    console.log("mount cclk");
     document.addEventListener("keydown", this.onkeydown.bind(this));
     console.log("mount", this.props.data.isBrowserPlayable);
     if (!this.props.data.isBrowserPlayable) {
@@ -112,7 +117,23 @@ class NewPlayer extends React.Component<PlayerProps> {
         break;
     }
   }
-  componentDidUpdate(prevProps: Readonly<PlayerProps>, prevState: Readonly<{}>, snapshot?: any): void {}
+  componentDidUpdate(prevProps: Readonly<PlayerProps>, prevState: Readonly<{}>, snapshot?: any): void {
+    console.log(prevProps.data.uuid, this.props.data.uuid);
+    if (prevProps.data.uuid != this.props.data.uuid) {
+      if (!this.props.data.isBrowserPlayable) {
+        this.hls = this.props.data.create_hls(this.video.current!, () => {
+          return {
+            trackIndex: this.state.currentTrack.Index,
+            currentQualityName: this.state.currentQuality.Name,
+            currentTime: this.state.currentTime.toString(),
+          };
+        });
+      } else {
+        this.video.current!.src = this.props.data.manifest;
+      }
+    }
+  }
+
   componentWillUnmount(): void {
     document.removeEventListener("keydown", this.onkeydown.bind(this));
     if (!this.props.data.isBrowserPlayable) this.props.data.unload(this.hls);
@@ -171,7 +192,7 @@ class NewPlayer extends React.Component<PlayerProps> {
     this.setState({ hideBottomBar: false });
     this.HiddenTimeout = setTimeout(() => {
       console.log("hide");
-      this.setState({ hideBottomBar: true });
+      this.setState({ hideBottomBar: false });
     }, 2000);
   }
 
@@ -277,7 +298,12 @@ class NewPlayer extends React.Component<PlayerProps> {
 
   render() {
     return (
-      <div onMouseMove={this.on_leave.bind(this)} onMouseEnter={this.on_enter.bind(this)} onMouseLeave={this.on_leave.bind(this)} ref={this.Container}>
+      <div
+        onMouseMove={this.on_leave.bind(this)}
+        onMouseEnter={this.on_enter.bind(this)}
+        onMouseLeave={this.on_leave.bind(this)}
+        ref={this.Container}
+      >
         <video
           onPlay={() => {
             this.setState({ playing: true });
@@ -345,81 +371,7 @@ class NewPlayer extends React.Component<PlayerProps> {
               />
             </div>
           )}
-          {!this.state.hideBottomBar && !this.state.controlsLocked && !isMobile && (
-            <>
-              <div>
-                <img
-                  onClick={this.playPause.bind(this)}
-                  src={!this.video.current?.paused ? pause : play}
-                  alt="pause"
-                  className="cursor-pointer w-10 h-10 pl-2"
-                />
-              </div>
-              <div className="flex w-[50%]">
-                <input
-                  className="w-full"
-                  type="range"
-                  min="0"
-                  max={this.video.current?.duration || 0}
-                  defaultValue={this.video.current?.currentTime ?? 0}
-                  onChange={(e) => {
-                    this.video.current!.currentTime = parseInt(e.target.value);
-                  }}
-                />
-                <div
-                  className="ml-2 font-bold
-          text-blue-950
-          text-xl
-          "
-                >
-                  {this.props.data.isLive ? "🔴livestream🔴" : secondsToHms(this.video.current?.duration ?? 0)}
-                </div>
-              </div>
-              <div className="flex">
-                {this.state.showSettings ? this.Settings() : <></>}
-                <img
-                  src={pip}
-                  hidden={isMobile}
-                  onClick={() => {
-                    this.video.current?.requestPictureInPicture();
-                  }}
-                  className="w-10 h-10 mr-2 cursor-pointer"
-                />
-                <img
-                  src={this.state.controlsLocked ? lock : unlock}
-                  onClick={() => this.setState({ controlsLocked: !this.state.controlsLocked })}
-                  className="w-10 h-10 mr-2 cursor-pointer"
-                />
-                <img
-                  src={this.props.data.isLive ? livestream : dl}
-                  hidden={this.props.data.download_url === ""}
-                  onClick={!this.props.data.isLive ? this.download.bind(this) : this.setAtMax.bind(this)}
-                  alt="download"
-                  className="hidden md:block  w-10 h-10 mr-2 cursor-pointer"
-                />
-                <img
-                  src={settings}
-                  onClick={this.OpenSettings.bind(this)}
-                  alt="settings"
-                  className="w-10 h-10 
-                mr-2 
-                cursor-pointer 
-                hover:rotate-90 
-                transition-[rotate] 
-                hover:animate-zoomInNoDelay
-                ease-in-out"
-                />
-                <img
-                  src={this.state.fullscreen ? minimize : fullscreencircle}
-                  onClick={(e) => this.fullScreen.bind(this)(e)}
-                  alt="fullscren"
-                  className="w-10 h-10 mr-2 cursor-pointer"
-                />
-              </div>
-            </>
-          )}
-
-          {!this.state.hideBottomBar && !this.state.controlsLocked && isMobile && (
+          {!this.state.hideBottomBar && !this.state.controlsLocked && (
             <>
               <div>
                 <img
@@ -431,7 +383,7 @@ class NewPlayer extends React.Component<PlayerProps> {
                   className="cursor-pointer w-10 h-10 pl-2"
                 />
               </div>
-              <div className="flex w-[50%]">
+              <div className="flex w-[50%] items-center">
                 <input
                   className="w-full"
                   type="range"
@@ -443,23 +395,30 @@ class NewPlayer extends React.Component<PlayerProps> {
                   }}
                 />
                 <div
-                  className="ml-2 font-bold
-          text-blue-950
-          text-xl
-          "
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.setState({ displayTimeMode: this.state.displayTimeMode === "until" ? "total" : "until" });
+                  }}
+                  className="ml-2 font-bold text-blue-950 text-xl"
                 >
-                  {this.props.data.isLive ? "🔴livestream🔴" : secondsToHms(this.video.current?.duration ?? 0)}
+                  {this.props.data.isLive
+                    ? "🔴livestream🔴"
+                    : secondsToHms(
+                        this.state.displayTimeMode === "until"
+                          ? (this.video.current?.duration ?? 0) - this.state.currentTime
+                          : this.video.current?.duration ?? 0
+                      )}
                 </div>
+                <NextForward player={this} />
               </div>
               <div className="flex">
                 {this.state.showSettings ? this.Settings() : <></>}
                 <img
                   src={pip}
-                  hidden={isMobile}
                   onClick={() => {
                     this.video.current?.requestPictureInPicture();
                   }}
-                  className="w-10 h-10 mr-2 cursor-pointer"
+                  className="w-10 hidden md:block h-10 mr-2 cursor-pointer"
                 />
                 <img
                   src={this.state.controlsLocked ? lock : unlock}
@@ -473,6 +432,7 @@ class NewPlayer extends React.Component<PlayerProps> {
                   alt="download"
                   className="hidden md:block  w-10 h-10 mr-2 cursor-pointer"
                 />
+
                 <img
                   src={settings}
                   onClick={this.OpenSettings.bind(this)}
@@ -539,6 +499,35 @@ export function Modal(props: { children: React.ReactNode }) {
     <div className="h-screen w-screen z-40 fixed top-0 left-0">
       <div className="h-full w-full bg-black bg-opacity-50"></div>
       <div className="bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">{props.children}</div>
+    </div>
+  );
+}
+
+function NextForward(props: { player: NewPlayer }) {
+  const nextFile = props.player.props.data.next;
+  const [hover, setHover] = React.useState(false);
+  const nav = useNavigate();
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log("go");
+        nav(`/player?transcode=${encodeURIComponent(nextFile.TRANSCODE_URL)}`);
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="relative hidden lg:block cursor-pointer"
+    >
+      <div hidden={!hover} className="bottom-[105%] left-1/2 bg-slate-900 h-32 w-60  text-white absolute rounded-lg">
+        <div className="w-full h-full flex items-center justify-center">
+          <img src={nextFile.POSTER} className="w-16 h-auto ml-1 rounded-lg" />
+          <div className="ml-2">
+            <div>{nextFile.NAME}</div>
+            <div>{FormatRuntime(nextFile.RUNTIME)}</div>
+          </div>
+        </div>
+      </div>
+      <img src={next} onClick={props.player.forward.bind(props.player)} className="w-10 h-10 ml-2 cursor-pointer" />
     </div>
   );
 }

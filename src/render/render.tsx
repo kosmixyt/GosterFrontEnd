@@ -227,14 +227,19 @@ class Renderer extends React.Component<RendereProps> {
     this.props.navigate("/player?transcode=" + encodeURIComponent(url));
   }
   public on_drop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
     if (this.state.item.TYPE === "tv") return;
+
     const file = e.dataTransfer.files[0];
-    if (!file) toast.error("Erreur lors de la récupération du fichier");
     if (file.name.endsWith(".torrent")) {
-      post_file_torrent(file, this.state.item.TYPE, this.state.item, -1);
+      post_file_torrent(file, this.state.item.TYPE, this.state.item, this.state.season);
     } else {
-      post_file(file, "movie", this.state.item.ID, "", -1, -1);
+      this.setState({ ChooseStorage: file });
     }
+  }
+  public uploadFile(path: string) {
+    if (!this.state.ChooseStorage) toast.error("Erreur lors de la récupération du fichier");
+    post_file(this.state.ChooseStorage!, "movie", this.state.item.ID, path, -1, -1);
   }
   public render() {
     if (typeof this.state.item.ID === "undefined") {
@@ -242,7 +247,7 @@ class Renderer extends React.Component<RendereProps> {
     }
     return (
       <div onDrop={this.on_drop.bind(this)} onDragOver={(e) => e.preventDefault()} className="w-screen  bg-no-repeat bg-cover text-white">
-        {this.state.addModal ? (
+        {this.state.addModal &&
           createPortal(
             <AddModal
               close={() => this.setState({ addModal: false })}
@@ -256,10 +261,12 @@ class Renderer extends React.Component<RendereProps> {
               }}
             />,
             document.body
-          )
-        ) : (
-          <></>
-        )}
+          )}
+        {this.state.ChooseStorage &&
+          createPortal(
+            <ChooseStorage close={() => this.setState({ ChooseStorage: null })} onsuccess={(path) => this.uploadFile(path)} />,
+            document.body
+          )}
         {this.state.convertModal && this.state.item.TYPE === "movie" && (
           <ConvertModal
             close={() => this.setState({ convertModal: false })}
@@ -635,8 +642,21 @@ export async function post_file(file: File, type: "tv" | "movie", id: string, pa
   };
   xhr.onload = (e) => {
     const json = JSON.parse(xhr.responseText);
-    xhr.status == 200 ? toast.success("Upload terminé") : toast.error(`Erreur lors de l'upload : ${json.error}`);
+    if (xhr.status == 200) {
+      toast.update(toastId, {
+        render: "Upload terminé",
+        type: "success",
+        autoClose: 5000,
+      });
+    } else {
+      toast.update(toastId, {
+        render: `Erreur lors de l'upload : ${json.error}`,
+        type: "error",
+        autoClose: 5000,
+      });
+    }
   };
+
   xhr.onerror = (e) => {
     toast.error("Erreur lors de l'upload");
   };
