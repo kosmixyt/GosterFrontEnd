@@ -118,7 +118,6 @@ class NewPlayer extends React.Component<PlayerProps> {
     }
   }
   componentDidUpdate(prevProps: Readonly<PlayerProps>, prevState: Readonly<{}>, snapshot?: any): void {
-    console.log(prevProps.data.uuid, this.props.data.uuid);
     if (prevProps.data.uuid != this.props.data.uuid) {
       if (!this.props.data.isBrowserPlayable) {
         this.hls = this.props.data.create_hls(this.video.current!, () => {

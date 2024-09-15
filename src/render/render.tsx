@@ -407,7 +407,7 @@ class Renderer extends React.Component<RendereProps> {
                           <div className="text-2xl font-semibold pb-2 pt-1">Episodes : </div>
                           <Swiper slidesPerView={"auto"} spaceBetween={"10px"}>
                             {this.state.item.SEASONS[this.state.season].EPISODES.map((e, i) => (
-                              <SwiperSlide style={{ width: "fit-content" }}>
+                              <SwiperSlide key={i} style={{ width: "fit-content" }}>
                                 <EpisodeRender item={this} season_index={this.state.season} i={i} />
                               </SwiperSlide>
                             ))}
@@ -424,7 +424,7 @@ class Renderer extends React.Component<RendereProps> {
                   <div className="text-2xl opacity-80 mt-4 font-semibold mb-2 font-roboto ">Similars</div>
                   <Swiper spaceBetween={20} loop slidesPerView={"auto"}>
                     {this.state.item.SIMILARS.map((e, i) => (
-                      <SwiperSlide style={{ width: "max-content", marginLeft: `${i === 0 ? "20px" : "0px"}` }}>
+                      <SwiperSlide key={i} style={{ width: "max-content", marginLeft: `${i === 0 ? "20px" : "0px"}` }}>
                         <Porenderer nav={this.props.navigate} render={e} />
                       </SwiperSlide>
                     ))}
@@ -592,7 +592,7 @@ class Renderer extends React.Component<RendereProps> {
               <div className="mb-2 text-xl opacity-10 pl-4">Similars</div>
               <Swiper slidesPerView={"auto"} spaceBetween={10}>
                 {this.state.item.SIMILARS.map((e, i) => (
-                  <SwiperSlide className={`${i == 0 ? "ml-2" : ""}`} style={{ width: "max-content" }}>
+                  <SwiperSlide key={i} className={`${i == 0 ? "ml-2" : ""}`} style={{ width: "max-content" }}>
                     <Porenderer nav={this.props.navigate} render={e} />
                   </SwiperSlide>
                 ))}
