@@ -20,7 +20,11 @@ import { CacheManager } from "../../cordova/cacheManager";
 const iconSize = 35;
 const showName = false;
 export const Head = (props: {}) => {
-  const nav = useNavigate();
+  const go = useNavigate();
+  const nav = (path: string) => {
+    if (document.location.href.includes("/login")) return;
+    go(path);
+  };
   const [isSearch, setSearch] = useState(false);
   const buttonStyle = "text-2xl cursor-pointer electron-no-draggable";
   if (document.location.href.includes("/player") || document.location.href.includes("/pty")) {
@@ -53,7 +57,7 @@ export const Head = (props: {}) => {
             <BsBroadcastPin size={iconSize} />
             {showName ? <div className="block text-xs text-center">Providers</div> : <></>}
           </div>
-          <div className={buttonStyle} onClick={() => setSearch(!isSearch)}>
+          <div className={buttonStyle} onClick={() => setSearch(!isSearch && !document.location.href.includes("/login"))}>
             <FaSearch size={iconSize} />
             {showName ? <div className="block text-xs text-center">Search</div> : <></>}
           </div>

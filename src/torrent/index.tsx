@@ -15,8 +15,6 @@ import { PlatformManager } from "../cordova/platform";
 export function bytesToSize(bytes: number, decimals = 2) {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   if (bytes === 0) return "0 Byte";
-  //   const i = parseInt(String(Math.floor(Math.log(bytes) / Math.log(1024))));
-  //   return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return parseFloat((bytes / Math.pow(1024, i)).toFixed(decimals)) + " " + sizes[i];
 }
@@ -220,7 +218,6 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 })
                   .then((e) => e.json())
                   .then((e) => {
-                    // toast.info(e.status);
                     if (e.error) {
                       return toast.error(e.error);
                     }
@@ -327,8 +324,8 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 </div>
                 <div>Time to 1% : {Math.round(showed.data?.time_to_1_percent)}s</div>
                 <div>
-                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) (
-                  {bytesToSize(showed.data.session_total_uploaded)} this session)
+                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) ({bytesToSize(showed.data.session_total_uploaded)} this
+                  session)
                 </div>
                 <div>
                   Progression : <progress value={showed.data.progress * 100} max={100}></progress>
@@ -339,9 +336,7 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 <div>Type de Média de Sortie : {showed.data.mediaoutput.toString()}</div>
                 <div>
                   Média de sortie : &nbsp;
-                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>
-                    {showed.data.media_output_uuid}
-                  </button>
+                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>{showed.data.media_output_uuid}</button>
                 </div>
               </div>
               <div className="w-3/12 text-left text-sm">
@@ -493,7 +488,6 @@ function DropArea(props: { children: React.ReactNode }) {
     );
   }
   if (itemType === "tv" && season === null) {
-    console.log("season", item_selected);
     item_selected = item_selected as TVItem;
     return <SeasonSelector seasons={item_selected.SEASONS} onselect={setSeason} />;
   }
@@ -535,7 +529,7 @@ function SeasonSelector(props: { seasons: SEASON[]; onselect: (index: number) =>
   );
 }
 
-export function post_file_torrent(file: File | string, itemType: "tv" | "movie", item: MovieItem | TVItem, season_number: number) {
+export function post_file_torrent(file: File | string, itemType: "tv" | "movie", item: MovieItem | TVItem, season_index: number) {
   const form = new FormData();
   console.log(file);
   if (file instanceof File) {
@@ -547,7 +541,7 @@ export function post_file_torrent(file: File | string, itemType: "tv" | "movie",
   }
   form.append("mediaType", itemType);
   form.append("mediauuid", item.ID.toString());
-  if (itemType === "tv") form.append("season_number", season_number.toString());
+  if (itemType === "tv") form.append("season_index", season_index.toString());
 
   console.log(FormData);
   fetch(`${app_url}/torrents/add`, {

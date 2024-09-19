@@ -1,14 +1,12 @@
-import { M } from "vite/dist/node/types.d-aGj9QkWt";
 import { DownloadWeb, get_transcode_data } from "./web";
 import { EPISODE, FileItem, MovieItem, TVItem } from "../render/render";
-import "./electron/electron";
-import { electron_load_cache, electron_save_cache, ElectronDownload } from "./electron/electron";
-import { app } from "electron";
 import { app_url } from "..";
 import { CacheManager } from "./cacheManager";
 import { QUALITY, Subtitle, Track } from "../player/player";
 import Hls from "hls.js";
-import { TranscodeDATA } from "./electron/electronTranscoder";
+import "./electron/electron";
+import { SKINNY_RENDER } from "../component/poster";
+import { ElectronDownload, ElectronLoadCache, ElectronSaveCache } from "./electron/electron";
 
 export type Platform = "web" | "android" | "electron" | "ios";
 export class PlatformManager {
@@ -19,7 +17,7 @@ export class PlatformManager {
   constructor() {}
   static GetPlatform(): Platform {
     // @ts-ignore
-    if (window.require) {
+    if (window.electron) {
       return "electron";
     }
     return PlatformManager.platform;
@@ -30,7 +28,7 @@ export class PlatformManager {
         DownloadWeb(url);
         break;
       case "electron":
-        ElectronDownload(url, fileInfo);
+        ElectronDownload(url);
         break;
     }
   }
@@ -55,7 +53,7 @@ export class PlatformManager {
         console.log("Web platform not supported");
         break;
       case "electron":
-        electron_save_cache(CacheManager.Save());
+        ElectronSaveCache(CacheManager.Save());
         break;
     }
   }
@@ -65,7 +63,7 @@ export class PlatformManager {
         console.log("Web platform not supported");
         return null;
       case "electron":
-        return electron_load_cache();
+        return ElectronLoadCache();
     }
     return null;
   }
@@ -73,6 +71,7 @@ export class PlatformManager {
     console.log(PlatformManager.GetPlatform());
     switch (PlatformManager.GetPlatform()) {
       case "web":
+      case "electron":
         console.log("Web platform not supported");
         return get_transcode_data(transcode_uri);
     }
@@ -80,5 +79,32 @@ export class PlatformManager {
   }
 }
 
+export interface TranscodeDATA {
+  uuid: string;
+  qualitys: QUALITY[];
+  tracks: Track[];
+  subtitles: Subtitle[];
+  download_url: string;
+  isBrowserPlayable: boolean;
+  manifest: string;
+  task_id: string;
+  current: number;
+  next: SKINNY_RENDER;
+  total: number;
+  name: string;
+  poster: string;
+  backdrop: string;
+  isLive: boolean;
+  create_hls: (
+    videoElement: HTMLVideoElement,
+    get_current_playback: () => {
+      trackIndex: number;
+      currentQualityName: string;
+      currentTime: string;
+    }
+  ) => Hls;
+  unload: (Hls: Hls) => void;
+}
+
 CacheManager.Load(PlatformManager.DispatchCacheManagerLoad());
-setInterval(PlatformManager.SaveCacheDispatcher, 1000 * 60);
+setInterval(PlatformManager.SaveCacheDispatcher, 1000);

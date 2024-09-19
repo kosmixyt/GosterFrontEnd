@@ -1,33 +1,21 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  RouterProvider,
-  Routes,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { Render } from "./render/render";
 import { PTY } from "./component/pty/pty";
-import { BrowseToWatchlist, Landing, landing_loader } from "./landing";
-import { browse_loader, BrowseFunc } from "./browser/browse";
+import { Landing, landing_loader } from "./landing";
+import { BrowseFunc } from "./browser/browse";
 import { PlayerRender } from "./player/player";
 import { LoginComp } from "./login/login";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
 import Torrent from "./torrent";
 import { Head } from "./component/layout/layout";
-import { Dragger, dragger_loader } from "./metadata/dragger";
-import { Updater } from "./metadata/updater";
+import fs from "fs";
+import { Dragger } from "./metadata/dragger";
 // export const app_url = "https://xxxxvideos.kosmix.fr/api";
 export const app_url = "http://localhost:90/api";
+console.log("fs", fs);
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 var globalMute = false;
 export const setMute = (mute: boolean) => {

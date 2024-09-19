@@ -232,6 +232,7 @@ class Renderer extends React.Component<RendereProps> {
 
     const file = e.dataTransfer.files[0];
     if (file.name.endsWith(".torrent")) {
+      // this state season is an index
       post_file_torrent(file, this.state.item.TYPE, this.state.item, this.state.season);
     } else {
       this.setState({ ChooseStorage: file });
@@ -255,7 +256,7 @@ class Renderer extends React.Component<RendereProps> {
                 search: `${this.state.item.DISPLAY_NAME} ${
                   this.state.item.TYPE === "tv" ? `S0${this.state.item.SEASONS[this.state.season].SEASON_NUMBER}` : `${this.state.item.YEAR}`
                 }`,
-                season: this.state.item.TYPE === "tv" ? this.state.item.SEASONS[this.state.season].SEASON_NUMBER : null,
+                season: this.state.item.TYPE === "tv" && this.state.season >= 0 ? this.state.season : null,
                 finalType: this.state.item.TYPE,
                 item: this.state.item,
               }}

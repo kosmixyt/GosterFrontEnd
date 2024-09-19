@@ -60,7 +60,7 @@ export function BrowseFunc() {
   useEffect(() => {
     browse_loader(document.location.href, action as string).then((res) => setData(res));
   }, [action]);
-  if (!data) return <div>Loading...</div>;
+  if (!data) return <div></div>;
   return (
     <div className="b-ctn">
       <LineName className="flex justify-center mb-4 underline" lineName={data[1]} />
