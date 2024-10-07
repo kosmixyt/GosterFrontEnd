@@ -1,7 +1,7 @@
 import { toast } from "react-toastify";
 import Hls from "hls.js";
-import { TranscodeDATA } from "./electron/electronTranscoder";
 import { app_url } from "..";
+import { TranscodeDATA } from "./platform";
 
 export function DownloadWeb(url: string) {
   document.location.href = url;
