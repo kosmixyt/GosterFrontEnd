@@ -129,58 +129,35 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
   const [swiper, setSwiper] = React.useState<any>(null);
   const [PreviousHiddenIndex, setPreviousHiddenIndex] = React.useState<boolean>(true);
   if (props.line.Data.length === 0) return <></>;
-  const freeModeOptions = {
-    freeMode: true,
-    freeModeMomentum: true,
-    freeModeMomentumRatio: 0.5,
-    freeModeMomentumBounce: true,
-    freeModeMomentumBounceRatio: 0.5,
-    freeModeMomentumVelocityRatio: 0.5,
-  };
 
   return (
     <div className={`${!isMobile ? "ml-2 mr-2" : ""}`}>
-      <LineName className="ml-14" key={k} more="/" lineName={props.line.Title} />
-      <div className="line-render flex">
-        <button
-          hidden={PreviousHiddenIndex}
-          className="mt-14 absolute h-36 opacity-0 z-10 bg-transparent left-0 swip-btn"
-          onClick={() => swiper?.slidePrev()}
-        >
-          <img src={prev} alt="" className="w-8 h-8" />
-        </button>
+      <LineName
+        className="ml-14"
+        key={k}
+        more="/"
+        lineName={props.line.Title}
+      />
+      <div className="">
         <Swiper
-          freeMode={{
-            enabled: isMobile,
-            momentum: true,
-            momentumBounce: true,
-            momentumVelocityRatio: 0.1,
-          }}
-          modules={[Pagination, FreeMode]}
+          modules={[Pagination]}
           className=""
           slidesPerView={"auto"}
           spaceBetween={!isMobile ? 5 : 1}
           onSwiper={(swiper: any) => setSwiper(swiper)}
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
-            <SwiperSlide
-              style={{
-                width: "fit-content",
-                marginLeft: `${e === 0 ? "10px" : "0px"}`,
-              }}
-              key={e}
-            >
-              <BackDrop className={`${e === 0 ? "ml-0" : ""}`} watchingLine={watchingLine} key={e} nav={nav} {...item} />
+            <SwiperSlide style={{ width: "fit-content" }} key={e}>
+              <BackDrop
+                className={`${e === 0 ? "ml-0" : ""}`}
+                watchingLine={watchingLine}
+                key={e}
+                nav={nav}
+                {...item}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
-        <button
-          hidden={props.line.Data.length <= 6}
-          className="mt-14 absolute h-36 opacity-0 z-10 bg-transparent right-0 swip-btn"
-          onClick={() => swiper?.slideNext() && setPreviousHiddenIndex(false)}
-        >
-          <img src={next} className="w-8 h-8" alt="" />
-        </button>
       </div>
     </div>
   );
