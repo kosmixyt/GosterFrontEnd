@@ -9,7 +9,6 @@ import { LoginComp } from "./login/login";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
-import Torrent from "./torrent";
 import { Head } from "./component/layout/layout";
 import fs from "fs";
 import { Dragger } from "./metadata/dragger";
@@ -24,7 +23,7 @@ export const setMute = (mute: boolean) => {
 export const getMute = () => {
   return globalMute;
 };
-declare global { 
+declare global {
   interface Window {
     isMauiApp: boolean;
   }
@@ -55,16 +54,8 @@ const router = createBrowserRouter([
         element: <BrowseFunc />,
       },
       {
-        path: "/torrents",
-        element: <Torrent />,
-      },
-      {
         path: "/me",
         element: <UserLanding />,
-      },
-      {
-        path: "/metadata",
-        element: <Dragger />,
       },
       {
         path: "/watchlist",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal } from "../../player/player";
-import { GetStorages } from "../../torrent/index";
+import { GetStorages } from "../../torrent";
 
 export function ChooseStorage(props: { close: () => void; onsuccess: (c: string) => void }) {
   const [storages, setStorages] = useState<string[]>([]);

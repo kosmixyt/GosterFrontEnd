@@ -1,11 +1,12 @@
-import { bytesToSize, TorrentItem } from "../torrent";
 import { app_url } from "..";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EPISODE, FileItem, TVItem } from "../render/render";
+import checked from "./checked-svgrepo-com.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { SKINNY_RENDER } from "../component/poster";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { FaArrowAltCircleRight, FaArrowCircleDown, FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
@@ -21,7 +22,7 @@ export function UserLanding() {
       document.body.style.overflowX = "auto";
     };
   }, []);
-  if (!me) return <div>Loading...</div>;
+  if (!me) return <div></div>;
   return (
     <div className="h-full w-full min-h-screen mt-14">
       <div className="text-3xl text-center mt-4 font-semibold font-roboto">Bienvenue {me.username}</div>
@@ -78,7 +79,7 @@ export function UserLanding() {
                 style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"}` }}
                 className="flex justify-center cursor-pointer"
               >
-                <div onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}>
+                <div className="" onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}>
                   <RequestItem item={req} />
                 </div>
               </SwiperSlide>
@@ -90,7 +91,7 @@ export function UserLanding() {
         <div className="flex flex-wrap justify-center gap-4">
           {me.requests.map((req, i) => {
             return (
-              <div>
+              <div className="m-4">
                 <RequestItem item={req} />
               </div>
             );
@@ -131,19 +132,29 @@ export function UserLanding() {
   );
 }
 function RequestItem(props: { item: MeRequest }) {
+  const ended = props.item.Status == "finished";
   return (
-    <div
-      style={{ background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + props.item.Render.BACKDROP + ")" }}
-      className="xl:w-[400px] xl:h-[225px] w-[180px] h-[150px] flex justify-center items-center  transition-transform hover:scale-105 rounded-lg p-4 m-4 bg-cover bg-center"
-    >
-      <div className="w-full hidden lg:flex justify-center">
-        <img src={props.item.Render.POSTER} alt="" className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg" />
+    <motion.div style={{ scale: 1.01 }} whileHover={{ scale: 1.05 }} className="m-4 cursor-pointer">
+      <div
+        style={{ background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + props.item.Render.BACKDROP + ")" }}
+        className="xl:w-[400px] xl:h-[225px] w-[180px] h-[150px] flex justify-center items-center  transition-transform rounded-lg p-4 bg-cover bg-center"
+      >
+        <div className="w-full hidden lg:flex justify-center">
+          <img src={props.item.Render.POSTER} alt="" className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg" />
+        </div>
+        <div className={`ml-1 xl:ml-0 ${ended ? "hidden" : ""}`}>
+          <div className="text-md xl:text-xl ml-1  font-semibold">{props.item.Render.NAME}</div>
+          <div className="opacity-35 hidden xl:block">Checked {props.item.Last_Update} sec ago</div>
+        </div>
+        <div
+          className={`w-full ${
+            ended ? "" : "hidden"
+          } h-full flex items-center justify-center bg-green-500  opacity-60 absolute  backdrop-opacity-50 rounded-lg`}
+        >
+          <img src={checked} alt="" className="h-24 w-24" />
+        </div>
       </div>
-      <div>
-        <div className="text-xl font-semibold">{props.item.Render.NAME}</div>
-        <div className="opacity-35">Checked {props.item.Last_Update} sec ago</div>
-      </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -402,4 +413,25 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
       </div>
     </div>
   );
+}
+
+export function bytesToSize(bytes: number) {
+  var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes == 0) return "0 Byte";
+  var i = parseInt(String(Math.floor(Math.log(bytes) / Math.log(1024))));
+  return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
+}
+export interface TorrentItem {
+  id: number;
+  name: string;
+  progress: number;
+  paused: boolean;
+  totalDownloaded: number;
+  totalUploaded: number;
+  size: number;
+  files: {
+    name: string;
+    progress: number;
+  }[];
+  SKINNY: SKINNY_RENDER;
 }

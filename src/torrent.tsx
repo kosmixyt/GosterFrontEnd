@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { app_url } from "..";
+import { app_url } from ".";
 import { toast } from "react-toastify";
 import bencode from "bencode";
 import { Buffer as bufff } from "buffer";
-import { SearchClass, SearchRender } from "../search/search";
-import { SKINNY_RENDER } from "../component/poster";
-import { MovieItem, SEASON, TVItem } from "../render/render";
-import { ToolTip } from "../component/tooptip/tooltip";
+import { SearchClass, SearchRender } from "./search/search";
+import { SKINNY_RENDER } from "./component/poster";
+import { MovieItem, SEASON, TVItem } from "./render/render";
+import { ToolTip } from "./component/tooptip/tooltip";
 import { IoIosCloseCircle } from "react-icons/io";
 import { createPortal } from "react-dom";
-import { PlatformManager } from "../cordova/platform";
+import { PlatformManager } from "./cordova/platform";
 
 export function bytesToSize(bytes: number, decimals = 2) {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -324,8 +324,8 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 </div>
                 <div>Time to 1% : {Math.round(showed.data?.time_to_1_percent)}s</div>
                 <div>
-                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) ({bytesToSize(showed.data.session_total_uploaded)} this
-                  session)
+                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) (
+                  {bytesToSize(showed.data.session_total_uploaded)} this session)
                 </div>
                 <div>
                   Progression : <progress value={showed.data.progress * 100} max={100}></progress>
@@ -336,7 +336,9 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 <div>Type de Média de Sortie : {showed.data.mediaoutput.toString()}</div>
                 <div>
                   Média de sortie : &nbsp;
-                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>{showed.data.media_output_uuid}</button>
+                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>
+                    {showed.data.media_output_uuid}
+                  </button>
                 </div>
               </div>
               <div className="w-3/12 text-left text-sm">

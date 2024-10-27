@@ -4,7 +4,7 @@ import { GENRE, Porenderer, SKINNY_RENDER } from "../component/poster";
 import { app_url } from "..";
 import { BrowserView, isMobile, MobileView } from "react-device-detect";
 import { Id, toast } from "react-toastify";
-import {motion } from "framer-motion";
+import { motion } from "framer-motion";
 import react from "@vitejs/plugin-react-swc";
 import { AddModal, post_file_torrent } from "../torrent";
 import { Buffer } from "buffer";
@@ -19,13 +19,17 @@ import { ChooseStorage } from "../component/choosestorage/choosestorage";
 import { RequestModal } from "../requests/requests";
 import { ShareModal } from "../me/landing";
 import { CgUnavailable } from "react-icons/cg";
+import { Loader } from "../component/loader/loader";
 
 export const Render = (props: {}) => {
   const params = useParams();
   const navigate = useNavigate();
-  const [forceRender, setForceRender] = React.useState(0);
   const [item, setItem] = React.useState<null | MovieItem | TVItem>(null);
   useEffect(() => {
+    if (item != null) {
+      console.log("Item changed", item);
+      setItem(null);
+    }
     PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "")
       .then((item) => {
         setItem(item);
@@ -34,7 +38,24 @@ export const Render = (props: {}) => {
         console.error(e);
       });
   }, [params.type, params.id]);
-  if (!item) return <div>Loading...</div>;
+  useEffect(() => {
+    if (item != null) {
+      document.addEventListener("load", () => {
+        document.body.style.overflowX = "hidden";
+      });
+      return () => {
+        document.body.style.overflowX = "auto";
+      };
+    }
+  }, [item]);
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+
+    return () => {
+      document.body.style.overflowX = "auto";
+    };
+  }, []);
+  if (!item) return <Loader />;
   return <Renderer params={params} navigate={navigate} Item={item} />;
 };
 export interface RendereProps {
@@ -297,12 +318,13 @@ class Renderer extends React.Component<RendereProps> {
             <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
               <div className="pl-8 pt-4 w-full">
                 <div className="flex">
-                  <motion.img 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-
-                  src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
+                  <motion.img
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    src={this.state.item.POSTER}
+                    className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]"
+                  />
                   <div className="w-[calc(100%-20%-20px)] ml-[20px]">
                     {this.state.item.LOGO != "" ? (
                       <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
