@@ -45,6 +45,7 @@
     "react-svg-spinners": "^0.3.1",
     "react-toastify": "^10.0.5",
     "react-tooltip": "^5.26.4",
+    "spinners-react": "^1.0.7",
     "swiper": "^11.0.7",
     "typescript": "^4.9.5",
     "vite": "^5.2.11",

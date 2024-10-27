@@ -3,7 +3,7 @@ import faucille from "./faucille.svg";
 import marteau from "./marteau.svg";
 import { createPortal } from "react-dom";
 import { useEffect } from "react";
-import { Pulse } from "react-svg-spinners";
+import { SpinnerInfinity } from "spinners-react";
 const animationDuration = 1.5;
 
 export function Loader() {
@@ -24,7 +24,7 @@ export function Loader() {
 
     "
     >
-      <Pulse className="w-48" color="white" />
+      <SpinnerInfinity color="black" secondaryColor="white" size={100} />
     </div>,
     document.body
   );
