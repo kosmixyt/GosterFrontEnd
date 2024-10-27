@@ -32,8 +32,10 @@ export const ChunkDisplay = (props: {
       }
     >
       <motion.div
+        key={items.length}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
         style={{ overflow: "hidden" }}
         className="w-full flex flex-wrap gap-2 md:gap-4 justify-center transition-all duration-500 ease-in-out"
