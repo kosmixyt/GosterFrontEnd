@@ -63,6 +63,7 @@ export class BackDrop extends React.Component<BackDropProps> {
             delay: 1,
           },
         }}
+
         onHoverStart={() => {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.hoverTimeout = setTimeout(() => {
@@ -73,7 +74,6 @@ export class BackDrop extends React.Component<BackDropProps> {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.setState({ isHovering: false });
         }}
-        className={`cursor-pointer relative pt-8 z-10 w-72 flex`}
       >
         <div>
           <motion.img

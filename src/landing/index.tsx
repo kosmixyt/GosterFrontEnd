@@ -3,13 +3,18 @@ import { SKINNY_RENDER } from "../component/poster";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
+import { motion } from "framer-motion";
 import "./main.css";
 import { LineName } from "../component/lineName/index";
 import { app_url } from "..";
 import { BackDrop } from "../component/backdrop/backdrop";
 import { Full } from "../component/full/full";
 import { Provider } from "../component/contentprovider/contentprov";
-import { ScrollRestoration, useLoaderData, useNavigate } from "react-router-dom";
+import {
+  ScrollRestoration,
+  useLoaderData,
+  useNavigate,
+} from "react-router-dom";
 import _, { min } from "lodash";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "../cordova/platform";
@@ -78,7 +83,9 @@ export function landing_loader(request: any) {
 
 export const Landing = () => {
   const loader_data = useLoaderData() as Api_Home;
-  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(loader_data.Lines.slice(0, 6));
+  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(
+    loader_data.Lines.slice(0, 6)
+  );
   const [hasMore, setHasMore] = React.useState<boolean>(true);
   useEffect(() => {
     const onresize = () => {
@@ -92,7 +99,13 @@ export const Landing = () => {
   return (
     <div>
       {!isMobile ? (
-        <Swiper autoplay={{ delay: 5000, disableOnInteraction: false }} navigation={true} modules={[Autoplay]} slidesPerGroup={1} slidesPerView={1}>
+        <Swiper
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          navigation={true}
+          modules={[Autoplay]}
+          slidesPerGroup={1}
+          slidesPerView={1}
+        >
           {loader_data.Recents.Data.map((e, i) => (
             <SwiperSlide key={i}>
               <Full i={i} data={e} />
@@ -106,8 +119,12 @@ export const Landing = () => {
         <InfiniteScroll
           dataLength={DisplayedData.length}
           next={() => {
-            var next = [...DisplayedData, loader_data.Lines[DisplayedData.length]];
-            if (next.length > loader_data.Lines.length) return setHasMore(false);
+            var next = [
+              ...DisplayedData,
+              loader_data.Lines[DisplayedData.length],
+            ];
+            if (next.length > loader_data.Lines.length)
+              return setHasMore(false);
             else setDisplayedData(next);
           }}
           hasMore={hasMore}
@@ -123,11 +140,15 @@ export const Landing = () => {
   );
 };
 
-export const LineRender = (props: { line: Line_Render; disable_observer: boolean }, k: number) => {
+export const LineRender = (
+  props: { line: Line_Render; disable_observer: boolean },
+  k: number
+) => {
   const nav = useNavigate();
   var watchingLine = props.line.Title === "Continue Watching";
   const [swiper, setSwiper] = React.useState<any>(null);
-  const [PreviousHiddenIndex, setPreviousHiddenIndex] = React.useState<boolean>(true);
+  const [PreviousHiddenIndex, setPreviousHiddenIndex] =
+    React.useState<boolean>(true);
   if (props.line.Data.length === 0) return <></>;
 
   return (
@@ -138,7 +159,20 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
         more="/"
         lineName={props.line.Title}
       />
-      <div className="">
+      <motion.div
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+        initial="hidden"
+        viewport={{ once: true, amount: 0.2 }}
+        whileInView="show" // Lance l'animation quand la div est dans la vue
+      >
         <Swiper
           modules={[Pagination]}
           className=""
@@ -148,17 +182,30 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide style={{ width: "fit-content" }} key={e}>
-              <BackDrop
-                className={`${e === 0 ? "ml-0" : ""}`}
-                watchingLine={watchingLine}
-                key={e}
-                nav={nav}
-                {...item}
-              />
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      duration: 0.5,
+                    },
+                  },
+                }}
+                className={`cursor-pointer relative pt-8 z-10 w-72 flex`}
+              >
+                <BackDrop
+                  className={`${e === 0 ? "ml-0" : ""}`}
+                  watchingLine={watchingLine}
+                  key={e}
+                  nav={nav}
+                  {...item}
+                />
+              </motion.div>
             </SwiperSlide>
           ))}
         </Swiper>
-      </div>
+      </motion.div>
     </div>
   );
 };
