@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { NavigateFunction, Params, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { app_url } from "..";
 import Hls from "hls.js";
+import { motion } from "framer-motion"
 import "./play.css";
 import pause from "./icons/pause-svgrepo-com.svg";
 import play from "./icons/play-svgrepo-com.svg";
@@ -19,8 +20,8 @@ import unlock from "./icons/lock-keyhole-minimalistic-unlocked-svgrepo-com.svg";
 import lock from "./icons/lock-keyhole-minimalistic-svgrepo-com.svg";
 import { isMobile } from "react-device-detect";
 import { DisplayTask } from "../component/taskdisplay/taskdisplay";
-import { PlatformManager } from "../cordova/platform";
-import { TranscodeDATA } from "../cordova/electron/electronTranscoder";
+import { PlatformManager, TranscodeDATA } from "../cordova/platform";
+// import { TranscodeDATA } from "../cordova/electron/electronTranscoder";
 import { FormatRuntime } from "../render/render";
 interface ProgressEvent {
   eventName: string;
@@ -191,7 +192,7 @@ class NewPlayer extends React.Component<PlayerProps> {
     this.setState({ hideBottomBar: false });
     this.HiddenTimeout = setTimeout(() => {
       console.log("hide");
-      this.setState({ hideBottomBar: false });
+      this.setState({ hideBottomBar: true });
     }, 2000);
   }
 
@@ -312,7 +313,7 @@ class NewPlayer extends React.Component<PlayerProps> {
           }}
           onTimeUpdate={(e) => this.setState({ currentTime: this.video.current?.currentTime ?? 0 })}
           autoPlay={true}
-          className="w-screen h-screen absolute bg-black"
+          className="w-screen h-screen absolute bg-black cursor-none"
           crossOrigin="use-credentials"
           ref={this.video}
         >
@@ -348,7 +349,16 @@ class NewPlayer extends React.Component<PlayerProps> {
               if (this.state.controlsLocked) return;
               this.playPause();
             }}
-          ></div>
+          >
+            <motion.div 
+            initial={{ marginTop: this.state.hideBottomBar ? 30 : -100 }}
+            animate={{ marginTop: this.state.hideBottomBar ? -100 : 30 }}
+            transition={{ duration: 0.3 }}
+            
+            className="text-center text-3xl font-bold mt-6 opacity-50">
+            {this.props.data.name}
+            </motion.div>
+          </div>
           <div
             className="w-full h-full flex items-center"
             onDoubleClick={(e) => {
@@ -359,8 +369,12 @@ class NewPlayer extends React.Component<PlayerProps> {
             {this.state.showDebugData && <DisplayTask task_id={this.props.data.task_id} />}
           </div>
         </div>
-        <div hidden={this.state.hideBottomBar} className="w-screen h-16 z-20  bottom-0 absolute flex  justify-between items-center">
-          {this.state.controlsLocked && !this.state.hideBottomBar && (
+        <motion.div 
+        initial={{ opacity: this.state.hideBottomBar ? 1 : 0 }}
+        animate={{ opacity: this.state.hideBottomBar ? 0 : 1 }}
+        transition={{ duration: 0.3 }}
+         className="w-screen h-16 z-20 overflow-hidden  bottom-0 absolute flex  justify-between items-center">
+          {this.state.controlsLocked  && (
             <div className="w-full flex justify-center">
               <img
                 src={lock}
@@ -370,7 +384,7 @@ class NewPlayer extends React.Component<PlayerProps> {
               />
             </div>
           )}
-          {!this.state.hideBottomBar && !this.state.controlsLocked && (
+          {!this.state.controlsLocked && (
             <>
               <div>
                 <img
@@ -453,7 +467,7 @@ class NewPlayer extends React.Component<PlayerProps> {
               </div>
             </>
           )}
-        </div>
+        </motion.div>
       </div>
     );
   }

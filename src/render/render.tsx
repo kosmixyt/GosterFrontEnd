@@ -4,6 +4,7 @@ import { GENRE, Porenderer, SKINNY_RENDER } from "../component/poster";
 import { app_url } from "..";
 import { BrowserView, isMobile, MobileView } from "react-device-detect";
 import { Id, toast } from "react-toastify";
+import {motion } from "framer-motion";
 import react from "@vitejs/plugin-react-swc";
 import { AddModal, post_file_torrent } from "../torrent";
 import { Buffer } from "buffer";
@@ -296,7 +297,12 @@ class Renderer extends React.Component<RendereProps> {
             <div className={`w-full h-full  pl-2 lg:pl-8 pt-[5%]`}>
               <div className="pl-8 pt-4 w-full">
                 <div className="flex">
-                  <img src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
+                  <motion.img 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+
+                  src={this.state.item.POSTER} className="w-52 lg:w-72 xl:w-96 rounded-lg aspect-[2/3]" />
                   <div className="w-[calc(100%-20%-20px)] ml-[20px]">
                     {this.state.item.LOGO != "" ? (
                       <img src={this.state.item.LOGO} className="w-[250px] xl:w-[500px] h-auto rounded-lg" />
@@ -388,7 +394,7 @@ class Renderer extends React.Component<RendereProps> {
                     ) : (
                       <></>
                     )}
-                    <div className="mt-4 font-semibold text-2xl underline">{this.state.item.TAGLINE}</div>
+                    <div className="mt-4 font-bold text-2xl">{this.state.item.TAGLINE}</div>
                     <div className="mt-4 w-[85%] text-white font-semibold opacity-90">{this.state.item.DESCRIPTION}</div>
                     {this.state.item.TYPE === "tv" ? (
                       <div className="mt-4">

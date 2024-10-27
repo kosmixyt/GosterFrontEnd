@@ -107,4 +107,4 @@ export interface TranscodeDATA {
 }
 
 CacheManager.Load(PlatformManager.DispatchCacheManagerLoad());
-setInterval(PlatformManager.SaveCacheDispatcher, 1000);
+setInterval(PlatformManager.SaveCacheDispatcher, 10_000);

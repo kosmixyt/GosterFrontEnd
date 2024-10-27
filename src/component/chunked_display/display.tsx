@@ -3,6 +3,7 @@ import { PosterRenderer, SKINNY_RENDER } from "../poster";
 import React, { useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Bottom } from "../../landing";
+import { motion } from "framer-motion";
 
 export const chunk_size = window.innerWidth > 1000 ? 6 : window.innerWidth > 600 ? 4 : 3;
 export const ChunkDisplay = (props: { items: SKINNY_RENDER[]; hidden?: boolean }) => {
@@ -20,10 +21,15 @@ export const ChunkDisplay = (props: { items: SKINNY_RENDER[]; hidden?: boolean }
       hasMore={items.length < props.items.length}
       loader={<div className="w-full flex justify-center">Chargement ...</div>}
     >
-      <div className="w-full flex flex-wrap gap-2 md:gap-4 justify-center">
+      <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      style={{ overflow: "hidden" }}
+       className="w-full flex flex-wrap gap-2 md:gap-4 justify-center">
         {items.map((item, i) => (
           <PosterRenderer key={i} {...item} />
-        ))}</div>
+        ))}</motion.div>
     </InfiniteScroll>
   );
 };

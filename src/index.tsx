@@ -13,8 +13,8 @@ import Torrent from "./torrent";
 import { Head } from "./component/layout/layout";
 import fs from "fs";
 import { Dragger } from "./metadata/dragger";
-// export const app_url = "https://xxxxvideos.kosmix.fr/api";
-export const app_url = "http://localhost:90/api";
+export const app_url = "https://xxxxvideos.kosmix.fr/api";
+// export const app_url = "http://localhost:90/api";
 console.log("fs", fs);
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 var globalMute = false;
@@ -24,7 +24,7 @@ export const setMute = (mute: boolean) => {
 export const getMute = () => {
   return globalMute;
 };
-declare global {
+declare global { 
   interface Window {
     isMauiApp: boolean;
   }

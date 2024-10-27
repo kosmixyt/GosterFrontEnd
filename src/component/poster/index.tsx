@@ -4,6 +4,7 @@ import { FormatRuntime, WATCH_DATA } from "../../render/render";
 import { PiTelevisionSimpleDuotone } from "react-icons/pi";
 import { MdMovieCreation } from "react-icons/md";
 import { isMobile } from "react-device-detect";
+import { motion } from "framer-motion";
 // id = po
 
 // type SKINNY_RENDER struct {
@@ -92,7 +93,12 @@ export class Porenderer extends React.Component<PosterRendererProps> {
 
   render() {
     return (
-      <div onClick={this.go.bind(this)} className={`w-40 2xl:w-52 ${this.props.className}  lg:mt-4  lg:mb-4 lg:ml-1 lg:mr-1`}>
+      <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      
+      onClick={this.go.bind(this)} className={`w-40 2xl:w-52 ${this.props.className}  lg:mt-4  lg:mb-4 lg:ml-1 lg:mr-1`}>
         <div className="relative border-2 border-transparent lg:hover:border-white rounded-xl h-auto cursor-pointer lg:hover:scale-110 duration-200 delay-100 transition-all ">
           <div
             style={{
@@ -141,7 +147,7 @@ export class Porenderer extends React.Component<PosterRendererProps> {
             {this.props.render.NAME.length > 30 ? this.props.render.NAME.substring(0, 40) + "..." : this.props.render.NAME}
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 }
