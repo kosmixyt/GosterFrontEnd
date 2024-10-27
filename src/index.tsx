@@ -15,7 +15,7 @@ import { Dragger } from "./metadata/dragger";
 export const app_url = "https://xxxxvideos.kosmix.fr/api";
 // export const app_url = "http://localhost:90/api";
 console.log("fs", fs);
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+const root = ReactDOM.createRoot(document.body);
 var globalMute = false;
 export const setMute = (mute: boolean) => {
   globalMute = mute;

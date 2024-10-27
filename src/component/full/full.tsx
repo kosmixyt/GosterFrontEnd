@@ -13,15 +13,16 @@ export const Full = (props: { data: SKINNY_RENDER; i: number }) => {
   return (
     <div
       onClick={(_) => send(props.data.ID, props.data.TYPE)}
-      className="w-screen cursor-pointer"
-      style={{ height: "110vh" }}
+      style={{
+        height: "110vh",
+      }}
+      className="relative"
     >
-      <img
-        ref={img}
-        src={props.data.BACKDROP}
-        className="w-screen"
-        style={{ height: "110vh" }}
-      />
+      <div
+        className="w-full h-full bg-cover bg-center absolute"
+        style={{ backgroundImage: `url('${props.data.BACKDROP}')` }}
+      ></div>
+      <div className="w-screen h-full absolute bg-gradient-to-b from-transparent to-[#121212]"></div>
     </div>
   );
 };

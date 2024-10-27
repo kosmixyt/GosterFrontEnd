@@ -72,7 +72,6 @@ export const miniaHeight = () => GetGoodMiniaDimmensions().height;
 export const miniaWidth = () => GetGoodMiniaDimmensions().width;
 
 export function landing_loader(request: any) {
-  console.log("landing_loader", request);
   return fetch(`${app_url}/home`, { credentials: "include" }).then((res) => {
     if (res.status === 401) {
       document.location.href = "/login";
@@ -100,7 +99,6 @@ export const Landing = () => {
     <div>
       {!isMobile ? (
         <Swiper
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
           navigation={true}
           modules={[Autoplay]}
           slidesPerGroup={1}
@@ -115,7 +113,10 @@ export const Landing = () => {
       ) : (
         <></>
       )}
-      <div style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}>
+      <div
+        className="relative z-40"
+        style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}
+      >
         <InfiniteScroll
           dataLength={DisplayedData.length}
           next={() => {
@@ -152,7 +153,7 @@ export const LineRender = (
   if (props.line.Data.length === 0) return <></>;
 
   return (
-    <div className={`${!isMobile ? "ml-2 mr-2" : ""}`}>
+    <div className={`${!isMobile ? "ml-2 mr-2 mt-6" : ""}`}>
       <LineName
         className="ml-14"
         key={k}
@@ -182,26 +183,13 @@ export const LineRender = (
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide style={{ width: "fit-content" }} key={e}>
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0 },
-                  show: {
-                    opacity: 1,
-                    transition: {
-                      duration: 0.5,
-                    },
-                  },
-                }}
-                className={`cursor-pointer relative pt-8 z-10 w-72 flex`}
-              >
-                <BackDrop
-                  className={`${e === 0 ? "ml-0" : ""}`}
-                  watchingLine={watchingLine}
-                  key={e}
-                  nav={nav}
-                  {...item}
-                />
-              </motion.div>
+              <BackDrop
+                className={`${e === 0 ? "ml-0" : ""}`}
+                watchingLine={watchingLine}
+                key={e}
+                nav={nav}
+                {...item}
+              />
             </SwiperSlide>
           ))}
         </Swiper>

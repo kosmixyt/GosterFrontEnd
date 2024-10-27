@@ -63,7 +63,16 @@ export class BackDrop extends React.Component<BackDropProps> {
             delay: 1,
           },
         }}
-
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              duration: 0.5,
+            },
+          },
+        }}
+        className={`cursor-pointer relative pt-8 z-10 w-72 flex`}
         onHoverStart={() => {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.hoverTimeout = setTimeout(() => {
