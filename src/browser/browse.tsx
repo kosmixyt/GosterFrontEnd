@@ -58,7 +58,13 @@ export function BrowseFunc() {
   const { action } = useParams();
   const [data, setData] = useState<[SKINNY_RENDER[], string] | null>(null);
   useEffect(() => {
-    browse_loader(document.location.href, action as string).then((res) => setData(res));
+    document.body.style.overflowY = "scroll";
+    browse_loader(document.location.href, action as string).then((res) =>
+      setData(res)
+    );
+    return () => {
+      document.body.style.overflowY = "auto";
+    };
   }, [action]);
   if (!data) return <div></div>;
   return (

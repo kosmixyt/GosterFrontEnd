@@ -16,32 +16,48 @@ export function UserLanding() {
   const [flexModeTorrent, setFlexModeTorrent] = useState(true);
   const [flexModeRequest, setFlexModeRequest] = useState(true);
   useEffect(() => {
-    document.body.style.overflowX = "hidden";
-    fetch(`${app_url}/me`, { credentials: "include" }).then((res) => res.json().then(setMe));
+    document.body.style.overflowY = "scroll";
+    fetch(`${app_url}/me`, { credentials: "include" }).then((res) =>
+      res.json().then(setMe)
+    );
     return () => {
-      document.body.style.overflowX = "auto";
+      document.body.style.overflowY = "auto";
     };
   }, []);
   if (!me) return <div></div>;
   return (
-    <div className="h-full w-full min-h-screen mt-14">
-      <div className="text-3xl text-center mt-4 font-semibold font-roboto">Bienvenue {me.username}</div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      className="h-full w-full min-h-screen mt-14"
+    >
+      <div className="text-3xl text-center mt-4 font-semibold font-roboto">
+        Bienvenue {me.username}
+      </div>
       <div className="md:flex justify-center">
         <div
           className={`w-1/5 min-w-56  h-24 rounded-lg m-4 ${
-            me.current_transcode + 5 > me.allowed_transcode ? "bg-red-900" : "bg-slate-900"
+            me.current_transcode + 5 > me.allowed_transcode
+              ? "bg-red-900"
+              : "bg-slate-900"
           }  flex justify-center items-center text-3xl font-semibold`}
         >
           <div>
             <div className="text-center">
               {me.current_transcode}/{me.allowed_transcode}
             </div>
-            <div className="text-lg opacity-50 text-center">Allowed Transcode</div>
+            <div className="text-lg opacity-50 text-center">
+              Allowed Transcode
+            </div>
           </div>
         </div>
         <div
           className={`w-1/5 min-w-56 h-24 rounded-lg m-4 ${
-            me.current_upload_number + 5 > me.allowed_upload_number ? "bg-red-900" : "bg-slate-900"
+            me.current_upload_number + 5 > me.allowed_upload_number
+              ? "bg-red-900"
+              : "bg-slate-900"
           }  flex justify-center items-center text-3xl font-semibold`}
         >
           <div>
@@ -53,20 +69,31 @@ export function UserLanding() {
         </div>
         <div
           className={`w-1/5 min-w-56  h-24 rounded-lg m-4 ${
-            me.current_upload_size + 5 * 1_000_000_000 > me.allowed_upload_size ? "bg-red-900" : "bg-slate-900"
+            me.current_upload_size + 5 * 1_000_000_000 > me.allowed_upload_size
+              ? "bg-red-900"
+              : "bg-slate-900"
           }  flex justify-center items-center text-3xl font-semibold`}
         >
           <div>
             <div className="text-center">
-              {bytesToSize(me.current_upload_size)}/{bytesToSize(me.allowed_upload_size)}
+              {bytesToSize(me.current_upload_size)}/
+              {bytesToSize(me.allowed_upload_size)}
             </div>
-            <div className="text-lg opacity-50 text-center">Allowed Upload Size</div>
+            <div className="text-lg opacity-50 text-center">
+              Allowed Upload Size
+            </div>
           </div>
         </div>
       </div>
-      <div hidden={me.Torrents.length == 0} className="ml-4 font-semibold text-2xl flex gap-4 items-center">
+      <div
+        hidden={me.Torrents.length == 0}
+        className="ml-4 font-semibold text-2xl flex gap-4 items-center"
+      >
         <div> Requete de téléchargement ({me.requests.length})</div>
-        <div className="mt-2" onClick={() => setFlexModeRequest(!flexModeRequest)}>
+        <div
+          className="mt-2"
+          onClick={() => setFlexModeRequest(!flexModeRequest)}
+        >
           {flexModeRequest ? <FaArrowAltCircleRight /> : <FaArrowCircleDown />}
         </div>
       </div>
@@ -76,10 +103,18 @@ export function UserLanding() {
             return (
               <SwiperSlide
                 key={req.ID}
-                style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"}` }}
+                style={{
+                  width: "fit-content",
+                  marginLeft: `${i === 0 ? "40px" : "0px"}`,
+                }}
                 className="flex justify-center cursor-pointer"
               >
-                <div className="" onClick={() => nav(`/render/${req.Media_Type}/${req.Media_ID}`)}>
+                <div
+                  className=""
+                  onClick={() =>
+                    nav(`/render/${req.Media_Type}/${req.Media_ID}`)
+                  }
+                >
                   <RequestItem item={req} />
                 </div>
               </SwiperSlide>
@@ -98,9 +133,15 @@ export function UserLanding() {
           })}
         </div>
       )}
-      <div hidden={me.Torrents.length == 0} className="ml-4 font-semibold text-2xl flex gap-4 items-center">
+      <div
+        hidden={me.Torrents.length == 0}
+        className="ml-4 font-semibold text-2xl flex gap-4 items-center"
+      >
         <div> Torrents ({me.Torrents.length})</div>
-        <div className="mt-2" onClick={() => setFlexModeTorrent(!flexModeTorrent)}>
+        <div
+          className="mt-2"
+          onClick={() => setFlexModeTorrent(!flexModeTorrent)}
+        >
           {flexModeTorrent ? <FaArrowAltCircleRight /> : <FaArrowCircleDown />}
         </div>
       </div>
@@ -109,7 +150,12 @@ export function UserLanding() {
           <Swiper spaceBetween={"30px"} slidesPerView={isMobile ? 1 : "auto"}>
             {me.Torrents.map((torrent, i) => {
               return (
-                <SwiperSlide style={{ width: "fit-content", marginLeft: `${i === 0 ? "40px" : "0px"} ` }}>
+                <SwiperSlide
+                  style={{
+                    width: "fit-content",
+                    marginLeft: `${i === 0 ? "40px" : "0px"} `,
+                  }}
+                >
                   <TorrentItemRender torrent={torrent} />
                 </SwiperSlide>
               );
@@ -128,7 +174,7 @@ export function UserLanding() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 function RequestItem(props: { item: MeRequest }) {

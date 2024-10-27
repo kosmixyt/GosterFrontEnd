@@ -18,17 +18,20 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
   const [timeout, setTm] = useState<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
     inputRef.current?.focus();
-    document.body.classList.add("overflow-hidden");
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    };
+    return () => {};
   }, []);
   useEffect(() => {
     if (timeout) {
       clearTimeout(timeout);
     }
     const tm = setTimeout(() => {
-      fetch(app_url + `/search?query=${search}${props.specificType ? `&type=${props.specificType}` : ""}`, { credentials: "include" })
+      fetch(
+        app_url +
+          `/search?query=${search}${
+            props.specificType ? `&type=${props.specificType}` : ""
+          }`,
+        { credentials: "include" }
+      )
         .then((res) => res.json())
         .then((data) => setData(data));
     }, 500);
@@ -57,7 +60,7 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
   }, [data]);
 
   return createPortal(
-    <div className="h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0">
+    <div className="h-full w-full fixed z-20 backdrop-blur-3xl top-0 left-0">
       <div className="relative md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-stone-900 h-full w-full  md:w-10/12 md:h-5/6 rounded-lg ">
         <div className="h-full w-full">
           <div className={`flex justify-center items-center flex-row h-1/6`}>
@@ -83,9 +86,18 @@ export function SearchRender(props: { headTitle?: string; specificType?: string;
               <CgSearchLoading size={257} />
             </div>
           ) : (
-            <div onClick={props.close} className={`flex flex-wrap gap-5 justify-center h-5/6 overflow-auto`}>
+            <div
+              onClick={props.close}
+              className={`flex flex-wrap gap-5 justify-center h-5/6 overflow-auto`}
+            >
               {data!.slice(0, 20).map((element, i) => {
-                return <PosterRenderer InheritGo={props.onselect} key={i} {...element} />;
+                return (
+                  <PosterRenderer
+                    InheritGo={props.onselect}
+                    key={i}
+                    {...element}
+                  />
+                );
               })}
             </div>
           )}

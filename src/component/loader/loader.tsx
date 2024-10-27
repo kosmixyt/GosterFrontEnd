@@ -13,7 +13,6 @@ export function Loader() {
       document.body.style.overflow = "auto";
     };
   }, []);
-
   return createPortal(
     <div
       className="
