@@ -63,7 +63,10 @@ export function BrowseFunc() {
   if (!data) return <div></div>;
   return (
     <div className="b-ctn">
-      <LineName className="flex justify-center mb-4 underline" lineName={data[1]} />
+      <LineName
+        className="flex justify-center mb-4 underline"
+        lineName={data[1]}
+      />
       <ChunkDisplay items={data[0]} />
     </div>
   );

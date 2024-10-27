@@ -11,8 +11,17 @@ export const Full = (props: { data: SKINNY_RENDER; i: number }) => {
     nav(`/render/${type}/${id}`);
   };
   return (
-    <div onClick={(_) => send(props.data.ID, props.data.TYPE)} className="w-screen" style={{ height: "110vh" }}>
-      <img ref={img} src={props.data.BACKDROP} className="w-screen" style={{ height: "110vh" }} />
+    <div
+      onClick={(_) => send(props.data.ID, props.data.TYPE)}
+      className="w-screen cursor-pointer"
+      style={{ height: "110vh" }}
+    >
+      <img
+        ref={img}
+        src={props.data.BACKDROP}
+        className="w-screen"
+        style={{ height: "110vh" }}
+      />
     </div>
   );
 };
