@@ -15,15 +15,13 @@ export interface TaskData {
 }
 export function DisplayTask(props: { task_id: string; className?: string; hidden?: boolean }) {
   const container = React.useRef<HTMLDivElement>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
   const [text, setText] = useState("");
   useEffect(() => {
-    const event = new EventSource(app_url + `/task?taskid=${props.task_id}`, { withCredentials: true });
+    const event = new EventSource(app_url + `/task?taskid=${props.task_id}`, {
+      withCredentials: true,
+    });
     event.addEventListener("log", (e) => {
       setText((text) => text + e.data.replaceAll("\n", "<br>"));
-      if (container.current && autoScroll) {
-        container.current.scrollTop = container.current.scrollHeight;
-      }
     });
     event.addEventListener("error", (e) => {
       event.close();
@@ -33,11 +31,6 @@ export function DisplayTask(props: { task_id: string; className?: string; hidden
       event.close();
     };
   }, []);
-  useEffect(() => {
-    if (container.current && autoScroll) {
-      container.current.scrollTop = container.current.scrollHeight;
-    }
-  }, [text]);
   return (
     <div
       ref={container}

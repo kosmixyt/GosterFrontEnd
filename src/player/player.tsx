@@ -23,6 +23,8 @@ import { DisplayTask } from "../component/taskdisplay/taskdisplay";
 import { PlatformManager, TranscodeDATA } from "../cordova/platform";
 // import { TranscodeDATA } from "../cordova/electron/electronTranscoder";
 import { FormatRuntime } from "../render/render";
+import { FaPause, FaPlay, FaUnlock } from "react-icons/fa";
+import { IoMdSkipForward } from "react-icons/io";
 interface ProgressEvent {
   eventName: string;
   data: string;
@@ -32,7 +34,9 @@ export const PlayerRender = (props: {}) => {
   const params = useParams();
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [playerData, setPlayerData] = React.useState<TranscodeDATA | null>(null);
+  const [playerData, setPlayerData] = React.useState<TranscodeDATA | null>(
+    null
+  );
   const [error, setError] = React.useState<string | null>(null);
   useEffect(() => {
     PlatformManager.DispatchTranscodeData(searchParams.get("transcode") ?? "")
@@ -101,7 +105,11 @@ class NewPlayer extends React.Component<PlayerProps> {
       this.video.current!.src = this.props.data.manifest;
     }
   }
-  shouldComponentUpdate(nextProps: Readonly<PlayerProps>, nextState: Readonly<{}>, nextContext: any): boolean {
+  shouldComponentUpdate(
+    nextProps: Readonly<PlayerProps>,
+    nextState: Readonly<{}>,
+    nextContext: any
+  ): boolean {
     return true;
   }
   onkeydown(e: KeyboardEvent) {
@@ -118,7 +126,11 @@ class NewPlayer extends React.Component<PlayerProps> {
         break;
     }
   }
-  componentDidUpdate(prevProps: Readonly<PlayerProps>, prevState: Readonly<{}>, snapshot?: any): void {
+  componentDidUpdate(
+    prevProps: Readonly<PlayerProps>,
+    prevState: Readonly<{}>,
+    snapshot?: any
+  ): void {
     if (prevProps.data.uuid != this.props.data.uuid) {
       if (!this.props.data.isBrowserPlayable) {
         this.hls = this.props.data.create_hls(this.video.current!, () => {
@@ -206,8 +218,15 @@ class NewPlayer extends React.Component<PlayerProps> {
       <Modal>
         <div className="w-96 h-48 rounded-lg">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-black w-full underline text-center">Settings</h1>
-            <img src={close} alt="settings" onClick={closeSet} className="w-10 h-10 cursor-pointer" />
+            <h1 className="text-2xl font-bold text-black w-full underline text-center">
+              Settings
+            </h1>
+            <img
+              src={close}
+              alt="settings"
+              onClick={closeSet}
+              className="w-10 h-10 cursor-pointer"
+            />
           </div>
           <div className="">
             <div className="flex mb-2">
@@ -218,7 +237,9 @@ class NewPlayer extends React.Component<PlayerProps> {
                   const index = parseInt(e.target.value);
                   this.setState({ currentQuality: this.Qualitys[index] });
                 }}
-                value={this.Qualitys.indexOf(this.state.currentQuality).toString()}
+                value={this.Qualitys.indexOf(
+                  this.state.currentQuality
+                ).toString()}
               >
                 {this.Qualitys.map((quality, index) => {
                   return (
@@ -229,8 +250,18 @@ class NewPlayer extends React.Component<PlayerProps> {
                 })}
               </select>
             </div>
-            <div className="text-black ml-4" hidden={this.props.data.task_id === ""}>
-              Show Debug Data : <button onClick={() => this.setState({ showDebugData: !this.state.showDebugData })}>Show/hide</button>
+            <div
+              className="text-black ml-4"
+              hidden={this.props.data.task_id === ""}
+            >
+              Show Debug Data :{" "}
+              <button
+                onClick={() =>
+                  this.setState({ showDebugData: !this.state.showDebugData })
+                }
+              >
+                Show/hide
+              </button>
             </div>
             <div className="flex mb-2">
               <div className="text-black ml-4">Tracks : </div>
@@ -311,7 +342,9 @@ class NewPlayer extends React.Component<PlayerProps> {
           onPause={() => {
             this.setState({ playing: false });
           }}
-          onTimeUpdate={(e) => this.setState({ currentTime: this.video.current?.currentTime ?? 0 })}
+          onTimeUpdate={(e) =>
+            this.setState({ currentTime: this.video.current?.currentTime ?? 0 })
+          }
           autoPlay={true}
           className="w-screen h-screen absolute bg-black cursor-none"
           crossOrigin="use-credentials"
@@ -321,7 +354,10 @@ class NewPlayer extends React.Component<PlayerProps> {
             return (
               <track
                 key={sub.Index}
-                src={app_url + `/transcode/${this.props.data.uuid}/subtitle/${sub.Index}`}
+                src={
+                  app_url +
+                  `/transcode/${this.props.data.uuid}/subtitle/${sub.Index}`
+                }
                 kind="subtitles"
                 srcLang="fr"
                 label={sub.Name}
@@ -350,13 +386,15 @@ class NewPlayer extends React.Component<PlayerProps> {
               this.playPause();
             }}
           >
-            <motion.div 
-            initial={{ marginTop: this.state.hideBottomBar ? 30 : -100 }}
-            animate={{ marginTop: this.state.hideBottomBar ? -100 : 30 }}
-            transition={{ duration: 0.3 }}
+            <motion.div
+              initial={{ marginTop: this.state.hideBottomBar ? 30 : -100 }}
+              animate={{ marginTop: this.state.hideBottomBar ? -100 : 30 }}
+              transition={{ duration: 0.3 }}
+              className={`
             
-            className="text-center text-3xl font-bold mt-6 opacity-50">
-            {this.props.data.name}
+            text-center text-3xl font-bold mt-6 opacity-50`}
+            >
+              {this.props.data.name}
             </motion.div>
           </div>
           <div
@@ -366,19 +404,26 @@ class NewPlayer extends React.Component<PlayerProps> {
               this.forward.bind(this);
             }}
           >
-            {this.state.showDebugData && <DisplayTask task_id={this.props.data.task_id} />}
+            {this.state.showDebugData && (
+              <DisplayTask task_id={this.props.data.task_id} />
+            )}
           </div>
         </div>
-        <motion.div 
-        initial={{ opacity: this.state.hideBottomBar ? 1 : 0 }}
-        animate={{ opacity: this.state.hideBottomBar ? 0 : 1 }}
-        transition={{ duration: 0.3 }}
-         className="w-screen h-16 z-20 overflow-hidden  bottom-0 absolute flex  justify-between items-center">
-          {this.state.controlsLocked  && (
+        <motion.div
+          initial={{ opacity: this.state.hideBottomBar ? 1 : 0 }}
+          animate={{ opacity: this.state.hideBottomBar ? 0 : 1 }}
+          transition={{ duration: 0.3 }}
+          className={`
+            ${!this.state.controlsLocked ? "bg-stone-950" : ""}
+            w-screen h-14 z-20 overflow-hidden  bottom-0 absolute flex  justify-between items-center`}
+        >
+          {this.state.controlsLocked && (
             <div className="w-full flex justify-center">
               <img
                 src={lock}
-                onClick={() => this.setState({ controlsLocked: !this.state.controlsLocked })}
+                onClick={() =>
+                  this.setState({ controlsLocked: !this.state.controlsLocked })
+                }
                 alt="lock"
                 className="w-14 h-14 pl-2 cursor-pointer"
               />
@@ -387,14 +432,29 @@ class NewPlayer extends React.Component<PlayerProps> {
           {!this.state.controlsLocked && (
             <>
               <div>
-                <img
+                {/* <img
                   onClick={(e) => {
                     this.playPause.bind(this);
                   }}
                   src={!this.video.current?.paused ? pause : play}
                   alt="pause"
                   className="cursor-pointer w-10 h-10 pl-2"
-                />
+                /> */}
+                {!this.video.current?.paused ? (
+                  <FaPause
+                    color="white"
+                    onClick={this.playPause.bind(this)}
+                    className="pl-2"
+                    size={30}
+                  />
+                ) : (
+                  <FaPlay
+                    color="white"
+                    onClick={this.playPause.bind(this)}
+                    className="pl-2"
+                    size={30}
+                  />
+                )}
               </div>
               <div className="flex w-[50%] items-center">
                 <input
@@ -410,15 +470,21 @@ class NewPlayer extends React.Component<PlayerProps> {
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    this.setState({ displayTimeMode: this.state.displayTimeMode === "until" ? "total" : "until" });
+                    this.setState({
+                      displayTimeMode:
+                        this.state.displayTimeMode === "until"
+                          ? "total"
+                          : "until",
+                    });
                   }}
-                  className="ml-2 font-bold text-blue-950 text-xl"
+                  className="ml-2 font-bold text-white text-xl"
                 >
                   {this.props.data.isLive
                     ? "🔴livestream🔴"
                     : secondsToHms(
                         this.state.displayTimeMode === "until"
-                          ? (this.video.current?.duration ?? 0) - this.state.currentTime
+                          ? (this.video.current?.duration ?? 0) -
+                              this.state.currentTime
                           : this.video.current?.duration ?? 0
                       )}
                 </div>
@@ -433,15 +499,23 @@ class NewPlayer extends React.Component<PlayerProps> {
                   }}
                   className="w-10 hidden md:block h-10 mr-2 cursor-pointer"
                 />
-                <img
-                  src={this.state.controlsLocked ? lock : unlock}
-                  onClick={() => this.setState({ controlsLocked: !this.state.controlsLocked })}
-                  className="w-10 h-10 mr-2 cursor-pointer"
+                <FaUnlock
+                  size={30}
+                  onClick={() =>
+                    this.setState({
+                      controlsLocked: !this.state.controlsLocked,
+                    })
+                  }
+                  className="mr-2 cursor-pointer"
                 />
                 <img
                   src={this.props.data.isLive ? livestream : dl}
                   hidden={this.props.data.download_url === ""}
-                  onClick={!this.props.data.isLive ? this.download.bind(this) : this.setAtMax.bind(this)}
+                  onClick={
+                    !this.props.data.isLive
+                      ? this.download.bind(this)
+                      : this.setAtMax.bind(this)
+                  }
                   alt="download"
                   className="hidden md:block  w-10 h-10 mr-2 cursor-pointer"
                 />
@@ -480,7 +554,9 @@ function secondsToHms(seconds: number) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
+    .toString()
+    .padStart(2, "0")}`;
 }
 export interface PlayerProps {
   data: TranscodeDATA;
@@ -511,7 +587,9 @@ export function Modal(props: { children: React.ReactNode }) {
   return (
     <div className="h-screen w-screen z-40 fixed top-0 left-0">
       <div className="h-full w-full bg-black bg-opacity-50"></div>
-      <div className="bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">{props.children}</div>
+      <div className="bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">
+        {props.children}
+      </div>
     </div>
   );
 }
@@ -531,7 +609,10 @@ function NextForward(props: { player: NewPlayer }) {
       onMouseLeave={() => setHover(false)}
       className="relative hidden lg:block cursor-pointer"
     >
-      <div hidden={!hover} className="bottom-[105%] left-1/2 bg-slate-900 h-32 w-60  text-white absolute rounded-lg">
+      <div
+        hidden={!hover}
+        className="bottom-[105%] left-1/2 bg-slate-900 h-32 w-60  text-white absolute rounded-lg"
+      >
         <div className="w-full h-full flex items-center justify-center">
           <img src={nextFile.POSTER} className="w-16 h-auto ml-1 rounded-lg" />
           <div className="ml-2">
@@ -540,7 +621,11 @@ function NextForward(props: { player: NewPlayer }) {
           </div>
         </div>
       </div>
-      <img src={next} onClick={props.player.forward.bind(props.player)} className="w-10 h-10 ml-2 cursor-pointer" />
+      <IoMdSkipForward
+        onClick={props.player.forceUpdate.bind(props.player)}
+        className="ml-2 cursor-pointer"
+        size={30}
+      />
     </div>
   );
 }

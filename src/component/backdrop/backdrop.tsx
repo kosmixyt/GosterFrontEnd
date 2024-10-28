@@ -13,13 +13,7 @@ import { motion } from "framer-motion";
 import { MdOutlineFileDownload } from "react-icons/md";
 
 import "react-tooltip/dist/react-tooltip.css";
-
-import { toast } from "react-toastify";
-import { Tooltip } from "primereact/tooltip";
-import { createPortal } from "react-dom";
-import { nanoid } from "nanoid";
-import { GetProgress, MovieItem } from "../../render/render";
-// import { PlayButton } from "../playButton/playButton";
+import { WATCH_DATA } from "@/src/render/render";
 
 export interface BackdropState {
   isHovering: boolean;
@@ -52,7 +46,6 @@ export class BackDrop extends React.Component<BackDropProps> {
     this.props.nav("/render/" + this.props.TYPE + "/" + this.props.ID);
   }
   render() {
-    console.log(this.state.isHovering);
     return (
       <motion.div
         onClick={this.goRender.bind(this)}
@@ -85,6 +78,12 @@ export class BackDrop extends React.Component<BackDropProps> {
         }}
       >
         <div>
+          <div
+            style={{
+              width: `${WatchPercent(this.props.WATCH)}%`,
+            }}
+            className="h-1 bg-red-800"
+          ></div>
           <motion.img
             src={this.props.BACKDROP}
             animate={{
@@ -114,108 +113,10 @@ export class BackDrop extends React.Component<BackDropProps> {
     );
   }
 }
-async function DeleteFromWatchingList(item: SKINNY_RENDER) {
-  const res = await fetch(`${app_url}/`);
-}
-async function InverseWatchlist(item: SKINNY_RENDER) {}
 
-function ContextMenu(props: {
-  x: number;
-  y: number;
-  close: () => void;
-  item: SKINNY_RENDER;
-}) {
-  const nav = useNavigate();
-  const renderId = nanoid();
-  useEffect(() => {
-    var f = 0;
-    const on_click = (e: MouseEvent) => {
-      if (f++ === 0) return;
-      if (
-        (e.target as HTMLElement).getAttribute("data-render-id") !== renderId
-      ) {
-        props.close();
-      }
-    };
-    window.addEventListener("click", on_click);
-    window.addEventListener("contextmenu", on_click);
-    return () => {
-      console.log("remove");
-      window.removeEventListener("contextmenu", on_click);
-      window.removeEventListener("click", on_click);
-    };
-  }, []);
-  return (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className={`absolute z-10 p-3 font-semibold rounded-[0.5rem] shadow-lg bg-slate-800`}
-      data-render-id={renderId}
-      style={{
-        top: props.y,
-        left: props.x,
-      }}
-    >
-      <div
-        className=" cursor-pointer"
-        onClick={() => {
-          nav("/render/" + props.item.TYPE + "/" + props.item.ID);
-        }}
-      >
-        Plus de détails
-      </div>
-      <div
-        className=" cursor-pointer"
-        onClick={() => {
-          window.open(`/render/${props.item.TYPE}/${props.item.ID}`, "_blank");
-          props.close();
-        }}
-      >
-        Ouvrir dans un nouvel onglet
-      </div>
-      <div
-        className=" cursor-pointer"
-        onClick={() => {
-          nav(
-            "/player/?transcode=" + encodeURIComponent(props.item.TRANSCODE_URL)
-          );
-        }}
-      >
-        Regarder
-      </div>
-      <div
-        hidden={props.item.WATCH.CURRENT === 0}
-        onClick={() => {
-          DeleteFromWatchingList(props.item)
-            .then(() => {})
-            .catch(() => {});
-        }}
-        className="text-red-700 cursor-pointer"
-      >
-        Supprimer des "à reprendre"
-      </div>
-      <div
-        className="text-blue-500 cursor-pointer"
-        onClick={() => {
-          InverseWatchlist(props.item)
-            .then(() => {})
-            .catch(() => {});
-        }}
-      >
-        {props.item.WATCHLISTED ? "Remove from Watchlist" : "Add to Watchlist"}
-      </div>
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          document.location.href =
-            app_url +
-            "/download?type=" +
-            props.item.TYPE +
-            "&id=" +
-            props.item.ID;
-        }}
-      >
-        Download
-      </div>
-    </div>
-  );
+function WatchPercent(data: WATCH_DATA): number {
+  if (data.TOTAL > 0) {
+    return (data.CURRENT / data.TOTAL) * 100;
+  }
+  return 0;
 }
