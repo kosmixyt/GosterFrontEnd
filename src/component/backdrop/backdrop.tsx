@@ -50,7 +50,7 @@ export class BackDrop extends React.Component<BackDropProps> {
       <motion.div
         onClick={this.goRender.bind(this)}
         whileHover={{
-          zIndex: 100,
+          zIndex: 2,
           transition: {
             duration: 0.2,
             delay: 1,
@@ -65,7 +65,7 @@ export class BackDrop extends React.Component<BackDropProps> {
             },
           },
         }}
-        className={`cursor-pointer relative pt-8 z-10 w-72 flex`}
+        className={`cursor-pointer relative pt-8 w-72 flex`}
         onHoverStart={() => {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.hoverTimeout = setTimeout(() => {
