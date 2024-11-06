@@ -98,18 +98,24 @@ export const Landing = () => {
   return (
     <div>
       {!isMobile ? (
-        <Swiper
-          navigation={true}
-          modules={[Autoplay]}
-          slidesPerGroup={1}
-          slidesPerView={1}
+        <motion.div
+          initial={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          animate={{ opacity: 1 }}
         >
-          {loader_data.Recents.Data.map((e, i) => (
-            <SwiperSlide key={i}>
-              <Full i={i} data={e} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          <Swiper
+            navigation={true}
+            modules={[Autoplay]}
+            slidesPerGroup={1}
+            slidesPerView={1}
+          >
+            {loader_data.Recents.Data.map((e, i) => (
+              <SwiperSlide key={i}>
+                <Full i={i} data={e} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </motion.div>
       ) : (
         <></>
       )}
