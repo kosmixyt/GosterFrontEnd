@@ -781,7 +781,7 @@ export function AddModal(props: {
                     <td>
                       <button
                         onClick={() => {
-                          setTorrentId(result.name);
+                          setTorrentId(result.link);
                           console.log("set", result.id);
                         }}
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
