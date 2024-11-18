@@ -1,12 +1,15 @@
 import { DownloadWeb, get_transcode_data } from "./web";
 import { EPISODE, FileItem, MovieItem, TVItem } from "../render/render";
 import { app_url } from "..";
-import { CacheManager } from "./cacheManager";
 import { QUALITY, Subtitle, Track } from "../player/player";
 import Hls from "hls.js";
 import "./electron/electron";
 import { SKINNY_RENDER } from "../component/poster";
-import { ElectronDownload, ElectronLoadCache, ElectronSaveCache } from "./electron/electron";
+import {
+  ElectronDownload,
+  ElectronLoadCache,
+  ElectronSaveCache,
+} from "./electron/electron";
 
 export type Platform = "web" | "android" | "electron" | "ios";
 export class PlatformManager {
@@ -22,7 +25,11 @@ export class PlatformManager {
     }
     return PlatformManager.platform;
   }
-  static DispatchDownload(url: string, fileInfo: MovieItem | EPISODE, fileId: number) {
+  static DispatchDownload(
+    url: string,
+    fileInfo: MovieItem | EPISODE,
+    fileId: number
+  ) {
     switch (PlatformManager.GetPlatform()) {
       case "web":
         DownloadWeb(url);
@@ -32,18 +39,17 @@ export class PlatformManager {
         break;
     }
   }
-  static async DispatchCache(item: string, type: string): Promise<MovieItem | TVItem> {
-    if (item == "undefined" || (type !== "movie" && type !== "tv")) throw new Error("Invalid item");
-    var render = null;
-    render = CacheManager.GetCache(item, type);
-    if (!render) {
-      const res = await fetch(`${app_url}/render?id=${item}&type=${type}`, { credentials: "include" });
-      if (res.status != 200) {
-        throw new Error("Failed to fetch data");
-      }
-      render = await res.json();
-      CacheManager.SetCache(item, type, { ...render });
+  static async DispatchCache(
+    item: string,
+    type: string
+  ): Promise<MovieItem | TVItem> {
+    const res = await fetch(`${app_url}/render?id=${item}&type=${type}`, {
+      credentials: "include",
+    });
+    if (res.status != 200) {
+      throw new Error("Failed to fetch data");
     }
+    var render = await res.json();
     return render;
   }
   static async SaveCacheDispatcher() {
@@ -53,7 +59,6 @@ export class PlatformManager {
         console.log("Web platform not supported");
         break;
       case "electron":
-        ElectronSaveCache(CacheManager.Save());
         break;
     }
   }
@@ -106,5 +111,3 @@ export interface TranscodeDATA {
   unload: (Hls: Hls) => void;
 }
 
-CacheManager.Load(PlatformManager.DispatchCacheManagerLoad());
-setInterval(PlatformManager.SaveCacheDispatcher, 10_000);

@@ -547,7 +547,11 @@ class Renderer extends React.Component<RendereProps> {
                           >
                             {this.state.item.SEASONS.map((e, i) => (
                               <option key={i} value={i}>
-                                {e.NAME}
+                                {e.NAME} -{" "}
+                                {e.EPISODES.reduce(
+                                  (p, c) => c.FILES.length + p,
+                                  0
+                                )}
                               </option>
                             ))}
                           </select>
