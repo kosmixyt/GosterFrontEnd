@@ -283,14 +283,7 @@ class Renderer extends React.Component<RendereProps> {
   public uploadFile(path: string) {
     if (!this.state.ChooseStorage)
       toast.error("Erreur lors de la récupération du fichier");
-    post_file(
-      this.state.ChooseStorage!,
-      "movie",
-      this.state.item.ID,
-      path,
-      -1,
-      -1
-    );
+    post_file(this.state.ChooseStorage!, "movie", this.state.item.ID, path, -1);
   }
   public render() {
     if (typeof this.state.item.ID === "undefined") {
@@ -871,56 +864,62 @@ export async function post_file(
   type: "tv" | "movie",
   id: string,
   path: string,
-  season: number = -1,
   episode: number = -1
 ) {
   var form = new FormData();
   console.log(file);
-  form.append("file", file);
-  form.append("type", type);
-  form.append("id", id);
+  form.append("action", "start");
+  form.append("name", file.name);
+  form.append("size", file.size.toString());
   form.append("path", path);
+  form.append("type", type);
+  form.append("uuid", id);
   if (type == "tv") {
-    if (season == -1 || episode == -1)
-      throw new Error("Season and episode must be provided");
-    form.append("season", season.toString());
-    form.append("episode", episode.toString());
+    form.append("episode_id", episode.toString());
   }
-
-  const xhr = new XMLHttpRequest();
-  var toastId = toast.info("Upload en cours", {
-    autoClose: false,
+  const res = await fetch(`${app_url}/upload`, {
+    method: "POST",
+    body: form,
+    credentials: "include",
   });
-  xhr.upload.onprogress = (e) => {
-    toast.update(toastId, {
-      render: `Upload en cours ${Number((e.loaded / e.total) * 100).toFixed(
-        1
-      )}%`,
-    });
-  };
-  xhr.onload = (e) => {
-    const json = JSON.parse(xhr.responseText);
-    if (xhr.status == 200) {
-      toast.update(toastId, {
-        render: "Upload terminé",
-        type: "success",
-        autoClose: 5000,
-      });
-    } else {
-      toast.update(toastId, {
-        render: `Erreur lors de l'upload : ${json.error}`,
-        type: "error",
-        autoClose: 5000,
-      });
-    }
-  };
 
-  xhr.onerror = (e) => {
-    toast.error("Erreur lors de l'upload");
-  };
-  xhr.open("POST", `${app_url}/upload`, true);
-  xhr.withCredentials = true;
-  xhr.send(form);
+  const data = await res.json();
+  if (data.error) {
+    return toast.error(data.error);
+  }
+  const upload_id = data.id;
+  const stream = file.stream();
+
+  const reader = stream.getReader();
+  const tProgress = toast.info("Upload en cours", { autoClose: false });
+  var progress = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const form = new FormData();
+    form.append("action", "upload");
+    form.append("upload_id", upload_id);
+    const chunked_file = new Blob([value]);
+    form.append("file", chunked_file, file.name);
+    const res = await fetch(`${app_url}/upload`, {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+    if (res.status != 200) {
+      toast.error("Erreur lors de l'upload");
+      break;
+    }
+    const data = await res.json();
+    if (data.error) {
+      toast.error(data.error);
+      break;
+    }
+    progress += value.byteLength;
+    toast.update(tProgress, {
+      render: `Upload en cours ${Math.floor((progress / file.size) * 100)}%`,
+    });
+  }
 }
 export function setFallbackImage(
   e: React.SyntheticEvent<HTMLImageElement, Event>
@@ -947,7 +946,7 @@ function EpisodeRender(props: {
         props.season_index
       );
     } else {
-      post_file(file, "tv", props.item.state.item.ID, path, season.ID, e.ID);
+      post_file(file, "tv", props.item.state.item.ID, path, e.ID);
     }
   };
   const on_drop = (e: React.DragEvent<HTMLDivElement>) => {

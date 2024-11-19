@@ -622,7 +622,7 @@ function NextForward(props: { player: NewPlayer }) {
         </div>
       </div>
       <IoMdSkipForward
-        onClick={props.player.forceUpdate.bind(props.player)}
+        onClick={() => props.player.forceUpdate.bind(props.player)}
         className="ml-2 cursor-pointer"
         size={30}
       />

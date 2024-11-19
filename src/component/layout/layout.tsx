@@ -15,7 +15,6 @@ import { BsBroadcastPin } from "react-icons/bs";
 import { IoTvSharp } from "react-icons/io5";
 import { SearchRender } from "../../search/search";
 import { Loader } from "../loader/loader";
-import { CacheManager } from "../../cordova/cacheManager";
 
 const iconSize = 35;
 const showName = false;
