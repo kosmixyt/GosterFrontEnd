@@ -11,7 +11,6 @@ import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
 import { Head } from "./component/layout/layout";
 import fs from "fs";
-import { Dragger } from "./metadata/dragger";
 export const app_url = "https://xxxxvideos.kosmix.fr/api";
 // export const app_url = "http://localhost:90/api";
 console.log("fs", fs);
@@ -35,10 +34,6 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginComp />,
-      },
-      {
-        path: "/dragger",
-        element: <Dragger />,
       },
       {
         path: "/",

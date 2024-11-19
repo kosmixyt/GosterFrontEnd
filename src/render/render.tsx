@@ -20,6 +20,7 @@ import { RequestModal } from "../requests/requests";
 import { ShareModal } from "../me/landing";
 import { CgUnavailable } from "react-icons/cg";
 import { Loader } from "../component/loader/loader";
+import { MoveMediaFile } from "../metadata/dragger";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -136,6 +137,7 @@ export interface RenderState {
   convertModal: boolean;
   ChooseStorage: File | null;
   shareModal: FileItem | null;
+  moveModal: boolean;
   requestModal: boolean;
 }
 
@@ -150,6 +152,7 @@ class Renderer extends React.Component<RendereProps> {
     convertModal: false,
     shareModal: null,
     season: 0,
+    moveModal: false,
     requestModal: false,
     addModal: false,
     ChooseStorage: null,
@@ -295,6 +298,12 @@ class Renderer extends React.Component<RendereProps> {
         onDragOver={(e) => e.preventDefault()}
         className="bg-no-repeat bg-cover text-white"
       >
+        {this.state.moveModal && (
+          <MoveMediaFile
+            close={() => this.setState({ moveModal: false })}
+            file={this.currentFile}
+          />
+        )}
         {this.state.addModal &&
           createPortal(
             <AddModal
@@ -446,6 +455,9 @@ class Renderer extends React.Component<RendereProps> {
                           onClick={() => this.setState({ convertModal: true })}
                         >
                           Convert
+                        </div>
+                        <div onClick={() => this.setState({ moveModal: true })}>
+                          Wrong file ?
                         </div>
                         <div
                           className="cursor-pointer"
