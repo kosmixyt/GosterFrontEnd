@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { FaArrowAltCircleRight, FaArrowCircleDown, FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
+import { AdminCleanMovie } from "../metadata/dragger";
 export function UserLanding() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const nav = useNavigate();
@@ -173,6 +174,15 @@ export function UserLanding() {
             })}
           </div>
         )}
+        <div className="text-3xl ml-1 font-bold">Admin Area</div>
+        <div className="flex flex-wrap mt-4">
+          <div
+            onClick={AdminCleanMovie}
+            className="p-4 bg-gray-800 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+          >
+            Clean Orphelin Movies
+          </div>
+        </div>
       </div>
     </motion.div>
   );

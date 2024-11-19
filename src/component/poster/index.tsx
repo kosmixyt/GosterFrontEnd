@@ -93,58 +93,89 @@ export class Porenderer extends React.Component<PosterRendererProps> {
 
   render() {
     return (
-      <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
-      
-      onClick={this.go.bind(this)} className={`w-40 2xl:w-52 ${this.props.className}  lg:mt-4  lg:mb-4 lg:ml-1 lg:mr-1`}>
-        <div className="relative border-2 border-transparent lg:hover:border-white rounded-xl h-auto cursor-pointer lg:hover:scale-110 duration-200 delay-100 transition-all ">
-          <div
-            style={{
-              width: Math.round((this.props.render.WATCH.CURRENT / this.props.render.WATCH.TOTAL) * 100) + "%",
-            }}
-            className="absolute bottom-0 bg-red-700 h-1"
-          ></div>
-          <div className="w-full h-full rounded-xl lg:hover:backdrop-blur-sm lg:hover:bg-[#181818]  lg:hover:bg-opacity-60 absolute group">
-            <div className="lg:group-hover:block hidden">
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  this.props.nav(`/browse/${this.props.render.TYPE}`);
-                }}
-                className="absolute  top-1 left-1 font-semibold capitalize  text-sm right-2 h-6 w-6"
-              >
-                {this.props.render.TYPE === "tv" ? <PiTelevisionSimpleDuotone className="w-full h-full" /> : <MdMovieCreation className="w-full h-full" />}
-              </div>
-              <div className="absolute top-1 right-1 flex gap-1 justify-end">
-                {this.props.render.PROVIDERS.splice(0, 4).map((e) => (
-                  <div onClick={(ev) => this.navigateProvider(ev, e)}>
-                    <img className="h-7 rounded-lg" src={e.URL} alt={e.PROVIDER_NAME} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+        onClick={this.go.bind(this)}
+        className={`w-40 2xl:w-52 ${this.props.className}  lg:mt-4  lg:mb-4 lg:ml-1 lg:mr-1`}
+      >
+        <a
+          onClick={(e) => e.preventDefault()}
+          href={`/render/${this.props.render.TYPE}/${this.props.render.ID}`}
+        >
+          <div className="relative border-2 border-transparent lg:hover:border-white rounded-xl h-auto cursor-pointer lg:hover:scale-110 duration-200 delay-100 transition-all ">
+            <div
+              style={{
+                width:
+                  Math.round(
+                    (this.props.render.WATCH.CURRENT /
+                      this.props.render.WATCH.TOTAL) *
+                      100
+                  ) + "%",
+              }}
+              className="absolute bottom-0 bg-red-700 h-1"
+            ></div>
+            <div className="w-full h-full rounded-xl lg:hover:backdrop-blur-sm lg:hover:bg-[#181818]  lg:hover:bg-opacity-60 absolute group">
+              <div className="lg:group-hover:block hidden">
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.props.nav(`/browse/${this.props.render.TYPE}`);
+                  }}
+                  className="absolute  top-1 left-1 font-semibold capitalize  text-sm right-2 h-6 w-6"
+                >
+                  {this.props.render.TYPE === "tv" ? (
+                    <PiTelevisionSimpleDuotone className="w-full h-full" />
+                  ) : (
+                    <MdMovieCreation className="w-full h-full" />
+                  )}
+                </div>
+                <div className="absolute top-1 right-1 flex gap-1 justify-end">
+                  {this.props.render.PROVIDERS.splice(0, 4).map((e) => (
+                    <div onClick={(ev) => this.navigateProvider(ev, e)}>
+                      <img
+                        className="h-7 rounded-lg"
+                        src={e.URL}
+                        alt={e.PROVIDER_NAME}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute bottom-[calc(1rem+1.25rem)] pl-1">
+                  <div className="text-white font-bold leading-4 text-lg">
+                    {this.props.render.NAME.length > 30
+                      ? this.props.render.NAME.substring(0, 40) + "..."
+                      : this.props.render.NAME}{" "}
+                    :
                   </div>
-                ))}
-              </div>
-              <div className="absolute bottom-[calc(1rem+1.25rem)] pl-1">
-                <div className="text-white font-bold leading-4 text-lg">
-                  {this.props.render.NAME.length > 30 ? this.props.render.NAME.substring(0, 40) + "..." : this.props.render.NAME} :
+                  <div className="text-xs 2xl:text-sm white font-medium opacity-70 leading-[0.8rem] max-h-[100px] overflow-auto no-scrollbar mt-1">
+                    {this.props.render.DESCRIPTION}
+                  </div>
                 </div>
-                <div className="text-xs 2xl:text-sm white font-medium opacity-70 leading-[0.8rem] max-h-[100px] overflow-auto no-scrollbar mt-1">
-                  {this.props.render.DESCRIPTION}
+                <div
+                  onClick={this.play.bind(this)}
+                  className="absolute w-[calc(100%-2*0.25rem)] h-7 rounded-lg bg-white left-1 bottom-1 flex justify-center items-center"
+                >
+                  <div className="text-[#181818] text-sm font-semibold">
+                    Lire
+                  </div>
                 </div>
-              </div>
-              <div
-                onClick={this.play.bind(this)}
-                className="absolute w-[calc(100%-2*0.25rem)] h-7 rounded-lg bg-white left-1 bottom-1 flex justify-center items-center"
-              >
-                <div className="text-[#181818] text-sm font-semibold">Lire</div>
               </div>
             </div>
+            <img
+              loading="lazy"
+              className="h-full w-full rounded-xl"
+              src={this.props.render.POSTER}
+              alt={this.props.render.NAME}
+            />
           </div>
-          <img loading="lazy" className="h-full w-full rounded-xl" src={this.props.render.POSTER} alt={this.props.render.NAME} />
-        </div>
+        </a>
         <div className="flex justify-center font-bold lg:hidden">
           <div className="text-center text-sm">
-            {this.props.render.NAME.length > 30 ? this.props.render.NAME.substring(0, 40) + "..." : this.props.render.NAME}
+            {this.props.render.NAME.length > 30
+              ? this.props.render.NAME.substring(0, 40) + "..."
+              : this.props.render.NAME}
           </div>
         </div>
       </motion.div>

@@ -28,16 +28,11 @@ export const Render = (props: {}) => {
   const [item, setItem] = React.useState<null | MovieItem | TVItem>(null);
   useEffect(() => {
     if (item != null) {
-      console.log("Item changed", item);
       setItem(null);
     }
-    PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "")
-      .then((item) => {
-        setItem(item);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "").then(
+      setItem
+    );
   }, [params.type, params.id]);
   if (!item) return <Loader />;
   return <Renderer params={params} navigate={navigate} Item={item} />;

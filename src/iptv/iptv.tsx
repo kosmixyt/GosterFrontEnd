@@ -24,9 +24,25 @@ export interface IptvProvider {
   ChannelCount: number;
 }
 
+function AddIptv(url: string) {
+  fetch(`${app_url}/iptv/add?url=${encodeURIComponent(url)}`, {
+    method: "GET",
+    credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res.error != undefined) {
+        toast.error(res.error);
+      } else {
+        toast.success("Iptv added");
+      }
+    });
+}
+
 export function UnorderedIptv() {
   const router = useNavigate();
   const [providers, setProviders] = React.useState<IptvProvider[]>([]);
+  const [url, setUrl] = React.useState("");
   useEffect(() => {
     fetch(`${app_url}/iptv/ordered`, {
       credentials: "include",
@@ -46,6 +62,24 @@ export function UnorderedIptv() {
     <div className="mt-20 w-full flex justify-center">
       <div className="w-11/12">
         <h1 className="text-4xl">Iptvs Providers</h1>
+        <div className="flex">
+          <div className="">Add Iptv (url) : </div>
+          <input
+            value={url}
+            onInput={(e) => setUrl(e.target.value as string)}
+            type="url"
+          />
+          <button
+            onClick={() => {
+              AddIptv(
+                (document.querySelector("input") as HTMLInputElement).value
+              );
+            }}
+          >
+            Add
+          </button>
+        </div>
+
         <Accordion activeIndex={0}>
           {providers.map((provider, i) => (
             <AccordionTab header={provider.FileName}>
@@ -85,7 +119,9 @@ export function Iptv() {
         dataLength={channels.length}
         next={() => {
           console.log("next");
-          fetch(`${app_url}/iptv?id=1&offset=${channels.length}&limit=40${g}`, { credentials: "include" })
+          fetch(`${app_url}/iptv?id=1&offset=${channels.length}&limit=40${g}`, {
+            credentials: "include",
+          })
             .then((res) => {
               if (res.status == 401) {
                 return (document.location.href = "/login");
@@ -129,8 +165,13 @@ export function IptvBackdrop(props: { channel: IptvChannel }) {
   return (
     <div onClick={transcode} className="w-1/2 h-1/2 flex justify-center">
       <div>
-        <img className="rounded-lg h-[128px]  w-[128px] m-auto" src={props.channel.Logo_url} />
-        <div className="text-center underline font-bold">{MoreLength(props.channel.Name, 20)}</div>
+        <img
+          className="rounded-lg h-[128px]  w-[128px] m-auto"
+          src={props.channel.Logo_url}
+        />
+        <div className="text-center underline font-bold">
+          {MoreLength(props.channel.Name, 20)}
+        </div>
       </div>
     </div>
   );
