@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { MovieItem, TVItem } from "../render/render";
 import { PlatformManager } from "../cordova/platform";
 import { move } from "./dragger";
+import { SearchRender } from "../search/search";
 
 export interface FileMetadata {
   id: number;
@@ -23,11 +24,14 @@ export interface FileMetadata {
 export default function () {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [selected, set_selected] = useState<FileMetadata[]>([]);
+  const [showSearch, set_showSearch] = useState(false);
+  const [itemForSelected, set_itemForSelected] = useState<MovieItem | TVItem>();
   useEffect(() => {
     fetch(`${app_url}/metadata/items`, { credentials: "include" })
       .then((res) => res.json())
       .then(setFiles);
   }, []);
+  var found = false;
   return (
     <div>
       <button
@@ -37,6 +41,30 @@ export default function () {
       >
         Filter Unnassigned
       </button>
+      <button
+        onClick={() => {
+          set_showSearch(!showSearch);
+        }}
+      >
+        Assign Selected to search item
+      </button>
+      {showSearch && (
+        <SearchRender
+          close={() => {
+            if (!found) set_showSearch(false);
+          }}
+          headTitle="Assign to"
+          title="Assign to"
+          onselect={(e, data) => {
+            // set_itemForSelected();
+            PlatformManager.DispatchCache(data.ID, data.TYPE).then((item) => {
+              set_itemForSelected(item);
+              set_showSearch(false);
+            });
+            found = true;
+          }}
+        />
+      )}
       {files.map((e) => (
         <div key={e.id} className="flex items-center mt-2">
           <input
@@ -50,13 +78,22 @@ export default function () {
               }
             }}
           />
-          <RenderFile file={e} />
+          <RenderFile
+            file={e}
+            predefinedItem={
+              selected.find((f) => f.id === e.id) ? itemForSelected : undefined
+            }
+          />
         </div>
       ))}
     </div>
   );
 }
-function RenderFile(props: { file: FileMetadata }) {
+function RenderFile(props: {
+  file: FileMetadata;
+  predefinedItem?: MovieItem | TVItem;
+}) {
+  console.log(props.predefinedItem);
   const [media_type, set_media_type] = useState<"movie" | "tv" | null>(
     props.file.itemid === 0 ? null : props.file.is_movie ? "movie" : "tv"
   );
@@ -65,9 +102,21 @@ function RenderFile(props: { file: FileMetadata }) {
   const [focus, set_focus] = useState(false);
   const [tmdb_data, set_tmdb_data] = useState<SKINNY_RENDER[]>([]);
   const container = useRef<HTMLDivElement>(null);
-  const [item, set_item] = useState<MovieItem | TVItem | null>(null);
+  const [item, set_item] = useState<MovieItem | TVItem | null>(
+    props.predefinedItem ?? null
+  );
   const [season_id, set_season_id] = useState<number>();
   const [episode_id, set_episode_id] = useState<number | null>(null);
+  useEffect(() => {
+    if (props.predefinedItem) {
+      set_item(props.predefinedItem);
+      set_media_type(props.predefinedItem.TYPE);
+      if (props.predefinedItem.TYPE === "tv") {
+        set_season_id(props.predefinedItem.SEASONS[0].ID);
+        set_episode_id(props.predefinedItem.SEASONS[0].EPISODES[0].ID);
+      }
+    }
+  }, [props.predefinedItem]);
   useEffect(() => {
     if (tmdb_search === "") return;
     fetch(`${app_url}/search?query=${tmdb_search}&type=${media_type}`, {
@@ -168,7 +217,14 @@ function RenderFile(props: { file: FileMetadata }) {
               <div className="flex">
                 <select
                   value={season_id}
-                  onChange={(e) => set_season_id(parseInt(e.target.value))}
+                  onChange={(e) => {
+                    set_season_id(parseInt(e.target.value));
+                    set_episode_id(
+                      (item as TVItem).SEASONS.find(
+                        (e) => e.ID === parseInt((e as any).target.value)
+                      )?.EPISODES[0].ID as number
+                    );
+                  }}
                   autoFocus={true}
                   className="ml-2"
                 >
