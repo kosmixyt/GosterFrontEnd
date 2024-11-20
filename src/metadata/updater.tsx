@@ -145,7 +145,10 @@ function RenderFile(props: { file: FileMetadata }) {
                   <div
                     onClick={() =>
                       PlatformManager.DispatchCache(e.ID, e.TYPE).then(
-                        (item: TVItem) => {
+                        (item: TVItem | MovieItem) => {
+                          if (item.TYPE != "tv") {
+                            throw new Error("Not a TV Item");
+                          }
                           set_item(item);
                           set_season_id(item.SEASONS[0].ID);
                           set_episode_id(item.SEASONS[0].EPISODES[0].ID);
@@ -199,7 +202,7 @@ function RenderFile(props: { file: FileMetadata }) {
                       episode_id
                     ).then((good) => {
                       set_item(null);
-                      set_season_id(null);
+                      set_season_id(0);
                       set_episode_id(null);
                       set_tmdb_search("");
                       set_tmdb_data([]);
@@ -212,7 +215,7 @@ function RenderFile(props: { file: FileMetadata }) {
                   size={30}
                   onClick={() => {
                     set_item(null);
-                    set_season_id(null);
+                    set_season_id(0);
                     set_episode_id(null);
                   }}
                 />
