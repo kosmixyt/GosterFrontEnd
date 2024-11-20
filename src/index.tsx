@@ -69,6 +69,10 @@ const router = createBrowserRouter([
         element: <PlayerRender />,
       },
       {
+        path: "/dragger",
+        element: <Updater />,
+      },
+      {
         path: "/pty",
         element: <PTY />,
       },
@@ -79,3 +83,5 @@ root.render(<RouterProvider router={router} />);
 
 import { Buffer } from "buffer";
 import { UserLanding } from "./me/landing";
+import Updater from "./metadata/updater";
+

@@ -12,6 +12,7 @@ import { FaPlay } from "react-icons/fa6";
 import { motion } from "framer-motion";
 import { MdOutlineFileDownload } from "react-icons/md";
 
+import { AnimatePresence } from "framer-motion";
 import "react-tooltip/dist/react-tooltip.css";
 import { WATCH_DATA } from "@/src/render/render";
 
@@ -40,6 +41,7 @@ export class BackDrop extends React.Component<BackDropProps> {
   };
 
   public tempElement: HTMLVideoElement | null = null;
+  public base64Image: string | null = null;
   public OpenTimeout: any | null = null;
   public video = React.createRef<HTMLVideoElement>();
   goRender() {
@@ -84,14 +86,31 @@ export class BackDrop extends React.Component<BackDropProps> {
             }}
             className="h-1 bg-red-800"
           ></div>
-          <motion.img
-            src={this.props.BACKDROP}
-            animate={{
-              scale: this.state.isHovering ? 1.3 : 1,
-              borderRadius: this.state.isHovering ? "1rem" : "0rem",
-            }}
-            className="object-cover"
-          />
+          <AnimatePresence>
+            {!this.state.isHovering && (
+              <motion.img
+                crossOrigin="anonymous"
+                onLoad={(e) => {
+                  this.base64Image = convertImageToBase64(
+                    e.target as HTMLImageElement
+                  );
+                }}
+                src={this.props.BACKDROP}
+                exit={{ opacity: 0 }}
+                className="object-fill"
+              />
+            )}
+            {this.state.isHovering && (
+              <motion.video
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                poster={this.base64Image as string}
+                autoPlay
+                src={`${app_url}/trailer?type=${this.props.TYPE}&id=${this.props.ID}#t=10`}
+                className="object-cover rounded-lg"
+              ></motion.video>
+            )}
+          </AnimatePresence>
           {this.state.isHovering && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -119,4 +138,19 @@ function WatchPercent(data: WATCH_DATA): number {
     return (data.CURRENT / data.TOTAL) * 100;
   }
   return 0;
+}
+function convertImageToBase64(imgElement: HTMLImageElement): string {
+  // Crée un canvas
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+
+  // Définit les dimensions du canvas pour correspondre à l'image
+  canvas.width = imgElement.width;
+  canvas.height = imgElement.height;
+
+  // Dessine l'image dans le canvas
+  context.drawImage(imgElement, 0, 0);
+
+  // Extrait les données en base64
+  return canvas.toDataURL("image/png"); // Remplace 'image/png' par un autre format si nécessaire
 }

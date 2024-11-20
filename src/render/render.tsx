@@ -227,6 +227,7 @@ class Renderer extends React.Component<RendereProps> {
     episode: EPISODE,
     i: number
   ) {
+    console.log("epDl", episode, i);
     event.stopPropagation();
     if (episode.FILES.length > 0) {
       if (i != -1) {
@@ -293,7 +294,7 @@ class Renderer extends React.Component<RendereProps> {
         onDragOver={(e) => e.preventDefault()}
         className="bg-no-repeat bg-cover text-white"
       >
-        {this.state.moveModal && (
+        {this.state.moveModal && this.currentFile && (
           <MoveMediaFile
             close={() => this.setState({ moveModal: false })}
             file={this.currentFile}
@@ -451,7 +452,10 @@ class Renderer extends React.Component<RendereProps> {
                         >
                           Convert
                         </div>
-                        <div onClick={() => this.setState({ moveModal: true })}>
+                        <div
+                          hidden={this.currentFile == null}
+                          onClick={() => this.setState({ moveModal: true })}
+                        >
                           Wrong file ?
                         </div>
                         <div
@@ -931,9 +935,9 @@ export async function post_file(
 export function setFallbackImage(
   e: React.SyntheticEvent<HTMLImageElement, Event>
 ) {
-  //   e.currentTarget.src = "/fallback.png";
   e.currentTarget.src = unavailable;
 }
+
 function EpisodeRender(props: {
   item: Renderer;
   season_index: number;
@@ -942,6 +946,7 @@ function EpisodeRender(props: {
   const season = (props.item.state.item as TVItem).SEASONS[props.season_index];
   const e = season.EPISODES[props.i];
   const [file, setFile] = useState<File | null>(null);
+  const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
   const on_choosedStorage = (path: string) => {
     if (!file) return;
     console.log(file.name);
@@ -960,7 +965,12 @@ function EpisodeRender(props: {
     e.preventDefault();
     setFile(e.dataTransfer.files[0]);
   };
-
+  useEffect(() => {
+    if (e.FILES.length > 0) {
+      setCurrentFile(e.FILES[0]);
+    }
+  }, []);
+  console.log(currentFile);
   return (
     <div
       onDrop={on_drop}
@@ -993,6 +1003,26 @@ function EpisodeRender(props: {
           className="w-full h-full rounded-lg"
         />
       </div>
+      <div>
+        <select
+          value={currentFile?.FILENAME}
+          onChange={(event) => {
+            console.log("change");
+            setCurrentFile(
+              e.FILES.find((f) => f.FILENAME == event.target.value) as FileItem
+            );
+          }}
+          onClick={(e) => e.stopPropagation()}
+          hidden={e.FILES.length == 0}
+          className="w-full mt-1"
+        >
+          {e.FILES.map((f, i) => (
+            <option value={f.FILENAME} key={i}>
+              {f.FILENAME}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="text-center flex items-center justify-center">
         <div>
           ({e.EPISODE_NUMBER}) {e.NAME}
@@ -1000,13 +1030,17 @@ function EpisodeRender(props: {
       </div>
       <div className="flex justify-between items-center pb-1 mt-1">
         <div
-          onClick={(event) => props.item.epStr(event, e, -1)}
+          onClick={(event) =>
+            props.item.epStr(event, e, e.FILES.indexOf(currentFile!))
+          }
           className="w-[50%] mr-1 ml-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
         >
           Lire
         </div>
         <div
-          onClick={(event) => props.item.epDl(event, e, -1)}
+          onClick={(event) =>
+            props.item.epDl(event, e, e.FILES.indexOf(currentFile!))
+          }
           className="w-[50%] mr-1 h-7 flex justify-center items-center bg-white text-black font-bold rounded-lg"
         >
           Télécharger

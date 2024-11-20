@@ -8,15 +8,15 @@ import { createPortal } from "react-dom";
 import { IoCaretBackCircleSharp } from "react-icons/io5";
 import { app_url } from "..";
 import { toast } from "react-toastify";
-async function move(
-  source: FileItem,
+export async function move(
+  sourceId: string,
   to: string,
   toType: string,
   season_id: number | null,
   episode_id: number | null
 ) {
   const form = new FormData();
-  form.append("fileid", source.ID.toString());
+  form.append("fileid", sourceId);
   form.append("type", toType);
   form.append("id", to);
   if (season_id) form.append("season_id", season_id.toString());
@@ -29,9 +29,11 @@ async function move(
   const data = await res.json();
   if (data.error) {
     toast.error(data.error);
+    return false;
   } else if (data.message) {
     toast.success(data.message);
   }
+  return true;
 }
 export async function AdminCleanMovie() {
   const res = await fetch(`${app_url}/metadata/clean`, {
@@ -53,7 +55,7 @@ export function MoveMediaFile(props: { file: FileItem; close: () => void }) {
   useEffect(() => {
     if ((item?.TYPE === "tv" && season && episode) || item?.TYPE === "movie") {
       move(
-        props.file,
+        props.file.ID.toString(),
         item?.ID as string,
         item?.TYPE as string,
         season,

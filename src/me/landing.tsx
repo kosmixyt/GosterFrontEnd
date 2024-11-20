@@ -379,8 +379,16 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
   return (
     <div>
       <div
+        onClick={() => {
+          nav(
+            `/render/${props.torrent.SKINNY.TYPE}/${props.torrent.SKINNY.ID}`
+          );
+        }}
         style={{
-          background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + props.torrent.SKINNY.BACKDROP + ")",
+          background:
+            "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" +
+            props.torrent.SKINNY.BACKDROP +
+            ")",
         }}
         className="bg-white 
         w-[200px] h-72
@@ -398,7 +406,12 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
             <div className="flex justify-between">
               <div className="flex justify-center items-center gap-2">
                 <div
-                  onClick={() => window.open(`${app_url}/torrents/zip?id=${props.torrent.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(
+                      `${app_url}/torrents/zip?id=${props.torrent.id}`
+                    );
+                  }}
                   className="p-4 h-[40px] flex justify-center items-center bg-gray-900 text-white font-bold rounded-md  text-lg font-roboto"
                 >
                   Zip
@@ -408,8 +421,12 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 </div>
               </div>
               <div
-                onClick={() => {
-                  ActionTorrent(props.torrent.id, pause ? "resume" : "pause").then((e) => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  ActionTorrent(
+                    props.torrent.id,
+                    pause ? "resume" : "pause"
+                  ).then((e) => {
                     if (e) setPause(!pause);
                   });
                 }}
@@ -423,7 +440,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                     <div className="p-2 hidden md:flex items-center justify-center text-sm bg-gray-900 text-white font-bold rounded-lg ">
                       <div className="flex justify-between gap-2  items-center">
                         <FaCloudDownloadAlt className="hidden lg:block" />
-                        {bytesToSize(props.torrent.totalDownloaded)}&nbsp;/&nbsp;
+                        {bytesToSize(props.torrent.totalDownloaded)}
+                        &nbsp;/&nbsp;
                       </div>
                       <div className="flex justify-center gap-2 items-center">
                         <FaCloudUploadAlt className="hidden lg:block" />
@@ -432,16 +450,22 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                     </div>
                   )}
 
-                  {pause && <div className="p-2 flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">Paused</div>}
+                  {pause && (
+                    <div className="p-2 flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">
+                      Paused
+                    </div>
+                  )}
                 </>
               </div>
             </div>
             <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1  no-scrollbar">
               {props.torrent.files.map((file, i) => (
                 <div
-                  onClick={() => {
-                    // nav(`/render/${file.type}/${file.id}`);
-                    window.open(`${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(
+                      `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`
+                    );
                   }}
                   className="w-full mt-1 rounded-lg bg-gray-900 text-white font-semibold text-sm 3xl:text-lg   overflow-hidden"
                 >
@@ -461,7 +485,11 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
           }}
           className="flex justify-center"
         >
-          <img src={props.torrent.SKINNY.POSTER} alt="" className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg" />
+          <img
+            src={props.torrent.SKINNY.POSTER}
+            alt=""
+            className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg"
+          />
         </div>
         <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg">
           {props.torrent.name.substring(0, 50)}

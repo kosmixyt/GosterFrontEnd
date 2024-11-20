@@ -66,7 +66,7 @@ export function UnorderedIptv() {
           <div className="">Add Iptv (url) : </div>
           <input
             value={url}
-            onInput={(e) => setUrl(e.target.value as string)}
+            onInput={(e) => setUrl((e.target as any).value)}
             type="url"
           />
           <button
