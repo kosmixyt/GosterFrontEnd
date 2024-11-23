@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { SKINNY_RENDER } from "../component/poster";
+import { PosterRenderer, SKINNY_RENDER } from "../component/poster";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -189,13 +189,17 @@ export const LineRender = (
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide style={{ width: "fit-content" }} key={e}>
-              <BackDrop
-                className={`${e === 0 ? "ml-0" : ""}`}
-                watchingLine={watchingLine}
-                key={e}
-                nav={nav}
-                {...item}
-              />
+              {item.ID.startsWith("tmdb@") ? (
+                <PosterRenderer {...item} />
+              ) : (
+                <BackDrop
+                  className={`${e === 0 ? "ml-0" : ""}`}
+                  watchingLine={watchingLine}
+                  key={e}
+                  nav={nav}
+                  {...item}
+                />
+              )}
             </SwiperSlide>
           ))}
         </Swiper>

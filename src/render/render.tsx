@@ -21,6 +21,7 @@ import { ShareModal } from "../me/landing";
 import { CgUnavailable } from "react-icons/cg";
 import { Loader } from "../component/loader/loader";
 import { MoveMediaFile } from "../metadata/dragger";
+import { AvailableTorrrent } from "./available_torrent";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -393,7 +394,7 @@ class Renderer extends React.Component<RendereProps> {
                       </div>
                     )}
 
-                    <div className="opacity-80 mt-4 font-bold text-sm">
+                    <div className="mt-4 font-bold text-sm">
                       <div className="flex">
                         <div>Tags :</div>&nbsp;
                         {this.state.item.RUNTIME > 0 ? (
@@ -458,6 +459,11 @@ class Renderer extends React.Component<RendereProps> {
                         >
                           Wrong file ?
                         </div>
+
+                        <AvailableTorrrent
+                          currentSeason={this.state.season}
+                          item={this.state.item}
+                        />
                         <div
                           className="cursor-pointer"
                           hidden={
@@ -551,11 +557,12 @@ class Renderer extends React.Component<RendereProps> {
                           >
                             {this.state.item.SEASONS.map((e, i) => (
                               <option key={i} value={i}>
-                                {e.NAME} -{" "}
+                                {e.NAME} - (
                                 {e.EPISODES.reduce(
                                   (p, c) => c.FILES.length + p,
                                   0
                                 )}
+                                /{e.EPISODES.length})
                               </option>
                             ))}
                           </select>
@@ -619,7 +626,7 @@ class Renderer extends React.Component<RendereProps> {
               backgroundImage: `url('${this.state.item.BACKDROP}')`,
               backgroundSize: "cover",
             }}
-            className="bg-no-repeat bg-cover w-screen mt-12 h-64"
+            className="bg-no-repeat bg-cover w-screen h-64"
           >
             <div
               className="
@@ -685,6 +692,10 @@ class Renderer extends React.Component<RendereProps> {
               >
                 Manualy add torrent
               </div>
+              <AvailableTorrrent
+                currentSeason={this.state.season}
+                item={this.state.item}
+              />
               <div
                 className="cursor-pointer"
                 hidden={

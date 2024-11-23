@@ -675,7 +675,7 @@ export interface SearchResults {
   name: string;
   link: string;
   seed: number;
-  metadata: null | SearchResultsFiles[];
+  size: number;
 }
 export interface SearchResultsFiles {
   size: number;
