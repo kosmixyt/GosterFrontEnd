@@ -10,11 +10,6 @@ export interface LineNameProps {
 
 export const LineName = (props: LineNameProps) => {
   const nav = useNavigate();
-  const send = () => {
-    if (!!props.more) {
-      nav(props.more);
-    }
-  };
   return (
     <div
       style={{
@@ -22,7 +17,7 @@ export const LineName = (props: LineNameProps) => {
       }}
       className={`relative z-10 ${props.className} font-semibold`}
     >
-      <div onClick={send} className="text-2xl md:text-3xl font-bold cursor-pointer opacity-75 hover:opacity-100">
+      <div className="text-2xl md:text-3xl font-bold cursor-pointer opacity-75 hover:opacity-100">
         {props.lineName}
       </div>
     </div>

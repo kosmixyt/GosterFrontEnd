@@ -6,6 +6,8 @@ import { app_url } from "..";
 export function AvailableTorrrent(props: {
   item: MovieItem | TVItem;
   currentSeason: number;
+  download : (torrent_id : number) => void;
+  stream : (torrent_id : number) => void;
 }) {
   const [torrents, setTorrents] = useState<SearchResults[]>([]);
   const [fetched, setFetched] = useState<boolean>(false);
@@ -78,15 +80,22 @@ export function AvailableTorrrent(props: {
                 <th>Size</th>
                 <th>Seed</th>
                 <th>Provider</th>
+                <th>Download</th>
               </tr>
             </thead>
             <tbody>
               {torrents.map((torrent, i) => (
                 <tr className="mt-2" key={i}>
-                  <td>{torrent.name}</td>
+                  <td
+                  onClick={() => window.open(torrent.link)}
+                  >{torrent.name}</td>
                   <td>{bytesToSize(torrent.size)}</td>
                   <td>{torrent.seed}</td>
                   <td>{torrent.provider_name}</td>
+                  <td>
+                    <button onClick={() => props.download(torrent.id)}>Download</button>
+                    <button onClick={() => props.stream(torrent.id)}>Stream</button>  
+                  </td>
                 </tr>
               ))}
             </tbody>

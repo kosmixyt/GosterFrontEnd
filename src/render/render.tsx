@@ -33,7 +33,10 @@ export const Render = (props: {}) => {
     }
     PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "").then(
       setItem
-    );
+    ).catch((e) => {
+      console.log(e);
+      navigate("/login");
+    })
   }, [params.type, params.id]);
   if (!item) return <Loader />;
   return <Renderer params={params} navigate={navigate} Item={item} />;
@@ -177,8 +180,7 @@ class Renderer extends React.Component<RendereProps> {
       console.log("Item changed", this.props.Item);
     }
   }
-  download() {
-    console.log(this.state, "download");
+  download(torrent_id : number) {
     const base64_backdrop = this.state.item.BACKDROP;
     const id = this.state.item.ID.split("@")[1];
     const provider = this.state.item.ID.split("@")[0];
@@ -191,7 +193,7 @@ class Renderer extends React.Component<RendereProps> {
       );
     } else {
       PlatformManager.DispatchDownload(
-        this.state.item.DOWNLOAD_URL,
+        this.state.item.DOWNLOAD_URL + "&torrent_id=" + torrent_id,
         this.state.item,
         -1
       );
@@ -203,7 +205,7 @@ class Renderer extends React.Component<RendereProps> {
     this.currentFile = this.state.item.FILES[parseInt(e.target.value)];
   }
 
-  stream() {
+  stream(torrent_id : number) {
     if (!!this.currentFile) {
       var encoded = encodeURIComponent(
         this.currentFile.TRANSCODE_URL + "&file=" + this.currentFile.ID
@@ -212,7 +214,7 @@ class Renderer extends React.Component<RendereProps> {
     } else {
       var item = this.state.item as MovieItem;
       this.props.navigate(
-        "/player?transcode=" + encodeURIComponent(item.TRANSCODE_URL)
+        "/player?transcode=" + encodeURIComponent(item.TRANSCODE_URL + "&torrent_id=" + torrent_id)
       );
     }
   }
@@ -463,6 +465,9 @@ class Renderer extends React.Component<RendereProps> {
                         <AvailableTorrrent
                           currentSeason={this.state.season}
                           item={this.state.item}
+                          download={this.download.bind(this)}
+                          stream={this.stream.bind(this)}
+                      
                         />
                         <div
                           className="cursor-pointer"
@@ -515,7 +520,7 @@ class Renderer extends React.Component<RendereProps> {
                         <div className="mt-4 gap-4">
                           <div className="flex gap-10">
                             <div
-                              onClick={this.stream.bind(this)}
+                              onClick={() => this.stream(-1)}
                               className="w-44 cursor-pointer flex justify-center items-center gap-2 text-[#181818] bg-white font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
                             >
                               <FaPlay />
@@ -526,7 +531,7 @@ class Renderer extends React.Component<RendereProps> {
                               </div>
                             </div>
                             <div
-                              onClick={this.download.bind(this)}
+                              onClick={() => this.download(-1)}
                               className="w-44 cursor-pointer flex justify-center items-center gap-2 bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
                             >
                               <FaPlay />
@@ -661,7 +666,7 @@ class Renderer extends React.Component<RendereProps> {
                 </>
               ))}
             </div>
-            <div className="flex justify-center opacity-35 gap-1">
+            <div className="flex justify-center gap-1">
               {this.state.item.RUNTIME > 0 ? (
                 <div>{FormatRuntime(this.state.item.RUNTIME)}</div>
               ) : (
@@ -693,6 +698,8 @@ class Renderer extends React.Component<RendereProps> {
                 Manualy add torrent
               </div>
               <AvailableTorrrent
+              download={this.download.bind(this)}
+              stream={this.stream.bind(this)}
                 currentSeason={this.state.season}
                 item={this.state.item}
               />
@@ -756,7 +763,7 @@ class Renderer extends React.Component<RendereProps> {
 
                   <div className="mt-4">
                     <div
-                      onClick={this.stream.bind(this)}
+                      onClick={() => this.stream(-1)}
                       className="cursor-pointer flex justify-center w-[90%] ml-[5%] items-center gap-2 bg-white text-[#181818] font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
                     >
                       <FaPlay />
@@ -767,7 +774,7 @@ class Renderer extends React.Component<RendereProps> {
                       </div>
                     </div>
                     <div
-                      onClick={this.download.bind(this)}
+                      onClick={() => this.download(-1)}
                       className="cursor-pointer flex mt-4 w-[90%] ml-[5%] justify-center items-center gap-2  bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
                     >
                       <FaPlay />

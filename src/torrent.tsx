@@ -671,7 +671,7 @@ function MoveTargetStorage(props: { item: TorrentItem; show: boolean; oncancel: 
 }
 export interface SearchResults {
   provider_name: string;
-  id: string;
+  id: number;
   name: string;
   link: string;
   seed: number;

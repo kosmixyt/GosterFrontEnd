@@ -28,7 +28,7 @@ export class PlatformManager {
   static DispatchDownload(
     url: string,
     fileInfo: MovieItem | EPISODE,
-    fileId: number
+    fileId: number,
   ) {
     switch (PlatformManager.GetPlatform()) {
       case "web":
