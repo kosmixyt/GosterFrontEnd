@@ -159,7 +159,7 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide style={{ width: "fit-content" }} key={e}>
               {item.ID.startsWith("tmdb@") ? (
-                <PosterRenderer {...item} key={e} />
+                <PosterRenderer {...item} />
               ) : (
                 <BackDrop className={`${e === 0 ? "ml-0" : ""}`} watchingLine={watchingLine} key={e} nav={nav} {...item} />
               )}
