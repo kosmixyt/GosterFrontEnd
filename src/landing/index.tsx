@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { SKINNY_RENDER } from "../component/poster";
+import { PosterRenderer, SKINNY_RENDER } from "../component/poster";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -10,11 +10,7 @@ import { app_url } from "..";
 import { BackDrop } from "../component/backdrop/backdrop";
 import { Full } from "../component/full/full";
 import { Provider } from "../component/contentprovider/contentprov";
-import {
-  ScrollRestoration,
-  useLoaderData,
-  useNavigate,
-} from "react-router-dom";
+import { ScrollRestoration, useLoaderData, useNavigate } from "react-router-dom";
 import _, { min } from "lodash";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "../cordova/platform";
@@ -82,9 +78,7 @@ export function landing_loader(request: any) {
 
 export const Landing = () => {
   const loader_data = useLoaderData() as Api_Home;
-  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(
-    loader_data.Lines.slice(0, 6)
-  );
+  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(loader_data.Lines.slice(0, 6));
   const [hasMore, setHasMore] = React.useState<boolean>(true);
   useEffect(() => {
     const onresize = () => {
@@ -98,17 +92,8 @@ export const Landing = () => {
   return (
     <div>
       {!isMobile ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          animate={{ opacity: 1 }}
-        >
-          <Swiper
-            navigation={true}
-            modules={[Autoplay]}
-            slidesPerGroup={1}
-            slidesPerView={1}
-          >
+        <motion.div initial={{ opacity: 0 }} transition={{ duration: 0.5 }} animate={{ opacity: 1 }}>
+          <Swiper navigation={true} modules={[Autoplay]} slidesPerGroup={1} slidesPerView={1}>
             {loader_data.Recents.Data.map((e, i) => (
               <SwiperSlide key={i}>
                 <Full i={i} data={e} />
@@ -119,19 +104,12 @@ export const Landing = () => {
       ) : (
         <></>
       )}
-      <div
-        className="relative z-40"
-        style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}
-      >
+      <div className="relative z-40" style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}>
         <InfiniteScroll
           dataLength={DisplayedData.length}
           next={() => {
-            var next = [
-              ...DisplayedData,
-              loader_data.Lines[DisplayedData.length],
-            ];
-            if (next.length > loader_data.Lines.length)
-              return setHasMore(false);
+            var next = [...DisplayedData, loader_data.Lines[DisplayedData.length]];
+            if (next.length > loader_data.Lines.length) return setHasMore(false);
             else setDisplayedData(next);
           }}
           hasMore={hasMore}
@@ -147,25 +125,16 @@ export const Landing = () => {
   );
 };
 
-export const LineRender = (
-  props: { line: Line_Render; disable_observer: boolean },
-  k: number
-) => {
+export const LineRender = (props: { line: Line_Render; disable_observer: boolean }, k: number) => {
   const nav = useNavigate();
   var watchingLine = props.line.Title === "Continue Watching";
   const [swiper, setSwiper] = React.useState<any>(null);
-  const [PreviousHiddenIndex, setPreviousHiddenIndex] =
-    React.useState<boolean>(true);
+  const [PreviousHiddenIndex, setPreviousHiddenIndex] = React.useState<boolean>(true);
   if (props.line.Data.length === 0) return <></>;
 
   return (
     <div className={`${!isMobile ? "ml-2 mr-2 mt-6" : ""}`}>
-      <LineName
-        className="ml-14"
-        key={k}
-        more="/"
-        lineName={props.line.Title}
-      />
+      <LineName className="ml-14" key={k} more="/" lineName={props.line.Title} />
       <motion.div
         variants={{
           hidden: { opacity: 0 },
@@ -189,13 +158,11 @@ export const LineRender = (
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
             <SwiperSlide style={{ width: "fit-content" }} key={e}>
-              <BackDrop
-                className={`${e === 0 ? "ml-0" : ""}`}
-                watchingLine={watchingLine}
-                key={e}
-                nav={nav}
-                {...item}
-              />
+              {item.ID.startsWith("tmdb@") ? (
+                <PosterRenderer {...item} key={e} />
+              ) : (
+                <BackDrop className={`${e === 0 ? "ml-0" : ""}`} watchingLine={watchingLine} key={e} nav={nav} {...item} />
+              )}
             </SwiperSlide>
           ))}
         </Swiper>
