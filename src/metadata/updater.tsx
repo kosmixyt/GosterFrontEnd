@@ -333,16 +333,21 @@ function LineDragTv(props: {
   );
 }
 function RenderTv(props: { tv: TvMetadata; movelocal: moveLocalToEpisode }) {
+  const [autoHide, setAutoHide] = useState<boolean>(false);
   return (
     <div className="bg-slate-700 m-2 rounded-md p-2 text-black">
       <div className="text-white">
-        {props.tv.name} - ({props.tv.seasons.length})
+        {props.tv.name} - ({props.tv.seasons.length}){" "}
+        <button onClick={() => setAutoHide(!autoHide)}>
+          {autoHide ? "Expand" : "Hide All"}
+        </button>
       </div>
       <div className="pl-2 mt-2">
         {props.tv.seasons.length > 0 ? (
           props.tv.seasons.map((season) => {
             return (
               <RenderSeason
+                autoHide={autoHide}
                 tv_id={props.tv.id}
                 season={season}
                 key={season.id}
@@ -361,14 +366,20 @@ function RenderSeason(props: {
   season: SeasonMetadata;
   moveLocal: moveLocalToEpisode;
   tv_id: number;
+  autoHide: boolean;
 }) {
+  const [hide, setHide] = useState<boolean>(props.autoHide);
+  useEffect(() => {
+    setHide(props.autoHide);
+  }, [props.autoHide]);
   return (
     <div className="bg-slate-500 m-2 rounded-md p-2">
-      <div className="text-red-600">
-        {props.season.name} - ({props.season.episodes.length})
+      <div className="text-white">
+        {props.season.name} - ({props.season.episodes.length}){" "}
+        <button onClick={() => setHide(!hide)}>{hide ? "Show" : "hide"}</button>
       </div>
       <div className="pl-2 mt-2">
-        {props.season.episodes.length > 0 ? (
+        {props.season.episodes.length > 0 && !hide ? (
           props.season.episodes.map((episode) => {
             return (
               <RenderEpisode
@@ -380,8 +391,10 @@ function RenderSeason(props: {
               />
             );
           })
-        ) : (
+        ) : props.season.episodes.length === 0 ? (
           <div className="text-red-500 p-2">No episodes</div>
+        ) : (
+          <></>
         )}
       </div>
     </div>

@@ -6,7 +6,7 @@ import checked from "./checked-svgrepo-com.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { SKINNY_RENDER } from "../component/poster";
 import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import {
   FaArrowAltCircleRight,
@@ -17,6 +17,7 @@ import {
 import { isMobile } from "react-device-detect";
 import { AdminCleanMovie } from "../metadata/dragger";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import { IoMdArrowDropleftCircle } from "react-icons/io";
 const get_me = async () => {
   const res = await fetch(`${app_url}/me`, { credentials: "include" });
   return await res.json();
@@ -443,6 +444,7 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
   const nav = useNavigate();
   const [pause, setPause] = useState(props.torrent.paused);
   const overlayPanel = useRef(null);
+  const [onleft, setOnleft] = useState(false);
   return (
     <div>
       <div
@@ -467,84 +469,172 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
         <div
           className={`absolute h-full  w-full rounded-lg hover:opacity-100 ${
             isMobile ? "opacity-100" : "opacity-0"
-          }   hover:backdrop-blur-md transition-all `}
+          }   hover:backdrop-blur-md  transition-all`}
         >
-          <div className="p-2 gap-1  w-full h-full">
-            <div className="flex justify-between">
-              <div className="flex justify-center items-center gap-2">
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(
-                      `${app_url}/torrents/zip?id=${props.torrent.id}`
-                    );
-                  }}
-                  className="p-4 h-[40px] flex justify-center items-center bg-gray-900 text-white font-bold rounded-md  text-lg font-roboto"
-                >
-                  Zip
-                </div>
-                <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">
-                  {bytesToSize(props.torrent.size)}
-                </div>
-              </div>
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  ActionTorrent(
-                    props.torrent.id,
-                    pause ? "resume" : "pause"
-                  ).then((e) => {
-                    if (e) setPause(!pause);
-                  });
-                }}
-                className="flex gap-2"
+          <AnimatePresence>
+            {!onleft && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ right: "-100%" }}
               >
-                <>
-                  <div className="p-2 flex h-auto items-center ml-1 justify-center bg-gray-900 text-white font-bold rounded-lg ">
-                    {Math.round(props.torrent.progress * 100)}%
-                  </div>
-                  {!isMobile && pause === false && (
-                    <div className="p-2 hidden md:flex items-center justify-center text-sm bg-gray-900 text-white font-bold rounded-lg ">
-                      <div className="flex justify-between gap-2  items-center">
-                        <FaCloudDownloadAlt className="hidden lg:block" />
-                        {bytesToSize(props.torrent.totalDownloaded)}
-                        &nbsp;/&nbsp;
+                <div className="p-2 gap-1  w-full h-full">
+                  <div className="flex justify-between">
+                    <div className="flex justify-center items-center gap-2">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOnleft(true);
+                        }}
+                      >
+                        <IoMdArrowDropleftCircle size={35} />
                       </div>
-                      <div className="flex justify-center gap-2 items-center">
-                        <FaCloudUploadAlt className="hidden lg:block" />
-                        {bytesToSize(props.torrent.totalUploaded)}
+                      <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">
+                        {bytesToSize(props.torrent.size)}
                       </div>
                     </div>
-                  )}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        ActionTorrent(
+                          props.torrent.id,
+                          pause ? "resume" : "pause"
+                        ).then((e) => {
+                          if (e) setPause(!pause);
+                        });
+                      }}
+                      className="flex gap-2"
+                    >
+                      <>
+                        <div className="p-2 flex h-auto items-center ml-1 justify-center bg-gray-900 text-white font-bold rounded-lg ">
+                          {Math.round(props.torrent.progress * 100)}%
+                        </div>
+                        {!isMobile && pause === false && (
+                          <div className="p-2 hidden md:flex items-center justify-center text-sm bg-gray-900 text-white font-bold rounded-lg ">
+                            <div className="flex justify-between gap-2  items-center">
+                              <FaCloudDownloadAlt className="hidden lg:block" />
+                              {bytesToSize(props.torrent.totalDownloaded)}
+                              &nbsp;/&nbsp;
+                            </div>
+                            <div className="flex justify-center gap-2 items-center">
+                              <FaCloudUploadAlt className="hidden lg:block" />
+                              {bytesToSize(props.torrent.totalUploaded)}
+                            </div>
+                          </div>
+                        )}
 
-                  {pause && (
-                    <div className="p-2 flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">
-                      Paused
+                        {pause && (
+                          <div className="p-2 flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">
+                            Paused
+                          </div>
+                        )}
+                      </>
                     </div>
-                  )}
-                </>
-              </div>
-            </div>
-            <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1  no-scrollbar">
-              {props.torrent.files.map((file, i) => (
+                  </div>
+                  <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1  no-scrollbar">
+                    {props.torrent.files.map((file, i) => (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(
+                            `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`
+                          );
+                        }}
+                        className="w-full mt-1 rounded-lg bg-gray-900 text-white font-semibold text-sm 3xl:text-lg   overflow-hidden"
+                      >
+                        <div>
+                          <div className="text-center overflow-auto border-2 border-white p-1 lg:border-0 relative">
+                            {Math.round(file.progress * 100)}% {file.name}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {onleft && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(
-                      `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`
-                    );
+                    setOnleft(false);
                   }}
-                  className="w-full mt-1 rounded-lg bg-gray-900 text-white font-semibold text-sm 3xl:text-lg   overflow-hidden"
+                  className="absolute top-1 right-1 z-40"
                 >
-                  <div>
-                    <div className="text-center overflow-auto border-2 border-white p-1 lg:border-0 relative">
-                      {Math.round(file.progress * 100)}% {file.name}
-                    </div>
+                  <IoCloseCircleSharp size={25} />
+                </div>
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full flex justify-center flex-wrap"
+                >
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.location.href = `${app_url}/torrents/zip?id=${props.torrent.id}`;
+                    }}
+                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
+                  >
+                    Download As Zip
+                  </div>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.location.href = `${app_url}/torrents/.torrent?id=${props.torrent.id}`;
+                    }}
+                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
+                  >
+                    Download .torrent
+                  </div>
+                  <div
+                    onClick={() => {
+                      const withFiles = confirm("Delete with files?");
+                      fetch(
+                        `${app_url}/torrents/action?id=${props.torrent.id}&action=delete&deleteFiles=${withFiles}`,
+                        {
+                          credentials: "include",
+                        }
+                      ).then((e) => {
+                        if (e.ok) {
+                          toast.success("Torrent deleted");
+                        } else {
+                          toast.error("Torrent not deleted");
+                        }
+                      });
+                    }}
+                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
+                  >
+                    Delete
+                  </div>
+                  <div
+                    onClick={() => {
+                      fetch(
+                        `${app_url}/torrents/action?id=${props.torrent.id}&action=recheck`,
+                        {
+                          credentials: "include",
+                        }
+                      ).then((e) => {
+                        if (e.ok) {
+                          toast.success("Torrent Rechek Started");
+                        } else {
+                          toast.error("Torrent not Recheck");
+                        }
+                      });
+                    }}
+                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
+                  >
+                    Rechek Torrent
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <div
           onClick={() => {

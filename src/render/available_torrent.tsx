@@ -33,16 +33,16 @@ export function AvailableTorrrent(props: {
     if (props.item.TYPE === "tv") {
       url += `&season=${props.item.SEASONS[props.currentSeason].ID}`;
     }
-    fetch(url, { credentials: "include" }).then((res) => {
-      res.json().then((data) => {
-        setFetched(true);
-        if (data.error) {
-          setError(data.error);
-          return;
-        }
-        setTorrents(data.torrents);
-      });
-    });
+    async function fetchTorrents() {
+      const res = await fetch(url, { credentials: "include" });
+      const data = await res.json();
+      setFetched(true);
+      if (data.error) {
+        return setError(data.error);
+      }
+      setTorrents(data.torrents);
+    }
+    fetchTorrents();
   }, [props.item]);
   if (props.item.TYPE === "movie") {
     if (props.item.FILES.length > 0) {
@@ -72,8 +72,8 @@ export function AvailableTorrrent(props: {
     >
       ({torrents.length}) torrents Available
       {hover && (
-        <div className="absolute z-50 text-white bg-slate-900 bg-opacity-100">
-          <table>
+        <div className="absolute z-50 text-white bg-slate-900 bg-opacity-100 p-4 rounded-lg">
+          <table className="gap-y-3">
             <thead>
               <tr>
                 <th>Name</th>
@@ -87,14 +87,23 @@ export function AvailableTorrrent(props: {
               {torrents.map((torrent, i) => (
                 <tr className="mt-2" key={i}>
                   <td
-                  onClick={() => window.open(torrent.link)}
-                  >{torrent.name}</td>
+                    className="pb-2"
+                    onClick={() => window.open(torrent.link)}
+                  >
+                    {torrent.name}
+                  </td>
                   <td>{bytesToSize(torrent.size)}</td>
                   <td>{torrent.seed}</td>
                   <td>{torrent.provider_name}</td>
                   <td>
-                    <button onClick={() => props.download(torrent.id)}>Download</button>
-                    <button onClick={() => props.stream(torrent.id)}>Stream</button>  
+                    <div className="flex justify-between gap-4">
+                      <button onClick={() => props.download(torrent.id)}>
+                        Download
+                      </button>
+                      <button onClick={() => props.stream(torrent.id)}>
+                        Stream
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
