@@ -1,6 +1,6 @@
 import { GENRE, SKINNY_RENDER } from "../component/poster";
 import { Provider } from "../component/contentprovider/contentprov";
-import { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import { app_url } from "..";
 import { createPortal } from "react-dom";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -9,277 +9,529 @@ import { MovieItem, TVItem } from "../render/render";
 import { PlatformManager } from "../cordova/platform";
 import { move } from "./dragger";
 import { SearchRender } from "../search/search";
+import { bytesToSize } from "../torrent";
+import { toast } from "react-toastify";
 
-export interface FileMetadata {
+type File = {
   id: number;
-  filename: string;
-  path: string;
-  is_movie: boolean;
   name: string;
-  episode_id: number;
-  season_id: number;
-  year: number;
-  itemid: number;
+  path: string;
+  size: number;
+};
+
+type MovieMetadata = {
+  id: number;
+  name: string;
+  tmdb_id: number;
+  files: File[];
+};
+
+type EpisodeMetadata = {
+  id: number;
+  name: string;
+  number: number;
+  files: File[];
+};
+
+type SeasonMetadata = {
+  id: number;
+  name: string;
+  number: number;
+  episodes: EpisodeMetadata[];
+};
+
+type TvMetadata = {
+  id: number;
+  name: string;
+  tmdb_id: number;
+  seasons: SeasonMetadata[];
+};
+interface MetadataRes {
+  movies: MovieMetadata[];
+  tvs: TvMetadata[];
+  orphans: File[];
+}
+
+type moveLocalToMovie = (
+  sourceFile: number,
+  sourceType: "movie" | "tv",
+  outputMovieId: number
+) => void;
+type moveLocalToEpisode = (
+  sourceFile: number,
+  sourceType: "movie" | "tv",
+  outputSeasonId: number,
+  outputEpisodeId: number
+) => void;
+interface dispositionItem {
+  value: "movie" | "tv";
+  width: CSSProperties;
 }
 export default function () {
-  const [files, setFiles] = useState<FileMetadata[]>([]);
-  const [selected, set_selected] = useState<FileMetadata[]>([]);
-  const [showSearch, set_showSearch] = useState(false);
-  const [itemForSelected, set_itemForSelected] = useState<MovieItem | TVItem>();
+  const [movies, setmovies] = useState<MovieMetadata[]>([]);
+  const [tvs, settvs] = useState<TvMetadata[]>([]);
+  const [orphans, setOrphans] = useState<File[]>([]);
+  const [disposition, setDisposition] = useState<dispositionItem[]>([
+    {
+      value: "movie",
+      width: { width: "50%" },
+    },
+    {
+      value: "tv",
+      width: { width: "50%" },
+    },
+  ]);
+
+  const navigate = useNavigate();
   useEffect(() => {
-    fetch(`${app_url}/metadata/items`, { credentials: "include" })
-      .then((res) => res.json())
-      .then(setFiles);
+    (async () => {
+      const res = await fetch(`${app_url}/metadata/items`, {
+        credentials: "include",
+      });
+      const data: MetadataRes = await res.json();
+      setmovies(data.movies);
+      settvs(data.tvs);
+      setOrphans(data.orphans);
+    })();
   }, []);
-  var found = false;
+  const moveLocalToMovie = (
+    sourceFile: number,
+    sourceType: string,
+    outputMovieId: number
+  ) => {
+    console.log("from", sourceType, "to movie");
+    if (sourceType == "movie") {
+      const movie = movies.find((movie) =>
+        movie.files.find((file) => file.id === sourceFile)
+      );
+      if (movie) {
+        const file = movie.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        const outputMovie = movies.find((movie) => movie.id === outputMovieId);
+        if (!outputMovie) throw new Error("Output movie not found");
+        if (outputMovie.id === movie.id) {
+          return toast.error("Cannot move to same movie");
+        }
+        if (outputMovie) {
+          outputMovie.files.push(file);
+          movie.files = movie.files.filter((file) => file.id !== sourceFile);
+        }
+        setmovies([...movies]);
+      }
+    }
+    if (sourceType == "tv") {
+      const sourceTv = tvs.find((tv) =>
+        tv.seasons.some((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        )
+      );
+      if (sourceTv) {
+        const sourceSeason = sourceTv.seasons.find((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        );
+        if (!sourceSeason) throw new Error("Source season not found");
+        const sourceEpisode = sourceSeason.episodes.find((episode) =>
+          episode.files.some((file) => file.id === sourceFile)
+        );
+        if (!sourceEpisode) throw new Error("Source episode not found");
+        const file = sourceEpisode.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        const outputMovie = movies.find((movie) => movie.id === outputMovieId);
+        if (!outputMovie) throw new Error("Output movie not found");
+        if (outputMovie) {
+          outputMovie.files.push(file);
+          sourceEpisode.files = sourceEpisode.files.filter(
+            (file) => file.id !== sourceFile
+          );
+        }
+        settvs([...tvs]);
+        setmovies([...movies]);
+      } else {
+        toast.error("Source tv not found");
+      }
+    }
+  };
+  const moveLocalToEpisode = (
+    sourceFile: number,
+    sourceType: string,
+    outputSeasonId: number,
+    outputEpisodeId: number
+  ) => {
+    console.log("from", sourceType, "to episode");
+    if (sourceType == "movie") {
+      const movie = movies.find((movie) =>
+        movie.files.find((file) => file.id === sourceFile)
+      );
+      if (movie) {
+        const file = movie.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        const outputTv = tvs.find((tv) =>
+          tv.seasons.find((season) => season.id === outputSeasonId)
+        );
+        if (!outputTv) throw new Error("Output tv not found");
+        const outputSeason = outputTv.seasons.find(
+          (season) => season.id === outputSeasonId
+        );
+        if (!outputSeason) throw new Error("Output season not found");
+        outputSeason.episodes
+          .find((episode) => episode.id === outputEpisodeId)!
+          .files.push(file);
+        movie.files = movie.files.filter((file) => file.id !== sourceFile);
+        setmovies([...movies]);
+      }
+    }
+    if (sourceType == "tv") {
+      const sourceTv = tvs.find((tv) =>
+        tv.seasons.some((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        )
+      );
+      if (sourceTv) {
+        const sourceSeason = sourceTv.seasons.find((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        );
+        if (!sourceSeason) throw new Error("Source season not found");
+        const sourceEpisode = sourceSeason.episodes.find((episode) =>
+          episode.files.some((file) => file.id === sourceFile)
+        );
+        if (!sourceEpisode) throw new Error("Source episode not found");
+        const file = sourceEpisode.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        const outputTv = tvs.find((tv) =>
+          tv.seasons.find((season) => season.id === outputSeasonId)
+        );
+        if (!outputTv) throw new Error("Output tv not found");
+        const outputSeason = outputTv.seasons.find(
+          (season) => season.id === outputSeasonId
+        );
+        if (!outputSeason) throw new Error("Output season not found");
+        outputSeason.episodes
+          .find((episode) => episode.id === outputEpisodeId)!
+          .files.push(file);
+        sourceEpisode.files = sourceEpisode.files.filter(
+          (file) => file.id !== sourceFile
+        );
+        settvs([...tvs]);
+      } else {
+        toast.error("Source tv not found");
+      }
+    }
+  };
+  console.log(disposition.length);
   return (
     <div>
-      <button
-        onClick={() => {
-          setFiles(files.filter((e) => e.itemid === 0));
-        }}
-      >
-        Filter Unnassigned
-      </button>
-      <button
-        onClick={() => {
-          set_showSearch(!showSearch);
-        }}
-      >
-        Assign Selected to search item
-      </button>
-      {showSearch && (
-        <SearchRender
-          close={() => {
-            if (!found) set_showSearch(false);
+      <div className="flex justify-center gap-10">
+        <button
+          onClick={() => {
+            const a = JSON.parse(JSON.stringify(disposition));
+            a.unshift({ value: "movie", width: "w-1/2" });
+            setDisposition(a);
           }}
-          headTitle="Assign to"
-          title="Assign to"
-          onselect={(e, data) => {
-            // set_itemForSelected();
-            PlatformManager.DispatchCache(data.ID, data.TYPE).then((item) => {
-              set_itemForSelected(item);
-              set_showSearch(false);
-            });
-            found = true;
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Add Movie Panel at Left
+        </button>
+        <button
+          onClick={() => {
+            const a = JSON.parse(JSON.stringify(disposition));
+            a.push({ value: "movie", width: "w-1/2" });
+            setDisposition(a);
           }}
-        />
-      )}
-      {files.map((e) => (
-        <div key={e.id} className="flex items-center mt-2">
-          <input
-            className="h-10 w-10"
-            type="checkbox"
-            onChange={(event) => {
-              if (event.target.checked) {
-                set_selected([...selected, e]);
-              } else {
-                set_selected(selected.filter((f) => f.id !== e.id));
-              }
-            }}
-          />
-          <RenderFile
-            file={e}
-            predefinedItem={
-              selected.find((f) => f.id === e.id) ? itemForSelected : undefined
-            }
-          />
-        </div>
-      ))}
+          className="bg-red-500 p-2 rounded-md text-white"
+        >
+          Add Movie Panel at Right
+        </button>
+        <button
+          onClick={() => {
+            const a = JSON.parse(JSON.stringify(disposition));
+            a.unshift({ value: "tv", width: "w-1/2" });
+            setDisposition(a);
+          }}
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Add TV Panel at Left
+        </button>
+        <button
+          onClick={() => {
+            const a = JSON.parse(JSON.stringify(disposition));
+            a.push({ value: "tv", width: "w-1/2" });
+            setDisposition(a);
+          }}
+          className="bg-red-500 p-2 rounded-md text-white"
+        >
+          Add TV Panel at Right
+        </button>
+      </div>
+      <div className="flex max-w-full">
+        {disposition.map((dis: dispositionItem, i) => {
+          dis.width = { width: `${100 / disposition.length}%` };
+          console.log(dis.width.width);
+          return (
+            <>
+              {dis.value === "movie" ? (
+                <LineDragMovie
+                  disposition={dis}
+                  movies={movies}
+                  movelocal={moveLocalToMovie}
+                />
+              ) : (
+                <LineDragTv
+                  tvs={tvs}
+                  movelocal={moveLocalToEpisode}
+                  disposition={dis}
+                />
+              )}
+            </>
+          );
+        })}
+      </div>
     </div>
   );
 }
-function RenderFile(props: {
-  file: FileMetadata;
-  predefinedItem?: MovieItem | TVItem;
+function LineDragTv(props: {
+  tvs: TvMetadata[];
+  movelocal: moveLocalToEpisode;
+  disposition: dispositionItem;
 }) {
-  console.log(props.predefinedItem);
-  const [media_type, set_media_type] = useState<"movie" | "tv" | null>(
-    props.file.itemid === 0 ? null : props.file.is_movie ? "movie" : "tv"
-  );
-  const is_not_assigned = props.file.itemid === 0;
-  const [tmdb_search, set_tmdb_search] = useState("");
-  const [focus, set_focus] = useState(false);
-  const [tmdb_data, set_tmdb_data] = useState<SKINNY_RENDER[]>([]);
-  const container = useRef<HTMLDivElement>(null);
-  const [item, set_item] = useState<MovieItem | TVItem | null>(
-    props.predefinedItem ?? null
-  );
-  const [season_id, set_season_id] = useState<number>();
-  const [episode_id, set_episode_id] = useState<number | null>(null);
+  const [renderTv, setRenderTv] = useState<TvMetadata[]>(props.tvs);
+  const [search, setSearch] = useState<string>("");
   useEffect(() => {
-    if (props.predefinedItem) {
-      set_item(props.predefinedItem);
-      set_media_type(props.predefinedItem.TYPE);
-      if (props.predefinedItem.TYPE === "tv") {
-        set_season_id(props.predefinedItem.SEASONS[0].ID);
-        set_episode_id(props.predefinedItem.SEASONS[0].EPISODES[0].ID);
-      }
+    if (search === "") {
+      setRenderTv(props.tvs);
+    } else {
+      setRenderTv(
+        props.tvs.filter((tv) =>
+          tv.name.toLowerCase().includes(search.toLowerCase())
+        )
+      );
     }
-  }, [props.predefinedItem]);
+  }, [search, props.tvs]);
+  return (
+    <div style={props.disposition.width} className={`pt-4`}>
+      <div className="text-center">
+        <div className="text-2xl">TV Shows</div>
+        <input
+          onInput={(e) => setSearch(e.currentTarget.value)}
+          value={search}
+          type="text"
+          placeholder="Search"
+          className="w-4/5 p-2 rounded-md border-2 border-white mt-2 mb-2"
+        />
+      </div>
+      {renderTv.map((tv) => {
+        return <RenderTv tv={tv} movelocal={props.movelocal} key={tv.id} />;
+      })}
+    </div>
+  );
+}
+function RenderTv(props: { tv: TvMetadata; movelocal: moveLocalToEpisode }) {
+  return (
+    <div className="bg-slate-700 m-2 rounded-md p-2 text-black">
+      <div className="text-white">
+        {props.tv.name} - ({props.tv.seasons.length})
+      </div>
+      <div className="pl-2 mt-2">
+        {props.tv.seasons.length > 0 ? (
+          props.tv.seasons.map((season) => {
+            return (
+              <RenderSeason
+                tv_id={props.tv.id}
+                season={season}
+                key={season.id}
+                moveLocal={props.movelocal}
+              />
+            );
+          })
+        ) : (
+          <div className="text-red-500 p-2">No seasons</div>
+        )}
+      </div>
+    </div>
+  );
+}
+function RenderSeason(props: {
+  season: SeasonMetadata;
+  moveLocal: moveLocalToEpisode;
+  tv_id: number;
+}) {
+  return (
+    <div className="bg-slate-500 m-2 rounded-md p-2">
+      <div className="text-red-600">
+        {props.season.name} - ({props.season.episodes.length})
+      </div>
+      <div className="pl-2 mt-2">
+        {props.season.episodes.length > 0 ? (
+          props.season.episodes.map((episode) => {
+            return (
+              <RenderEpisode
+                tv_id={props.tv_id}
+                moveLocal={props.moveLocal}
+                season={props.season}
+                episode={episode}
+                key={episode.id}
+              />
+            );
+          })
+        ) : (
+          <div className="text-red-500 p-2">No episodes</div>
+        )}
+      </div>
+    </div>
+  );
+}
+function RenderEpisode(props: {
+  episode: EpisodeMetadata;
+  season: SeasonMetadata;
+  tv_id: number;
+  moveLocal: moveLocalToEpisode;
+}) {
+  return (
+    <div className="bg-slate-300 m-2 rounded-md p-2">
+      <div>
+        {props.episode.name} - ({props.episode.number})
+      </div>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData("id");
+          const sourceType = e.dataTransfer.getData("type");
+          move(
+            id,
+            "db@" + props.tv_id.toString(),
+            "tv",
+            props.season.id,
+            props.episode.id
+          ).then(() => {
+            props.moveLocal(
+              parseInt(id),
+              sourceType as "movie" | "tv",
+              props.season.id,
+              props.episode.id
+            );
+          });
+        }}
+        className="pl-2 mt-2"
+      >
+        {props.episode.files.length > 0 ? (
+          props.episode.files.map((file) => {
+            return <RenderFile type="tv" file={file} key={file.id} />;
+          })
+        ) : (
+          <div className="text-red-500 p-2">No files</div>
+        )}
+      </div>
+    </div>
+  );
+}
+function LineDragMovie(props: {
+  movies: MovieMetadata[];
+  movelocal: moveLocalToMovie;
+  disposition: dispositionItem;
+}) {
+  const [renderMovie, setRenderMovie] = useState<MovieMetadata[]>(props.movies);
+  const [search, setSearch] = useState<string>("");
   useEffect(() => {
-    if (tmdb_search === "") return;
-    fetch(`${app_url}/search?query=${tmdb_search}&type=${media_type}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data: SKINNY_RENDER[]) => set_tmdb_data(data.slice(0, 10)));
-  }, [tmdb_search]);
+    if (search === "") {
+      setRenderMovie(props.movies);
+    } else {
+      setRenderMovie(
+        props.movies.filter((movie) =>
+          movie.name.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
+  }, [search, props.movies]);
 
-  useEffect(() => {
-    if (!focus) return;
-    const handler_focus_out = (event: any) => {
-      if (container.current?.contains(event.target)) {
-        return;
-      }
-      set_focus(false);
-    };
-    document.addEventListener("click", handler_focus_out);
-    return () => {
-      document.removeEventListener("click", handler_focus_out);
-    };
-  }, [focus]);
+  return (
+    <div style={props.disposition.width} className={`pt-4 `}>
+      <div className="text-center">
+        <div className="text-2xl">Movies</div>
+        <input
+          onInput={(e) => setSearch(e.currentTarget.value)}
+          value={search}
+          type="text"
+          placeholder="Search"
+          className="w-4/5 p-2 rounded-md border-2 border-white mt-2 mb-2"
+        />
+      </div>
+      {renderMovie.map((movie) => {
+        return (
+          <RenderMovie
+            movie={movie}
+            movelocal={props.movelocal}
+            key={movie.id}
+          />
+        );
+      })}
+    </div>
+  );
+}
+function RenderMovie(props: {
+  movie: MovieMetadata;
+  movelocal: moveLocalToMovie;
+}) {
+  return (
+    <div className="bg-slate-700 m-2 rounded-md p-2">
+      <div>
+        {props.movie.name} - ({props.movie.files.length})
+      </div>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData("id");
+          const sourceType = e.dataTransfer.getData("type");
+          console.log("id", id);
+          move(id, "db@" + props.movie.id.toString(), "movie", null, null).then(
+            () => {
+              props.movelocal(
+                parseInt(id),
+                sourceType as "movie" | "tv",
+                props.movie.id
+              );
+            }
+          );
+        }}
+        className="pl-2 mt-2"
+      >
+        {props.movie.files.length > 0 ? (
+          props.movie.files.map((file) => {
+            return <RenderFile type="movie" file={file} key={file.id} />;
+          })
+        ) : (
+          <div className="text-red-500 p-2">No files</div>
+        )}
+      </div>
+    </div>
+  );
+}
+function RenderFile(props: { file: File; type: "movie" | "tv" }) {
   return (
     <div
-      ref={container}
-      onFocus={() => set_focus(true)}
-      className="flex items-center"
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.clearData();
+        e.dataTransfer.setData("id", props.file.id.toString());
+        e.dataTransfer.setData("type", props.type);
+
+        console.log("drag");
+      }}
+      className="flex bg-slate-200 mt-2 p-1 rounded-lg text-black"
     >
-      <div className="flex mr-2">
-        <div
-          onClick={() => {
-            set_media_type(media_type === "movie" ? "tv" : "movie");
-          }}
-          className={`bg-blue-600  p-2 cursor-pointer rounded-md ml-2 mr-2`}
-        >
-          {media_type == null ? "Not Assigned" : media_type}
-        </div>
+      <div>
+        {props.file.name} - {bytesToSize(props.file.size)}
       </div>
-      {props.file.filename}
-      {media_type === "movie" && (
-        <div className="ml-3">
-          <input
-            autoFocus={true}
-            value={item ? item.DISPLAY_NAME : tmdb_search}
-            onChange={(e) => set_tmdb_search(e.target.value)}
-            type="text"
-            className="border-2 border-white w-64"
-          />
-          <div hidden={!focus} className="absolute bg-slate-700 w-64">
-            {tmdb_data.map((e, i) => (
-              <div key={i} className="flex items-center p-2">
-                <img src={e.POSTER} className="h-24 rounded-md" />
-                <div className="ml-1">{e.NAME}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {media_type === "tv" && (
-        <div>
-          <div className="ml-3 flex">
-            <div>
-              <input
-                autoFocus={true}
-                value={item ? item.DISPLAY_NAME : tmdb_search}
-                onChange={(e) => set_tmdb_search(e.target.value)}
-                type="text"
-                className="border-2 border-white w-64"
-              />
-              <div
-                hidden={!focus || item != null}
-                className="absolute bg-slate-700 w-64"
-              >
-                {tmdb_data.map((e, i) => (
-                  <div
-                    onClick={() =>
-                      PlatformManager.DispatchCache(e.ID, e.TYPE).then(
-                        (item: TVItem | MovieItem) => {
-                          if (item.TYPE != "tv") {
-                            throw new Error("Not a TV Item");
-                          }
-                          set_item(item);
-                          set_season_id(item.SEASONS[0].ID);
-                          set_episode_id(item.SEASONS[0].EPISODES[0].ID);
-                        }
-                      )
-                    }
-                    key={i}
-                    className="flex items-center p-2"
-                  >
-                    <img src={e.POSTER} className="h-24 rounded-md" />
-                    <div className="ml-1">{e.NAME}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {item && (
-              <div className="flex">
-                <select
-                  value={season_id}
-                  onChange={(e) => {
-                    set_season_id(parseInt(e.target.value));
-                    set_episode_id(
-                      (item as TVItem).SEASONS.find(
-                        (e) => e.ID === parseInt((e as any).target.value)
-                      )?.EPISODES[0].ID as number
-                    );
-                  }}
-                  autoFocus={true}
-                  className="ml-2"
-                >
-                  {(item as TVItem).SEASONS.map((e, i) => (
-                    <option value={e.ID} key={i}>
-                      {e.NAME} - {e.SEASON_NUMBER}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={episode_id ?? ""}
-                  onChange={(e) => set_episode_id(parseInt(e.target.value))}
-                  autoFocus={true}
-                  className="ml-2"
-                >
-                  {(item as TVItem).SEASONS.find(
-                    (e) => e.ID === season_id
-                  )?.EPISODES.map((e, i) => (
-                    <option value={e.ID} key={i}>
-                      {e.NAME} - {e.EPISODE_NUMBER}
-                    </option>
-                  ))}
-                </select>
-                <div
-                  onClick={() => {
-                    move(
-                      props.file.id.toString(),
-                      item.ID,
-                      media_type,
-                      season_id as number,
-                      episode_id
-                    ).then((good) => {
-                      set_item(null);
-                      set_season_id(0);
-                      set_episode_id(null);
-                      set_tmdb_search("");
-                      set_tmdb_data([]);
-                    });
-                  }}
-                >
-                  Valider
-                </div>
-                <IoIosCloseCircle
-                  size={30}
-                  onClick={() => {
-                    set_item(null);
-                    set_season_id(0);
-                    set_episode_id(null);
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

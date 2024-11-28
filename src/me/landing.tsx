@@ -8,9 +8,19 @@ import { SKINNY_RENDER } from "../component/poster";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
-import { FaArrowAltCircleRight, FaArrowCircleDown, FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
+import {
+  FaArrowAltCircleRight,
+  FaArrowCircleDown,
+  FaCloudDownloadAlt,
+  FaCloudUploadAlt,
+} from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { AdminCleanMovie } from "../metadata/dragger";
+import { IoCloseCircleSharp } from "react-icons/io5";
+const get_me = async () => {
+  const res = await fetch(`${app_url}/me`, { credentials: "include" });
+  return await res.json();
+};
 export function UserLanding() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const nav = useNavigate();
@@ -18,9 +28,7 @@ export function UserLanding() {
   const [flexModeRequest, setFlexModeRequest] = useState(true);
   useEffect(() => {
     document.body.style.overflowY = "scroll";
-    fetch(`${app_url}/me`, { credentials: "include" }).then((res) =>
-      res.json().then(setMe)
-    );
+    get_me().then(setMe);
     return () => {
       document.body.style.overflowY = "auto";
     };
@@ -116,7 +124,10 @@ export function UserLanding() {
                     nav(`/render/${req.Media_Type}/${req.Media_ID}`)
                   }
                 >
-                  <RequestItem item={req} />
+                  <RequestItem
+                    refresh={() => get_me().then(setMe)}
+                    item={req}
+                  />
                 </div>
               </SwiperSlide>
             );
@@ -128,7 +139,7 @@ export function UserLanding() {
           {me.requests.map((req, i) => {
             return (
               <div className="m-4">
-                <RequestItem item={req} />
+                <RequestItem item={req} refresh={() => get_me().then(setMe)} />
               </div>
             );
           })}
@@ -187,20 +198,48 @@ export function UserLanding() {
     </motion.div>
   );
 }
-function RequestItem(props: { item: MeRequest }) {
+function RequestItem(props: { item: MeRequest; refresh: () => void }) {
   const ended = props.item.Status == "finished";
   return (
-    <motion.div style={{ scale: 1.01 }} whileHover={{ scale: 1.05 }} className="m-4 cursor-pointer">
+    <motion.div
+      style={{ scale: 1.01 }}
+      whileHover={{ scale: 1.05 }}
+      className="m-4 cursor-pointer"
+    >
       <div
-        style={{ background: "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" + props.item.Render.BACKDROP + ")" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          DeleteRequest(props.item.ID.toString()).then(() => {
+            props.refresh();
+          });
+        }}
+        className="absolute top-1 left-1 z-40"
+      >
+        <IoCloseCircleSharp size={25} />
+      </div>
+      <div
+        style={{
+          background:
+            "linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url(" +
+            props.item.Render.BACKDROP +
+            ")",
+        }}
         className="xl:w-[400px] xl:h-[225px] w-[180px] h-[150px] flex justify-center items-center  transition-transform rounded-lg p-4 bg-cover bg-center"
       >
         <div className="w-full hidden lg:flex justify-center">
-          <img src={props.item.Render.POSTER} alt="" className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg" />
+          <img
+            src={props.item.Render.POSTER}
+            alt=""
+            className="h-auto w-24 transition-transform hover:scale-105   mt-1 mb-1 rounded-lg"
+          />
         </div>
         <div className={`ml-1 xl:ml-0 ${ended ? "hidden" : ""}`}>
-          <div className="text-md xl:text-xl ml-1  font-semibold">{props.item.Render.NAME}</div>
-          <div className="opacity-35 hidden xl:block">Checked {props.item.Last_Update} sec ago</div>
+          <div className="text-md xl:text-xl ml-1  font-semibold">
+            {props.item.Render.NAME}
+          </div>
+          <div className="opacity-35 hidden xl:block">
+            Checked {props.item.Last_Update} sec ago
+          </div>
         </div>
         <div
           className={`w-full ${
@@ -268,7 +307,9 @@ type Me_Share = {
 };
 
 async function DeleteRequest(id: string) {
-  const bd = await fetch(`${app_url}/request/remove?id=${id}`, { credentials: "include" });
+  const bd = await fetch(`${app_url}/request/remove?id=${id}`, {
+    credentials: "include",
+  });
   if (bd.ok) {
     toast.success("Request deleted");
   } else {
@@ -276,15 +317,21 @@ async function DeleteRequest(id: string) {
   }
 }
 async function DeleteShare(id: string) {
-  const bd = await fetch(`${app_url}/share/remove?id=${id}`, { credentials: "include" });
+  const bd = await fetch(`${app_url}/share/remove?id=${id}`, {
+    credentials: "include",
+  });
   if (bd.ok) {
     toast.success("Share deleted");
   } else {
     toast.error("Share not deleted");
   }
 }
-async function CreateShare(fileId: string): Promise<{ id: number; expire: Date }> {
-  const bd = await fetch(`${app_url}/share/add?id=${fileId}`, { credentials: "include" });
+async function CreateShare(
+  fileId: string
+): Promise<{ id: number; expire: Date }> {
+  const bd = await fetch(`${app_url}/share/add?id=${fileId}`, {
+    credentials: "include",
+  });
   if (bd.ok) {
     toast.success("Share created");
   } else {
@@ -318,9 +365,14 @@ export function ShareModal(props: { file_item: FileItem; close: () => void }) {
       <div className="fixed inset-0 bg-black opacity-50"></div>
       <div className="fixed z-10  rounded-lg p-4 bg-[#181818] flex flex-col w-1/4 justify-center">
         <div className="text-2xl font-semibold">Nouveau partage</div>
-        <div className="text-xs opacity-50">Lorsque le fichier sera partagé il sera disponible pour une durée de 24h</div>
+        <div className="text-xs opacity-50">
+          Lorsque le fichier sera partagé il sera disponible pour une durée de
+          24h
+        </div>
         <input type="text" value={`${app_url}/share/get?id=${id}`} readOnly />
-        <div className="text-xs text-center opacity-50">Expire: {expire.toLocaleString()}</div>
+        <div className="text-xs text-center opacity-50">
+          Expire: {expire.toLocaleString()}
+        </div>
         <div
           onClick={() => {
             props.close();
@@ -335,7 +387,10 @@ export function ShareModal(props: { file_item: FileItem; close: () => void }) {
   );
 }
 async function ActionTorrent(id: number, action: string) {
-  const data = await fetch(`${app_url}/torrents/action?id=${id}&action=${action}`, { credentials: "include" });
+  const data = await fetch(
+    `${app_url}/torrents/action?id=${id}&action=${action}`,
+    { credentials: "include" }
+  );
   if (data.ok) {
     toast.success(`Torrent ${action}d`);
   } else {
@@ -343,7 +398,12 @@ async function ActionTorrent(id: number, action: string) {
   }
   return data.ok;
 }
-export type TaskStatus = "ERROR" | "PENDING" | "RUNNING" | "FINISHED" | "CANCELLED";
+export type TaskStatus =
+  | "ERROR"
+  | "PENDING"
+  | "RUNNING"
+  | "FINISHED"
+  | "CANCELLED";
 interface ConvertProgress {
   SOURCE_FILE_ID: number;
   SOURCE_FILE_NAME: string;
