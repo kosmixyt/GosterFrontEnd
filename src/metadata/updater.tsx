@@ -228,7 +228,7 @@ export default function () {
   console.log(disposition.length);
   return (
     <div>
-      <div className="flex justify-center gap-10">
+      <div className="flex justify-center gap-10 m-4">
         <button
           onClick={() => {
             const a = JSON.parse(JSON.stringify(disposition));
@@ -270,7 +270,7 @@ export default function () {
           Add TV Panel at Right
         </button>
       </div>
-      <div className="flex max-w-full">
+      <div className="flex max-w-full h-[calc(100vh-32px-40px-35px-2*8px)]">
         {disposition.map((dis: dispositionItem, i) => {
           dis.width = { width: `${100 / disposition.length}%` };
           console.log(dis.width.width);
@@ -315,7 +315,7 @@ function LineDragTv(props: {
     }
   }, [search, props.tvs]);
   return (
-    <div style={props.disposition.width} className={`pt-4`}>
+    <div style={props.disposition.width} className={`pt-4 overflow-auto`}>
       <div className="text-center">
         <div className="text-2xl">TV Shows</div>
         <input
@@ -453,7 +453,7 @@ function LineDragMovie(props: {
   }, [search, props.movies]);
 
   return (
-    <div style={props.disposition.width} className={`pt-4 `}>
+    <div style={props.disposition.width} className={`pt-4 overflow-auto`}>
       <div className="text-center">
         <div className="text-2xl">Movies</div>
         <input
