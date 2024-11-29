@@ -14,40 +14,39 @@ export function AvailableTorrrent(props: {
   const [error, setError] = useState<string>("");
   const [hover, setHover] = useState<boolean>(false);
   useEffect(() => {
-    if (props.item.TYPE === "movie") {
-      if (props.item.FILES.length > 0) {
-        return;
-      }
-    }
+    if (props.item.TYPE === "movie" && props.item.FILES.length > 0) return;
     if (props.item.TYPE === "tv") {
       const currentSeasonHaveFile =
         props.item.SEASONS[props.currentSeason].EPISODES.reduce(
           (prev, cur) => prev + cur.FILES.length,
           0
         ) > 0;
-      if (currentSeasonHaveFile) {
-        return;
-      }
-    }
-    var url = `${app_url}/torrents/available?type=${props.item.TYPE}&id=${props.item.ID}`;
-    if (props.item.TYPE === "tv") {
-      url += `&season=${props.item.SEASONS[props.currentSeason].ID}`;
+      if (currentSeasonHaveFile) return;
     }
     async function fetchTorrents() {
-      const res = await fetch(url, { credentials: "include" });
+      const start = Date.now();
+      const res = await fetch(
+        `${app_url}/torrents/available?type=${props.item.TYPE}&id=${
+          props.item.ID
+        }${
+          props.item.TYPE === "tv"
+            ? `&season=${props.item.SEASONS[props.currentSeason].ID}`
+            : ""
+        }`,
+        { credentials: "include" }
+      );
       const data = await res.json();
       setFetched(true);
       if (data.error) {
         return setError(data.error);
       }
       setTorrents(data.torrents);
+      console.log("Fetched in ", Date.now() - start);
     }
     fetchTorrents();
-  }, [props.item]);
-  if (props.item.TYPE === "movie") {
-    if (props.item.FILES.length > 0) {
-      return <div></div>;
-    }
+  }, []);
+  if (props.item.TYPE === "movie" && props.item.FILES.length > 0) {
+    return <div></div>;
   }
   if (props.item.TYPE === "tv") {
     if (

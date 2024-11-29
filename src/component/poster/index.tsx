@@ -132,8 +132,8 @@ export class Porenderer extends React.Component<PosterRendererProps> {
                   )}
                 </div>
                 <div className="absolute top-1 right-1 flex gap-1 justify-end">
-                  {this.props.render.PROVIDERS.splice(0, 4).map((e) => (
-                    <div onClick={(ev) => this.navigateProvider(ev, e)}>
+                  {this.props.render.PROVIDERS.splice(0, 4).map((e, i) => (
+                    <div key={i} onClick={(ev) => this.navigateProvider(ev, e)}>
                       <img
                         className="h-7 rounded-lg"
                         src={e.URL}

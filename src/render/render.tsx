@@ -467,7 +467,6 @@ class Renderer extends React.Component<RendereProps> {
                           item={this.state.item}
                           download={this.download.bind(this)}
                           stream={this.stream.bind(this)}
-                      
                         />
                         <div
                           className="cursor-pointer"
@@ -654,16 +653,14 @@ class Renderer extends React.Component<RendereProps> {
             </div>
 
             <div className="flex opacity-30 mt-1 justify-center">
-              {this.state.item.GENRE.map((e) => (
-                <>
-                  <div
-                    onClick={() => this.browseGenre(e.ID, e.NAME)}
-                    className="underline cursor-pointer "
-                  >
-                    {e.NAME}
-                  </div>
-                  &nbsp;
-                </>
+              {this.state.item.GENRE.map((e, i) => (
+                <div
+                  key={i}
+                  onClick={() => this.browseGenre(e.ID, e.NAME)}
+                  className="underline cursor-pointer mr-1"
+                >
+                  {e.NAME}
+                </div>
               ))}
             </div>
             <div className="flex justify-center gap-1">
@@ -698,8 +695,8 @@ class Renderer extends React.Component<RendereProps> {
                 Manualy add torrent
               </div>
               <AvailableTorrrent
-              download={this.download.bind(this)}
-              stream={this.stream.bind(this)}
+                download={this.download.bind(this)}
+                stream={this.stream.bind(this)}
                 currentSeason={this.state.season}
                 item={this.state.item}
               />

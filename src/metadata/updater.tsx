@@ -326,6 +326,34 @@ function LineDragTv(props: {
           className="w-4/5 p-2 rounded-md border-2 border-white mt-2 mb-2"
         />
       </div>
+      <div className="w-full flex justify-center gap-2">
+        <button
+          onClick={() => {
+            setRenderTv(props.tvs);
+          }}
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Clear filters
+        </button>
+        <button
+          onClick={() => {
+            setRenderTv(props.tvs.filter((tvs) => tvs.tmdb_id !== 0));
+          }}
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Show Movie with TMDB ID
+        </button>
+        <button
+          onClick={() => {
+            // setRenderMovie(props.movies.filter((movie) => movie.tmdb_id == 0));
+            setRenderTv(props.tvs.filter((tvs) => tvs.tmdb_id == 0));
+          }}
+          className="bg-red-500 p-2 rounded-md text-white"
+        >
+          Show Movie without TMDB ID
+        </button>
+      </div>
+      <div className="text-center">{renderTv.length} TV Shows</div>
       {renderTv.map((tv) => {
         return <RenderTv tv={tv} movelocal={props.movelocal} key={tv.id} />;
       })}
@@ -477,6 +505,34 @@ function LineDragMovie(props: {
           className="w-4/5 p-2 rounded-md border-2 border-white mt-2 mb-2"
         />
       </div>
+
+      <div className="w-full flex justify-center gap-2">
+        <button
+          onClick={() => {
+            setRenderMovie(props.movies);
+          }}
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Clear filters
+        </button>
+        <button
+          onClick={() => {
+            setRenderMovie(props.movies.filter((movie) => movie.tmdb_id !== 0));
+          }}
+          className="bg-green-500 p-2 rounded-md text-white"
+        >
+          Show Movie with TMDB ID
+        </button>
+        <button
+          onClick={() => {
+            setRenderMovie(props.movies.filter((movie) => movie.tmdb_id == 0));
+          }}
+          className="bg-red-500 p-2 rounded-md text-white"
+        >
+          Show Movie without TMDB ID
+        </button>
+      </div>
+      <div className="text-center">{renderMovie.length} TV Shows</div>
       {renderMovie.map((movie) => {
         return (
           <RenderMovie

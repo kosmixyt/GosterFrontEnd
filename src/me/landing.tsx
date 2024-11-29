@@ -29,8 +29,11 @@ export function UserLanding() {
   const [flexModeRequest, setFlexModeRequest] = useState(true);
   useEffect(() => {
     document.body.style.overflowY = "scroll";
-    get_me().then(setMe);
+    const inter = setInterval(() => {
+      get_me().then(setMe);
+    }, 1000);
     return () => {
+      clearInterval(inter);
       document.body.style.overflowY = "auto";
     };
   }, []);
@@ -201,6 +204,12 @@ export function UserLanding() {
           >
             Metadata Dragger
           </div>
+          <div
+            onClick={() => nav("/pty")}
+            className="p-4 bg-gray-800 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+          >
+            PTY SHELL
+          </div>
         </div>
       </div>
     </motion.div>
@@ -212,7 +221,7 @@ function RequestItem(props: { item: MeRequest; refresh: () => void }) {
     <motion.div
       style={{ scale: 1.01 }}
       whileHover={{ scale: 1.05 }}
-      className="m-4 cursor-pointer"
+      className="m-4 cursor-pointer group"
     >
       <div
         onClick={(e) => {
@@ -223,7 +232,10 @@ function RequestItem(props: { item: MeRequest; refresh: () => void }) {
         }}
         className="absolute top-1 left-1 z-40"
       >
-        <IoCloseCircleSharp size={25} />
+        <IoCloseCircleSharp
+          size={25}
+          className="opacity-0 group-hover:opacity-100 transition-all duration-300"
+        />
       </div>
       <div
         style={{
@@ -399,10 +411,11 @@ async function ActionTorrent(id: number, action: string) {
     `${app_url}/torrents/action?id=${id}&action=${action}`,
     { credentials: "include" }
   );
+  const res = await data.json();
   if (data.ok) {
     toast.success(`Torrent ${action}d`);
   } else {
-    toast.error(`Torrent not ${action}d`);
+    toast.error(res.error);
   }
   return data.ok;
 }
@@ -442,9 +455,10 @@ interface ConvertProgress {
 
 function TorrentItemRender(props: { torrent: TorrentItem }) {
   const nav = useNavigate();
-  const [pause, setPause] = useState(props.torrent.paused);
-  const overlayPanel = useRef(null);
-  const [onleft, setOnleft] = useState(false);
+  const [paused, setPaused] = useState(props.torrent.paused);
+  const [showFiles, setShowFiles] = useState(false);
+  const buttonStyle =
+    "w-4/6 rounded-lg text-center bg-slate-900 text-white  text-lg m-1";
   return (
     <div>
       <div
@@ -466,176 +480,123 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
         relative
         rounded-lg cursor-pointer bg-cover  bg-center"
       >
-        <div
-          className={`absolute h-full  w-full rounded-lg hover:opacity-100 ${
-            isMobile ? "opacity-100" : "opacity-0"
-          }   hover:backdrop-blur-md  transition-all`}
-        >
-          <AnimatePresence>
-            {!onleft && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ right: "-100%" }}
-              >
-                <div className="p-2 gap-1  w-full h-full">
-                  <div className="flex justify-between">
-                    <div className="flex justify-center items-center gap-2">
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOnleft(true);
-                        }}
-                      >
-                        <IoMdArrowDropleftCircle size={35} />
-                      </div>
-                      <div className="flex h-[40px] justify-center items-center bg-gray-900 font-semibold p-2 rounded-lg ">
-                        {bytesToSize(props.torrent.size)}
-                      </div>
-                    </div>
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        ActionTorrent(
-                          props.torrent.id,
-                          pause ? "resume" : "pause"
-                        ).then((e) => {
-                          if (e) setPause(!pause);
-                        });
-                      }}
-                      className="flex gap-2"
-                    >
-                      <>
-                        <div className="p-2 flex h-auto items-center ml-1 justify-center bg-gray-900 text-white font-bold rounded-lg ">
-                          {Math.round(props.torrent.progress * 100)}%
-                        </div>
-                        {!isMobile && pause === false && (
-                          <div className="p-2 hidden md:flex items-center justify-center text-sm bg-gray-900 text-white font-bold rounded-lg ">
-                            <div className="flex justify-between gap-2  items-center">
-                              <FaCloudDownloadAlt className="hidden lg:block" />
-                              {bytesToSize(props.torrent.totalDownloaded)}
-                              &nbsp;/&nbsp;
-                            </div>
-                            <div className="flex justify-center gap-2 items-center">
-                              <FaCloudUploadAlt className="hidden lg:block" />
-                              {bytesToSize(props.torrent.totalUploaded)}
-                            </div>
-                          </div>
-                        )}
-
-                        {pause && (
-                          <div className="p-2 flex items-center justify-center bg-gray-900 text-white font-bold rounded-lg ">
-                            Paused
-                          </div>
-                        )}
-                      </>
-                    </div>
-                  </div>
-                  <div className="overflow-auto max-h-[calc(100%-0.5rem-40px-0.25rem)] mt-1  no-scrollbar">
-                    {props.torrent.files.map((file, i) => (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(
-                            `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`
-                          );
-                        }}
-                        className="w-full mt-1 rounded-lg bg-gray-900 text-white font-semibold text-sm 3xl:text-lg   overflow-hidden"
-                      >
-                        <div>
-                          <div className="text-center overflow-auto border-2 border-white p-1 lg:border-0 relative">
-                            {Math.round(file.progress * 100)}% {file.name}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            {onleft && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOnleft(false);
-                  }}
-                  className="absolute top-1 right-1 z-40"
-                >
-                  <IoCloseCircleSharp size={25} />
-                </div>
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full h-full flex justify-center flex-wrap"
-                >
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      document.location.href = `${app_url}/torrents/zip?id=${props.torrent.id}`;
-                    }}
-                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
-                  >
-                    Download As Zip
-                  </div>
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      document.location.href = `${app_url}/torrents/.torrent?id=${props.torrent.id}`;
-                    }}
-                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
-                  >
-                    Download .torrent
-                  </div>
-                  <div
-                    onClick={() => {
-                      const withFiles = confirm("Delete with files?");
-                      fetch(
-                        `${app_url}/torrents/action?id=${props.torrent.id}&action=delete&deleteFiles=${withFiles}`,
-                        {
-                          credentials: "include",
-                        }
-                      ).then((e) => {
-                        if (e.ok) {
-                          toast.success("Torrent deleted");
-                        } else {
-                          toast.error("Torrent not deleted");
-                        }
-                      });
-                    }}
-                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
-                  >
-                    Delete
-                  </div>
-                  <div
-                    onClick={() => {
-                      fetch(
-                        `${app_url}/torrents/action?id=${props.torrent.id}&action=recheck`,
-                        {
-                          credentials: "include",
-                        }
-                      ).then((e) => {
-                        if (e.ok) {
-                          toast.success("Torrent Rechek Started");
-                        } else {
-                          toast.error("Torrent not Recheck");
-                        }
-                      });
-                    }}
-                    className="w-4/5 bg-gray-900 text-white font-bold rounded-lg text-center p-1 border-[1px] border-white mt-2"
-                  >
-                    Rechek Torrent
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="absolute top-1 left-1 p-1 bg-stone-900 font-bold rounded-lg">
+          {bytesToSize(props.torrent.size)}
         </div>
+        <div className="absolute top-1 right-1 p-1 bg-stone-900 font-bold rounded-lg">
+          {Math.round(props.torrent.progress * 100) + "%"}
+        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1, backdropFilter: "blur(20px)" }}
+          className={`absolute h-full w-full rounded-lg z-[60]`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {!showFiles && (
+            <div className="w-full h-full pt-4 items-center flex flex-col overflow-auto no-scrollbar">
+              <div
+                onClick={() => {
+                  document.location.href = `${app_url}/torrents/zip?id=${props.torrent.id}`;
+                }}
+                className={buttonStyle}
+              >
+                Zip
+              </div>
+              <div
+                onClick={() => {
+                  setShowFiles(true);
+                }}
+                className={buttonStyle}
+              >
+                Files
+              </div>
+              <div
+                onClick={() => {
+                  document.location.href = `${app_url}/torrents/.torrent?id=${props.torrent.id}`;
+                }}
+                className={buttonStyle}
+              >
+                Download .torrent
+              </div>
+              <div
+                onClick={() => {
+                  ActionTorrent(
+                    props.torrent.id,
+                    paused ? "resume" : "pause"
+                  ).then((e) => {
+                    if (e) {
+                      setPaused(!paused);
+                    }
+                  });
+                }}
+                className={buttonStyle}
+              >
+                {paused ? "Resume" : "Pause"}
+              </div>
+              <div
+                onClick={async () => {
+                  if (!confirm("Are you sure to delete this torrent")) return;
+                  const res = await fetch(
+                    `${app_url}/torrents/action?id=${
+                      props.torrent.id
+                    }&action=delete&deleteFiles=${confirm("Delete files ?")}`,
+                    { credentials: "include" }
+                  );
+                  const data = await res.json();
+                  if (res.ok) {
+                    toast.success("Torrent deleted");
+                  } else {
+                    toast.error(data.error);
+                  }
+                }}
+                className={buttonStyle}
+              >
+                Delete
+              </div>
+              <div className="w-full text-center"></div>
+              <div className="text-center bg-gray-700 w-4/6 rounded-md font-bold  mt-4">
+                <div className="flex items-center justify-center gap-2">
+                  <FaCloudDownloadAlt />
+                  <div>{bytesToSize(props.torrent.totalDownloaded)}</div>
+                  <FaCloudUploadAlt />
+                  <div>{bytesToSize(props.torrent.totalUploaded)}</div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showFiles && (
+            <div className="w-full h-full pt-4 items-center flex flex-col">
+              <div
+                onClick={() => {
+                  setShowFiles(false);
+                }}
+                className={buttonStyle}
+              >
+                Back
+              </div>
+              <div className="w-full h-full overflow-y-auto flex flex-col items-center no-scrollbar">
+                {props.torrent.files.map((file, i) => {
+                  return (
+                    <div
+                      onClick={() => {
+                        document.location.href = `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`;
+                      }}
+                      key={i}
+                      className="bg-gray-800 max-w-[80%] rounded-lg mt-1 p-2 mb-1 flex gap-2"
+                    >
+                      <div className="break-words whitespace-normal max-w-[85%]">
+                        {file.name}
+                      </div>
+                      <div className="max-w-[15%]">
+                        {Math.round(file.progress * 100) + "%"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </motion.div>
         <div
           onClick={() => {
             console.log("ccc");
@@ -645,10 +606,10 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
           <img
             src={props.torrent.SKINNY.POSTER}
             alt=""
-            className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg"
+            className="h-auto w-24 2xl:w-32 mt-6 mb-2 rounded-lg relative z-50"
           />
         </div>
-        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg">
+        <div className="text-center font-semibold overflow-hidden ml-1 mr-1 text-xs xl:text-sm 2xl:text-lg absolute bottom-1 w-full leading-[4px]">
           {props.torrent.name.substring(0, 50)}
         </div>
       </div>
