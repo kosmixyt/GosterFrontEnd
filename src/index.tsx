@@ -37,6 +37,10 @@ const router = createBrowserRouter([
     element: <Head />,
     children: [
       {
+        path: "/admin",
+        element: <Admin />,
+      },
+      {
         path: "/login",
         element: <LoginComp />,
       },
@@ -89,4 +93,5 @@ root.render(<RouterProvider router={router} />);
 import { Buffer } from "buffer";
 import { UserLanding } from "./me/landing";
 import Updater from "./metadata/updater";
+import Admin from "./admin";
 
