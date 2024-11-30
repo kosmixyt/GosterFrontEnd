@@ -29,6 +29,9 @@ declare global {
     isMauiApp: boolean;
   }
 }
+
+
+
 const router = createBrowserRouter([
   {
     element: <Head />,

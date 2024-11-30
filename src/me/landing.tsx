@@ -49,6 +49,18 @@ export function UserLanding() {
       <div className="text-3xl text-center mt-4 font-semibold font-roboto">
         Bienvenue {me.username}
       </div>
+      <div className="flex justify-center">
+        <div
+          onClick={() => {
+            fetch(`${app_url}/logout`, { credentials: "include" }).then(() => {
+              nav("/login");
+            });
+          }}
+          className="p-4 bg-gray-800 mt-3 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+        >
+          Logout
+        </div>
+      </div>
       <div className="md:flex justify-center">
         <div
           className={`w-1/5 min-w-56  h-24 rounded-lg m-4 ${
