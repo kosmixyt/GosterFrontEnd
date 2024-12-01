@@ -4,15 +4,22 @@ import { useEffect, useState } from "react";
 import { QUALITY, Track } from "../player/player";
 import { app_url } from "..";
 import { toast } from "react-toastify";
+import { StorageRender } from "../torrent";
+import { ChooseStorage } from "../component/choosestorage/choosestorage";
 export const QUALITYS = ["1080p", "720p", "480p", "360p", "240p"];
 
 export interface ConvertInfo {
   Qualities: QUALITY[];
   AudioTracks: Track[];
-  Paths: string[];
+  Paths: StorageRender[];
 }
 
-export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE; hidden: boolean; close: () => void }) {
+export function ConvertModal(props: {
+  file: FileItem;
+  item: MovieItem | EPISODE;
+  hidden: boolean;
+  close: () => void;
+}) {
   if (props.hidden) {
     return <></>;
   }
@@ -20,15 +27,23 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
   const [convertInfo, setConvertInfo] = useState<ConvertInfo | null>(null);
   const [qualityIndex, setQualityIndex] = useState(0);
   const [audioIndex, setAudioIndex] = useState(0);
-  const [pathIndex, setPathIndex] = useState(0);
+  const [choosestorage, setChooseStorage] = useState<StorageRender | null>(
+    null
+  );
+  const [askChooseStorage, setAskChooseStorage] = useState(false);
   useEffect(() => {
     var t = toast.info("Loading Convert Info", { autoClose: false });
-    fetch(`${app_url}/transcode/options?file_id=${props.file.ID}`, { credentials: "include" })
+    fetch(`${app_url}/transcode/options?file_id=${props.file.ID}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((body) => {
         setConvertInfo(body);
-        toast.update(t, { render: "Convert Info Loaded", type: "success", autoClose: 2000 });
-        setPathIndex(0);
+        toast.update(t, {
+          render: "Convert Info Loaded",
+          type: "success",
+          autoClose: 2000,
+        });
         toast.dismiss(t);
       });
   }, []);
@@ -41,8 +56,23 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
   if (!convertInfo) {
     return <></>;
   }
+  if (askChooseStorage) {
+    return (
+      <ChooseStorage
+        close={() => setAskChooseStorage(false)}
+        onsuccess={(c, path) => {
+          post_convert(
+            newFileName,
+            props.file.ID,
+            convertInfo.Qualities[qualityIndex].Resolution,
+            audioIndex,
+            `${c.id}@${path}`
+          ).then(props.close);
+        }}
+      />
+    );
+  }
 
-  console.log(audioIndex)
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -89,7 +119,7 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
                 </option>
               ))}
             </select>
-            <select
+            {/* <select
               value={pathIndex}
               onChange={(e) => setPathIndex(parseInt(e.target.value))}
               className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
@@ -99,16 +129,16 @@ export function ConvertModal(props: { file: FileItem; item: MovieItem | EPISODE;
                   {path}
                 </option>
               ))}
-            </select>
+            </select> */}
             <button
               onClick={() => {
-                post_convert(newFileName, props.file.ID, convertInfo.Qualities[qualityIndex].Resolution, audioIndex, convertInfo.Paths[pathIndex]).then(
-                  props.close
-                );
+                askChooseStorage
+                  ? setAskChooseStorage(false)
+                  : setAskChooseStorage(true);
               }}
               className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
             >
-              Convert
+              Choose Storage & Convert
             </button>
           </div>
         </div>

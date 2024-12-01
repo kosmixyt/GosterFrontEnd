@@ -6,7 +6,7 @@ import { BrowserView, isMobile, MobileView } from "react-device-detect";
 import { Id, toast } from "react-toastify";
 import { motion } from "framer-motion";
 import react from "@vitejs/plugin-react-swc";
-import { AddModal, post_file_torrent } from "../torrent";
+import { AddModal, post_file_torrent, StorageRender } from "../torrent";
 import { Buffer } from "buffer";
 import { createPortal } from "react-dom";
 import unavailable from "./unavailable.png";
@@ -31,12 +31,12 @@ export const Render = (props: {}) => {
     if (item != null) {
       setItem(null);
     }
-    PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "").then(
-      setItem
-    ).catch((e) => {
-      console.log(e);
-      navigate("/login");
-    })
+    PlatformManager.DispatchCache(params.id ?? "any", params.type ?? "")
+      .then(setItem)
+      .catch((e) => {
+        console.log(e);
+        navigate("/login");
+      });
   }, [params.type, params.id]);
   if (!item) return <Loader />;
   return <Renderer params={params} navigate={navigate} Item={item} />;
@@ -180,7 +180,7 @@ class Renderer extends React.Component<RendereProps> {
       console.log("Item changed", this.props.Item);
     }
   }
-  download(torrent_id : number) {
+  download(torrent_id: number) {
     const base64_backdrop = this.state.item.BACKDROP;
     const id = this.state.item.ID.split("@")[1];
     const provider = this.state.item.ID.split("@")[0];
@@ -205,7 +205,7 @@ class Renderer extends React.Component<RendereProps> {
     this.currentFile = this.state.item.FILES[parseInt(e.target.value)];
   }
 
-  stream(torrent_id : number) {
+  stream(torrent_id: number) {
     if (!!this.currentFile) {
       var encoded = encodeURIComponent(
         this.currentFile.TRANSCODE_URL + "&file=" + this.currentFile.ID
@@ -214,7 +214,8 @@ class Renderer extends React.Component<RendereProps> {
     } else {
       var item = this.state.item as MovieItem;
       this.props.navigate(
-        "/player?transcode=" + encodeURIComponent(item.TRANSCODE_URL + "&torrent_id=" + torrent_id)
+        "/player?transcode=" +
+          encodeURIComponent(item.TRANSCODE_URL + "&torrent_id=" + torrent_id)
       );
     }
   }
@@ -282,7 +283,7 @@ class Renderer extends React.Component<RendereProps> {
       this.setState({ ChooseStorage: file });
     }
   }
-  public uploadFile(path: string) {
+  public uploadFile(storer: StorageRender, path: string) {
     if (!this.state.ChooseStorage)
       toast.error("Erreur lors de la récupération du fichier");
     post_file(this.state.ChooseStorage!, "movie", this.state.item.ID, path, -1);
@@ -329,7 +330,7 @@ class Renderer extends React.Component<RendereProps> {
           createPortal(
             <ChooseStorage
               close={() => this.setState({ ChooseStorage: null })}
-              onsuccess={(path) => this.uploadFile(path)}
+              onsuccess={(storer, path) => this.uploadFile(storer, path)}
             />,
             document.body
           )}
@@ -962,7 +963,7 @@ function EpisodeRender(props: {
   const e = season.EPISODES[props.i];
   const [file, setFile] = useState<File | null>(null);
   const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
-  const on_choosedStorage = (path: string) => {
+  const on_choosedStorage = (storer: StorageRender, path: string) => {
     if (!file) return;
     console.log(file.name);
     if (file.name.endsWith(".torrent")) {
@@ -973,7 +974,13 @@ function EpisodeRender(props: {
         props.season_index
       );
     } else {
-      post_file(file, "tv", props.item.state.item.ID, path, e.ID);
+      post_file(
+        file,
+        "tv",
+        props.item.state.item.ID,
+        `${storer.id}@${path}`,
+        e.ID
+      );
     }
   };
   const on_drop = (e: React.DragEvent<HTMLDivElement>) => {

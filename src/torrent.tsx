@@ -250,7 +250,7 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
               </button>
             </div>
           </ToolTip>
-          {showed.moveTargetStorage ? (
+          {/* {showed.moveTargetStorage ? (
             <MoveTargetStorage
               item={props.torrent as TorrentItem}
               oncancel={() => {
@@ -264,7 +264,7 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
             />
           ) : (
             <></>
-          )}
+          )} */}
         </td>
         <td>
           <button
@@ -590,85 +590,86 @@ export interface ParsedBencode {
   );
 }
 
-export function GetStorages(): Promise<string[]> {
+export interface StorageRender {
+  id: number;
+  name: string;
+  paths: string[];
+}
+export function GetStorages(): Promise<StorageRender[]> {
   return fetch(`${app_url}/torrents/storage`, {
     credentials: "include",
-  })
-    .then((e) => e.json())
-    .then((e) => {
-      return e.paths;
-    });
+  }).then((e) => e.json());
 }
 
-function MoveTargetStorage(props: { item: TorrentItem; show: boolean; oncancel: () => void }) {
-  const [availableStorage, setAvailableStorage] = useState<string[]>([]);
-  const [target, setTarget] = useState("");
-  console.log("render", target);
-  useEffect(() => {
-    GetStorages().then((e) => {
-      setAvailableStorage(e);
-      setTarget(e[0]);
-    });
-    document.body.classList.add("overflow-hidden");
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    };
-  }, []);
-  return (
-    <div onClick={(e) => e.stopPropagation()} className="h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0">
-      <div className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black w-3/4 min-w-[450px] h-5/6  rounded-lg flex-col flex justify-center">
-        <div className="text-3xl p-4">Move Storage</div>
-        <div className="flex justify-center items-center flex-row h-1/6">
-          <div className="ml-4 mr-4 text-center mt-4 mb-4">
-            <div className="justify-center">
-              <div className="text-xl">New path For torrent : {props.item.name} : </div>
-              <div className="flex items-center justify-center mt-4">
-                <select value={target} onChange={(e) => setTarget(e.currentTarget.value)} className="rounded-lg text-2xl w-1/2 h-10">
-                  {availableStorage.map((e) => (
-                    <option value={e}>{e}</option>
-                  ))}
-                </select>
-                <button
-                  className="ml-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    props.oncancel();
-                  }}
-                >
-                  <IoIosCloseCircle size={40} />
-                </button>
-              </div>
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const start = toast("Start Moving torrent", {
-                    autoClose: false,
-                  });
-                  const eventSource = new EventSource(`${app_url}/torrents/move?torrent_id=${props.item.id}&target=${target}`, {
-                    withCredentials: true,
-                  });
-                  eventSource.addEventListener("progress", (e) => {
-                    toast.update(start, {
-                      render: (parseFloat(e.data) * 100).toString() + "%",
-                    });
-                  });
-                  eventSource.addEventListener("move", (e) => {
-                    toast.update(start, { render: e.data });
-                    eventSource.close();
-                    props.oncancel();
-                  });
-                }}
-              >
-                Move
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// function MoveTargetStorage(props: { item: TorrentItem; show: boolean; oncancel: () => void }) {
+//   const [availableStorage, setAvailableStorage] = useState<string[]>([]);
+//   const [target, setTarget] = useState("");
+//   console.log("render", target);
+//   useEffect(() => {
+//     GetStorages().then((e) => {
+//       setAvailableStorage(e);
+//       setTarget(e[0]);
+//     });
+//     document.body.classList.add("overflow-hidden");
+//     return () => {
+//       document.body.classList.remove("overflow-hidden");
+//     };
+//   }, []);
+//   return (
+//     <div onClick={(e) => e.stopPropagation()} className="h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0">
+//       <div className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black w-3/4 min-w-[450px] h-5/6  rounded-lg flex-col flex justify-center">
+//         <div className="text-3xl p-4">Move Storage</div>
+//         <div className="flex justify-center items-center flex-row h-1/6">
+//           <div className="ml-4 mr-4 text-center mt-4 mb-4">
+//             <div className="justify-center">
+//               <div className="text-xl">New path For torrent : {props.item.name} : </div>
+//               <div className="flex items-center justify-center mt-4">
+//                 <select value={target} onChange={(e) => setTarget(e.currentTarget.value)} className="rounded-lg text-2xl w-1/2 h-10">
+//                   {availableStorage.map((e) => (
+//                     <option value={e}>{e}</option>
+//                   ))}
+//                 </select>
+//                 <button
+//                   className="ml-2"
+//                   onClick={(e) => {
+//                     e.stopPropagation();
+//                     props.oncancel();
+//                   }}
+//                 >
+//                   <IoIosCloseCircle size={40} />
+//                 </button>
+//               </div>
+//               <button
+//                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+//                 onClick={(e) => {
+//                   e.stopPropagation();
+//                   const start = toast("Start Moving torrent", {
+//                     autoClose: false,
+//                   });
+//                   const eventSource = new EventSource(`${app_url}/torrents/move?torrent_id=${props.item.id}&target=${target}`, {
+//                     withCredentials: true,
+//                   });
+//                   eventSource.addEventListener("progress", (e) => {
+//                     toast.update(start, {
+//                       render: (parseFloat(e.data) * 100).toString() + "%",
+//                     });
+//                   });
+//                   eventSource.addEventListener("move", (e) => {
+//                     toast.update(start, { render: e.data });
+//                     eventSource.close();
+//                     props.oncancel();
+//                   });
+//                 }}
+//               >
+//                 Move
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 export interface SearchResults {
   provider_name: string;
   id: number;
