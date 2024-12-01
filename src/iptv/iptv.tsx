@@ -134,7 +134,6 @@ export function Iptv() {
                 return router("/");
               }
               if (res.channels.length == 0) {
-                toast.error("No more channels");
                 return;
               }
               setChannels([...channels, ...res.channels]);

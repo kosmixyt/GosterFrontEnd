@@ -456,17 +456,21 @@ class NewPlayer extends React.Component<PlayerProps> {
                   />
                 )}
               </div>
-              <div className="flex w-[50%] items-center">
-                <input
-                  className="w-full"
-                  type="range"
-                  min="0"
-                  max={this.video.current?.duration || 0}
-                  defaultValue={this.video.current?.currentTime ?? 0}
-                  onChange={(e) => {
-                    this.video.current!.currentTime = parseInt(e.target.value);
-                  }}
-                />
+              <div className="flex w-[50%] items-center justify-center">
+                {!this.props.data.isLive && (
+                  <input
+                    className="w-full"
+                    type="range"
+                    min="0"
+                    max={this.video.current?.duration || 0}
+                    defaultValue={this.video.current?.currentTime ?? 0}
+                    onChange={(e) => {
+                      this.video.current!.currentTime = parseInt(
+                        e.target.value
+                      );
+                    }}
+                  />
+                )}
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
@@ -488,7 +492,7 @@ class NewPlayer extends React.Component<PlayerProps> {
                           : this.video.current?.duration ?? 0
                       )}
                 </div>
-                <NextForward player={this} />
+                {!this.props.data.isLive && <NextForward player={this} />}
               </div>
               <div className="flex">
                 {this.state.showSettings ? this.Settings() : <></>}
