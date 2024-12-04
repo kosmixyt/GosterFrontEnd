@@ -22,6 +22,7 @@ import { CgUnavailable } from "react-icons/cg";
 import { Loader } from "../component/loader/loader";
 import { MoveMediaFile } from "../metadata/dragger";
 import { AvailableTorrrent } from "./available_torrent";
+import { ContextMenu } from "../component/contextMenu/file";
 
 export const Render = (props: {}) => {
   const params = useParams();
@@ -135,8 +136,6 @@ export interface RenderState {
   addModal: boolean;
   convertModal: boolean;
   ChooseStorage: File | null;
-  shareModal: FileItem | null;
-  moveModal: boolean;
   requestModal: boolean;
 }
 
@@ -145,13 +144,11 @@ class Renderer extends React.Component<RendereProps> {
   public provider: string;
   public toastId: Id = 0;
   public fileRef: React.RefObject<HTMLInputElement> = React.createRef();
-  public currentFile: FileItem = {} as FileItem;
+  public currentFile: FileItem = null as any;
   public state: RenderState = {
     item: {} as MovieItem | TVItem,
     convertModal: false,
-    shareModal: null,
     season: 0,
-    moveModal: false,
     requestModal: false,
     addModal: false,
     ChooseStorage: null,
@@ -298,12 +295,6 @@ class Renderer extends React.Component<RendereProps> {
         onDragOver={(e) => e.preventDefault()}
         className="bg-no-repeat bg-cover text-white"
       >
-        {this.state.moveModal && this.currentFile && (
-          <MoveMediaFile
-            close={() => this.setState({ moveModal: false })}
-            file={this.currentFile}
-          />
-        )}
         {this.state.addModal &&
           createPortal(
             <AddModal
@@ -326,22 +317,6 @@ class Renderer extends React.Component<RendereProps> {
             />,
             document.body
           )}
-        {this.state.ChooseStorage &&
-          createPortal(
-            <ChooseStorage
-              close={() => this.setState({ ChooseStorage: null })}
-              onsuccess={(storer, path) => this.uploadFile(storer, path)}
-            />,
-            document.body
-          )}
-        {this.state.convertModal && this.state.item.TYPE === "movie" && (
-          <ConvertModal
-            close={() => this.setState({ convertModal: false })}
-            file={this.currentFile}
-            item={this.state.item}
-            hidden={!this.state.convertModal}
-          />
-        )}
         {this.state.requestModal && (
           <RequestModal
             itemId={this.state.item.ID}
@@ -352,12 +327,6 @@ class Renderer extends React.Component<RendereProps> {
                 : ""
             }
             close={() => this.setState({ requestModal: false })}
-          />
-        )}
-        {this.state.shareModal != null && (
-          <ShareModal
-            file_item={this.state.shareModal}
-            close={() => this.setState({ shareModal: null })}
           />
         )}
         <BrowserView>
@@ -446,23 +415,7 @@ class Renderer extends React.Component<RendereProps> {
                         >
                           Manualy add torrent
                         </div>
-                        <div
-                          className="cursor-pointer"
-                          hidden={
-                            this.state.item.TYPE === "tv" ||
-                            this.state.item.FILES.length == 0
-                          }
-                          onClick={() => this.setState({ convertModal: true })}
-                        >
-                          Convert
-                        </div>
-                        <div
-                          hidden={this.currentFile == null}
-                          onClick={() => this.setState({ moveModal: true })}
-                        >
-                          Wrong file ?
-                        </div>
-
+                        <ContextMenu file={this.currentFile} />
                         <AvailableTorrrent
                           currentSeason={this.state.season}
                           item={this.state.item}
@@ -490,17 +443,6 @@ class Renderer extends React.Component<RendereProps> {
                                   .SEASON_NUMBER
                               })`
                             : ""}
-                        </div>
-                        <div
-                          onClick={() =>
-                            this.setState({ shareModal: this.currentFile })
-                          }
-                          hidden={
-                            this.state.item.TYPE === "tv" ||
-                            this.state.item.FILES.length == 0
-                          }
-                        >
-                          Share
                         </div>
                       </div>
                     </div>
@@ -704,16 +646,6 @@ class Renderer extends React.Component<RendereProps> {
               <div
                 className="cursor-pointer"
                 hidden={
-                  this.state.item.TYPE === "tv" ||
-                  this.state.item.FILES.length == 0
-                }
-                onClick={() => this.setState({ convertModal: true })}
-              >
-                Convert
-              </div>
-              <div
-                className="cursor-pointer"
-                hidden={
                   (this.state.item.TYPE === "movie" &&
                     this.state.item.FILES.length > 0) ||
                   (this.state.item.TYPE === "tv" &&
@@ -732,15 +664,6 @@ class Renderer extends React.Component<RendereProps> {
                       this.state.item.SEASONS[this.state.season].SEASON_NUMBER
                     })`
                   : ""}
-              </div>
-              <div
-                onClick={() => this.setState({ shareModal: this.currentFile })}
-                hidden={
-                  this.state.item.TYPE === "tv" ||
-                  this.state.item.FILES.length == 0
-                }
-              >
-                Share
               </div>
             </div>
             <div>
@@ -992,7 +915,6 @@ function EpisodeRender(props: {
       setCurrentFile(e.FILES[0]);
     }
   }, []);
-  console.log(currentFile);
   return (
     <div
       onDrop={on_drop}
@@ -1047,8 +969,9 @@ function EpisodeRender(props: {
       </div>
       <div className="text-center flex items-center justify-center">
         <div>
-          ({e.EPISODE_NUMBER}) {e.NAME}
+          <ContextMenu file={currentFile} />
         </div>
+        <div>{e.NAME}</div>
       </div>
       <div className="flex justify-between items-center pb-1 mt-1">
         <div

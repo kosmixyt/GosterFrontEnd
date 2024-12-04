@@ -1,7 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { Render } from "./render/render";
-import { PTY } from "./component/pty/pty";
 import { Landing, landing_loader } from "./landing";
 import { BrowseFunc } from "./browser/browse";
 import { PlayerRender } from "./player/player";
@@ -9,7 +8,7 @@ import { LoginComp } from "./login/login";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
-import { Head } from "./component/layout/layout";
+import { Head } from "./layout/layout";
 import fs from "fs";
 export const app_url = "https://xxxxvideos.kosmix.fr/api";
 // export const app_url = "http://192.168.1.63:9075/api"
@@ -30,8 +29,6 @@ declare global {
   }
 }
 
-
-
 const router = createBrowserRouter([
   {
     element: <Head />,
@@ -39,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         element: <Admin />,
+      },
+      {
+        path: "/admin/files",
+        element: <DisplayFiles />,
       },
       {
         path: "/login",
@@ -94,4 +95,6 @@ import { Buffer } from "buffer";
 import { UserLanding } from "./me/landing";
 import Updater from "./metadata/updater";
 import Admin from "./admin";
+import { DisplayFiles } from "./admin/files";
+import { PTY } from "./pty/pty";
 

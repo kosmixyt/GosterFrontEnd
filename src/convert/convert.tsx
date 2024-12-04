@@ -16,14 +16,12 @@ export interface ConvertInfo {
 
 export function ConvertModal(props: {
   file: FileItem;
-  item: MovieItem | EPISODE;
   hidden: boolean;
   close: () => void;
 }) {
   if (props.hidden) {
     return <></>;
   }
-  const [newFileName, setNewFileName] = useState(props.file.FILENAME);
   const [convertInfo, setConvertInfo] = useState<ConvertInfo | null>(null);
   const [qualityIndex, setQualityIndex] = useState(0);
   const [audioIndex, setAudioIndex] = useState(0);
@@ -57,19 +55,19 @@ export function ConvertModal(props: {
     return <></>;
   }
   if (askChooseStorage) {
-    return (
+    return createPortal(
       <ChooseStorage
         close={() => setAskChooseStorage(false)}
         onsuccess={(c, path) => {
           post_convert(
-            newFileName,
             props.file.ID,
             convertInfo.Qualities[qualityIndex].Resolution,
             audioIndex,
             `${c.id}@${path}`
           ).then(props.close);
         }}
-      />
+      />,
+      document.body
     );
   }
 
@@ -90,13 +88,6 @@ export function ConvertModal(props: {
         <div className="flex justify-center mt-8">
           <div className="w-4/5">
             <div className="w-full text-center">New Filename : </div>
-            <input
-              type="text"
-              value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
-              placeholder="New File Name"
-              className="bg-[#181818] text-white border-b-2 border-white w-full"
-            />
             <select
               value={qualityIndex}
               onChange={(e) => setQualityIndex(parseInt(e.target.value))}
@@ -119,17 +110,7 @@ export function ConvertModal(props: {
                 </option>
               ))}
             </select>
-            {/* <select
-              value={pathIndex}
-              onChange={(e) => setPathIndex(parseInt(e.target.value))}
-              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
-            >
-              {convertInfo.Paths.map((path, i) => (
-                <option key={i} value={i}>
-                  {path}
-                </option>
-              ))}
-            </select> */}
+
             <button
               onClick={() => {
                 askChooseStorage
@@ -147,20 +128,37 @@ export function ConvertModal(props: {
     document.body
   );
 }
-export async function post_convert(newFileName: string, file_id: number, qualityRes: number, audioTrackIndex: number, path: string) {
+export async function post_convert(
+  file_id: number,
+  qualityRes: number,
+  audioTrackIndex: number,
+  path: string
+) {
   console.log(audioTrackIndex);
   const t = toast.info("Converting", { autoClose: false });
-  const req = await fetch(
-    `${app_url}/transcode/convert?file_id=${file_id}&audio_track_index=${audioTrackIndex}&quality_res=${qualityRes}&filename=${newFileName}&path=${path}`,
-    {
-      credentials: "include",
-    }
-  );
+  const req = await fetch(`${app_url}/transcode/convert`, {
+    method: "POST",
+    body: JSON.stringify({
+      file_id,
+      quality_res: qualityRes,
+      audio_track_index: audioTrackIndex,
+      path: path,
+    }),
+    credentials: "include",
+  });
   const body = await req.json();
   console.log(body);
   if (body.status === "success") {
-    toast.update(t, { render: `Converted task id ${body.task_id}`, type: "success", autoClose: 2000 });
+    toast.update(t, {
+      render: `Converted task id ${body.task_id}`,
+      type: "success",
+      autoClose: 2000,
+    });
   } else {
-    toast.update(t, { render: `Failed to Convert ${body.error}`, type: "error", autoClose: 2000 });
+    toast.update(t, {
+      render: `Failed to Convert ${body.error}`,
+      type: "error",
+      autoClose: 2000,
+    });
   }
 }

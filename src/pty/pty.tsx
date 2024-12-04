@@ -1,10 +1,10 @@
 import React from "react";
-import { Terminal } from "@xterm/xterm"
-import "@xterm/xterm/css/xterm.css"
-import { Buffer } from 'buffer';
-import { app_url } from "../..";
-import { FitAddon } from '@xterm/addon-fit';
+import { Terminal } from "@xterm/xterm";
+import "@xterm/xterm/css/xterm.css";
+import { Buffer } from "buffer";
+import { FitAddon } from "@xterm/addon-fit";
 import exp from "constants";
+import { app_url } from "..";
 
 function AssociedProtocol(url: string): string {
   if (url.startsWith("http")) {
@@ -76,6 +76,8 @@ export class PTY extends React.Component<{}> {
     }
   }
   render(): React.ReactNode {
-    return <div className="w-screen h-screen relative" ref={this.containerRef}></div>;
+    return (
+      <div className="w-screen h-screen relative" ref={this.containerRef}></div>
+    );
   }
 }

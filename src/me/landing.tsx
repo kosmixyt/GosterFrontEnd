@@ -29,6 +29,7 @@ export function UserLanding() {
   const [flexModeRequest, setFlexModeRequest] = useState(true);
   useEffect(() => {
     document.body.style.overflowY = "scroll";
+    get_me().then(setMe);
     const inter = setInterval(() => {
       get_me().then(setMe);
     }, 1000);
@@ -326,7 +327,7 @@ async function DeleteRequest(id: string) {
     toast.error("Request not deleted");
   }
 }
-async function DeleteShare(id: string) {
+export async function DeleteShare(id: string) {
   const bd = await fetch(`${app_url}/share/remove?id=${id}`, {
     credentials: "include",
   });
@@ -336,7 +337,7 @@ async function DeleteShare(id: string) {
     toast.error("Share not deleted");
   }
 }
-async function CreateShare(
+export async function CreateShare(
   fileId: string
 ): Promise<{ id: number; expire: Date }> {
   const bd = await fetch(`${app_url}/share/add?id=${fileId}`, {
@@ -356,7 +357,10 @@ async function CreateShare(
   bo = bo.share;
   return { id: bo.id, expire: bo.expire };
 }
-export function ShareModal(props: { file_item: FileItem; close: () => void }) {
+export function ShareModal(props: {
+  file_item: FileItem;
+  close: (e: React.MouseEvent<HTMLDivElement>) => void;
+}) {
   const [expire, setExpire] = useState(new Date());
   const [id, setId] = useState(0);
   useEffect(() => {
@@ -384,8 +388,8 @@ export function ShareModal(props: { file_item: FileItem; close: () => void }) {
           Expire: {expire.toLocaleString()}
         </div>
         <div
-          onClick={() => {
-            props.close();
+          onClick={(e) => {
+            props.close(e);
           }}
           className="text-center mt-2"
         >

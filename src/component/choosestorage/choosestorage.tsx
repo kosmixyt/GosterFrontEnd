@@ -49,14 +49,7 @@ function RenderStorage(props: {
 }) {
   const [path, setPath] = useState<string>(props.storage.paths[0]);
   return (
-    <div
-      key={props.storage.id}
-      className={`p-2 rounded-lg cursor-pointer`}
-      onClick={(j) => {
-        j.stopPropagation();
-        props.onclick(path);
-      }}
-    >
+    <div key={props.storage.id} className={`p-2 rounded-lg cursor-pointer`}>
       Choose : {props.storage.name}
       <select
         className="bg-stone-800 text-white"
@@ -68,6 +61,15 @@ function RenderStorage(props: {
           </option>
         ))}
       </select>
+      <button
+        className="bg-stone-800 text-white"
+        onClick={(j) => {
+          j.stopPropagation();
+          props.onclick(path);
+        }}
+      >
+        Choose
+      </button>
     </div>
   );
 }

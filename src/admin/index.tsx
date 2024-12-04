@@ -27,6 +27,12 @@ export default function Admin() {
           >
             PTY SHELL
           </div>
+          <div
+            onClick={() => nav("/admin/files")}
+            className="p-4 bg-gray-800 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+          >
+            File Manager
+          </div>
         </div>
       </div>
     </div>
