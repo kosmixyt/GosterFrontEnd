@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { AdminCleanMovie } from "../metadata/dragger";
+import { app_url } from "..";
 
 export default function Admin() {
   const nav = useNavigate();
@@ -33,6 +34,26 @@ export default function Admin() {
           >
             File Manager
           </div>
+          <button
+            onClick={() => {
+              const pl = {
+                channel_id: 46,
+                start: Date.now() + 1000 * 3,
+                duration: 60,
+                output_type: "movie",
+                output_id: 386,
+                force: true,
+                storer_output: "4@/home/storag18/media/series/",
+              };
+              fetch(`${app_url}/iptv/record/add`, {
+                method: "POST",
+                body: JSON.stringify(pl),
+                credentials: "include",
+              });
+            }}
+          >
+            Request
+          </button>
         </div>
       </div>
     </div>
