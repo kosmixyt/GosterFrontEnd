@@ -3,9 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EPISODE, FileItem, TVItem } from "../render/render";
 import checked from "./checked-svgrepo-com.svg";
+import { AiOutlineDelete } from "react-icons/ai";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { SKINNY_RENDER } from "../component/poster";
 import { toast } from "react-toastify";
+import { CiPause1, CiPlay1 } from "react-icons/ci";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import {
@@ -18,6 +20,9 @@ import { isMobile } from "react-device-detect";
 import { AdminCleanMovie } from "../metadata/dragger";
 import { IoCloseCircleSharp } from "react-icons/io5";
 import { IoMdArrowDropleftCircle } from "react-icons/io";
+import { BackDrop } from "../component/backdrop/backdrop";
+import { MdCancel } from "react-icons/md";
+import { action_convert } from "../convert/convert";
 const get_me = async () => {
   const res = await fetch(`${app_url}/me`, { credentials: "include" });
   return await res.json();
@@ -203,6 +208,117 @@ export function UserLanding() {
           </div>
         )}
       </div>
+      <div>
+        <div
+          hidden={me.Torrents.length == 0}
+          className="ml-4 font-semibold text-2xl mb-4"
+        >
+          <div> Converts ({me.converts.length})</div>
+          <div className="flex gap-2 mt-2">
+            <Swiper spaceBetween={isMobile ? 10 : 20} slidesPerView={"auto"}>
+              {me.converts.map((e, i) => (
+                <SwiperSlide
+                  className={`py-4 ${i == 0 ? "ml-8" : ""}`}
+                  style={{
+                    width: "fit-content",
+                  }}
+                >
+                  <ConvertItem item={e} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+function ConvertItem(props: { item: ConvertRender }) {
+  const nav = useNavigate();
+  const url = `/render/${props.item.source.TYPE}/${props.item.source.ID}`;
+  const width = props.item.progress.TotalProgress * 100;
+  const d = new Date(props.item.start * 1000);
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      onClick={() => nav(url)}
+      className="flex bg-stone-900 rounded-md cursor-pointer"
+    >
+      <div className="absolute flex right-2 mt-2  text-xs">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            const action = props.item.paused ? "resume" : "pause";
+            action_convert(action, props.item.task_id);
+          }}
+        >
+          {props.item.paused ? <CiPlay1 size={22} /> : <CiPause1 size={22} />}
+        </div>
+        <div>
+          <AiOutlineDelete size={22} />
+        </div>
+      </div>
+      <motion.img
+        whileHover={{ scale: 1.05 }}
+        src={props.item.source.BACKDROP}
+        alt=""
+        className="h-[12rem] rounded-lg"
+      />
+      <div className="mx-4">
+        <div className="text-lg mt-4 -ml-1 flex gap-1">
+          <div>{props.item.source.TYPE === "movie" ? "🎬" : "📺"}</div>
+          {props.item.source.NAME}
+        </div>
+        <div className="flex text-xs gap-2">
+          <div>📆 {props.item.source.YEAR}</div>
+          <div>⏳️ {props.item.source.RUNTIME}</div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              nav(
+                `/player?transcode=${encodeURIComponent(
+                  props.item.file.TRANSCODE_URL
+                )}`
+              );
+            }}
+          >
+            🍿
+          </div>
+        </div>
+        <div className="rounded-lg bg-blue-600 mt-2 p-1 opacity-50 text-xs inline-block">
+          {props.item.paused
+            ? "⏸️ Pause"
+            : props.item.task_status == "RUNNING"
+            ? "🟢 Running"
+            : props.item.task_status}
+        </div>
+        <div className="opacity-75 text-sm">
+          <div className="flex">
+            <div>📁{props.item.file.FILENAME}</div>&nbsp;
+            <div>{bytesToSize(props.item.file.SIZE)}</div>
+          </div>
+          <div>
+            {props.item.file.FILENAME.split(".")[1]} → {"mp4"}@
+            {props.item.quality}
+          </div>
+          <div
+            className={`w-full ${"bg-gray-700"} rounded-full h-2.5 overflow-hidden mt-2`}
+          >
+            <div
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-300 ease-in-out"
+              style={{
+                width: `${width}%`,
+              }}
+            />
+          </div>
+          <div className="text-xs mt-1">
+            <div>
+              {props.item.progress.Progress} {props.item.progress.Speed}x💨
+            </div>
+            <div>{d.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -264,14 +380,34 @@ function RequestItem(props: { item: MeRequest; refresh: () => void }) {
   );
 }
 
-function Multiplicate<T>(t: T[]): T[] {
-  for (let i = 0; i < 4; i++) {
-    // res.push(t);
-    t.push(t[0]);
-  }
-
-  return t;
-}
+type ConvertRender = {
+  file: FileItem;
+  paused: boolean;
+  source: SKINNY_RENDER;
+  quality: string;
+  task_id: number;
+  audio_track_index: number;
+  running: boolean;
+  task_status: string;
+  task_error: string;
+  progress: FfmpegProgress;
+  start: number;
+};
+type FfmpegProgress = {
+  Frame: number;
+  Fps: number;
+  Stream_0_0_q: number;
+  Bitrate: number;
+  Total_size: number;
+  Out_time_us: number;
+  Out_time_ms: number;
+  Out_time: string;
+  Dup_frames: number;
+  Drop_frames: number;
+  Speed: number;
+  Progress: string;
+  TotalProgress: number;
+};
 
 interface Me {
   id: number;
@@ -286,6 +422,7 @@ interface Me {
   current_transcode: number;
   shares: Me_Share[];
   Torrents: TorrentItem[];
+  converts: ConvertRender[];
 }
 
 interface MeNotification {
@@ -413,39 +550,6 @@ async function ActionTorrent(id: number, action: string) {
   }
   return data.ok;
 }
-export type TaskStatus =
-  | "ERROR"
-  | "PENDING"
-  | "RUNNING"
-  | "FINISHED"
-  | "CANCELLED";
-interface ConvertProgress {
-  SOURCE_FILE_ID: number;
-  SOURCE_FILE_NAME: string;
-  OUTPUT_FILE_NAME: string;
-  TaskStatus: TaskStatus;
-  TaskError: string;
-  Task_id: number;
-  Quality: string;
-  AudioTrackIndex: number;
-  Running: boolean;
-  Progress: {
-    Frame: number;
-    Fps: number;
-    Stream_0_0_q: number;
-    Bitrate: number;
-    Total_size: number;
-    Out_time_us: number;
-    Out_time_ms: number;
-    Out_time: string;
-    Dup_frames: number;
-    Drop_frames: number;
-    Speed: number;
-    Progress: "progress" | "end";
-    TotalProgress: number;
-  };
-  Start: number;
-}
 
 function TorrentItemRender(props: { torrent: TorrentItem }) {
   const nav = useNavigate();
@@ -481,15 +585,18 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
           {Math.round(props.torrent.progress * 100) + "%"}
         </div>
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{
+            opacity: isMobile ? 1 : 0,
+            backdropFilter: isMobile ? "blur(0px)" : "",
+          }}
           whileHover={{ opacity: 1, backdropFilter: "blur(20px)" }}
           className={`absolute h-full w-full rounded-lg z-[60]`}
-          onClick={(e) => e.stopPropagation()}
         >
           {!showFiles && (
             <div className="w-full h-full pt-4 items-center flex flex-col overflow-auto no-scrollbar">
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   document.location.href = `${app_url}/torrents/zip?id=${props.torrent.id}`;
                 }}
                 className={buttonStyle}
@@ -497,7 +604,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 Zip
               </div>
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowFiles(true);
                 }}
                 className={buttonStyle}
@@ -505,7 +613,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 Files
               </div>
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   document.location.href = `${app_url}/torrents/.torrent?id=${props.torrent.id}`;
                 }}
                 className={buttonStyle}
@@ -513,7 +622,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 Download .torrent
               </div>
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   ActionTorrent(
                     props.torrent.id,
                     paused ? "resume" : "pause"
@@ -528,7 +638,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 {paused ? "Resume" : "Pause"}
               </div>
               <div
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.stopPropagation();
                   if (!confirm("Are you sure to delete this torrent")) return;
                   const res = await fetch(
                     `${app_url}/torrents/action?id=${

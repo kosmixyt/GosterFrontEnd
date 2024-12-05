@@ -46,10 +46,7 @@ export function ConvertModal(props: {
       });
   }, []);
   useEffect(() => {
-    document.body.style.overflowY = "hidden";
-    return () => {
-      document.body.style.overflowY = "auto";
-    };
+    return () => {};
   }, [convertInfo]);
   if (!convertInfo) {
     return <></>;
@@ -59,12 +56,13 @@ export function ConvertModal(props: {
       <ChooseStorage
         close={() => setAskChooseStorage(false)}
         onsuccess={(c, path) => {
+          props.close();
           post_convert(
             props.file.ID,
             convertInfo.Qualities[qualityIndex].Resolution,
             audioIndex,
             `${c.id}@${path}`
-          ).then(props.close);
+          );
         }}
       />,
       document.body
@@ -160,5 +158,23 @@ export async function post_convert(
       type: "error",
       autoClose: 2000,
     });
+  }
+}
+
+export async function action_convert(
+  action: "pause" | "resume" | "stop",
+  task_id: number
+) {
+  const res = await fetch(
+    `${app_url}/transcode/convert/action?action=${action}&convert_id=${task_id}`,
+    {
+      credentials: "include",
+    }
+  );
+  const body = await res.json();
+  if (body.status === "success") {
+    toast.success(`Convert ${action}d`);
+  } else {
+    toast.error(`Failed to ${action} Convert`);
   }
 }
