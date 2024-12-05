@@ -44,7 +44,7 @@ export function AvailableTorrrent(props: {
       console.log("Fetched in ", Date.now() - start);
     }
     fetchTorrents();
-  }, []);
+  }, [props.currentSeason, props.item]);
   if (props.item.TYPE === "movie" && props.item.FILES.length > 0) {
     return <div></div>;
   }
