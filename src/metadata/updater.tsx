@@ -64,21 +64,29 @@ type moveLocalToEpisode = (
   outputEpisodeId: number
 ) => void;
 interface dispositionItem {
-  value: "movie" | "tv";
+  value: "movie" | "tv" | "orphan";
   width: CSSProperties;
 }
+type moveLocalToOrphan = (
+  sourceFile: number,
+  sourceType: "movie" | "tv"
+) => void;
 export default function () {
   const [movies, setmovies] = useState<MovieMetadata[]>([]);
   const [tvs, settvs] = useState<TvMetadata[]>([]);
   const [orphans, setOrphans] = useState<File[]>([]);
   const [disposition, setDisposition] = useState<dispositionItem[]>([
     {
-      value: "movie",
-      width: { width: "50%" },
+      value: "orphan",
+      width: { width: "33%" },
     },
     {
       value: "tv",
-      width: { width: "50%" },
+      width: { width: "33%" },
+    },
+    {
+      value: "movie",
+      width: { width: "33%" },
     },
   ]);
 
@@ -154,6 +162,18 @@ export default function () {
         toast.error("Source tv not found");
       }
     }
+    if (sourceType == "orphan") {
+      const file = orphans.find((file) => file.id === sourceFile);
+      if (file) {
+        const outputMovie = movies.find((movie) => movie.id === outputMovieId);
+        if (!outputMovie) throw new Error("Output movie not found");
+        if (outputMovie) {
+          outputMovie.files.push(file);
+          setOrphans(orphans.filter((file) => file.id !== sourceFile));
+        }
+        setmovies([...movies]);
+      }
+    }
   };
   const moveLocalToEpisode = (
     sourceFile: number,
@@ -224,6 +244,72 @@ export default function () {
         toast.error("Source tv not found");
       }
     }
+    if (sourceType == "orphan") {
+      const file = orphans.find((file) => file.id === sourceFile);
+      console.log(file);
+      if (file) {
+        const outputTv = tvs.find((tv) =>
+          tv.seasons.find((season) => season.id === outputSeasonId)
+        );
+        if (!outputTv) throw new Error("Output tv not found");
+        const outputSeason = outputTv.seasons.find(
+          (season) => season.id === outputSeasonId
+        );
+        if (!outputSeason) throw new Error("Output season not found");
+        outputSeason.episodes
+          .find((episode) => episode.id === outputEpisodeId)!
+          .files.push(file);
+        setOrphans(orphans.filter((file) => file.id !== sourceFile));
+        settvs([...tvs]);
+      }
+    }
+  };
+  const moveLocalToOrphan = (sourceFile: number, sourceType: string) => {
+    console.log("from", sourceType, "to orphan");
+    if (sourceType == "movie") {
+      const movie = movies.find((movie) =>
+        movie.files.find((file) => file.id === sourceFile)
+      );
+      if (movie) {
+        const file = movie.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        orphans.push(file);
+        movie.files = movie.files.filter((file) => file.id !== sourceFile);
+        setmovies([...movies]);
+        setOrphans([...orphans]);
+      }
+    }
+    if (sourceType == "tv") {
+      const sourceTv = tvs.find((tv) =>
+        tv.seasons.some((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        )
+      );
+      if (sourceTv) {
+        const sourceSeason = sourceTv.seasons.find((season) =>
+          season.episodes.some((episode) =>
+            episode.files.some((file) => file.id === sourceFile)
+          )
+        );
+        if (!sourceSeason) throw new Error("Source season not found");
+        const sourceEpisode = sourceSeason.episodes.find((episode) =>
+          episode.files.some((file) => file.id === sourceFile)
+        );
+        if (!sourceEpisode) throw new Error("Source episode not found");
+        const file = sourceEpisode.files.find((file) => file.id === sourceFile);
+        if (!file) throw new Error("File not found");
+        orphans.push(file);
+        sourceEpisode.files = sourceEpisode.files.filter(
+          (file) => file.id !== sourceFile
+        );
+        settvs([...tvs]);
+        setOrphans([...orphans]);
+      } else {
+        toast.error("Source tv not found");
+      }
+    }
   };
   console.log(disposition.length);
   return (
@@ -282,11 +368,16 @@ export default function () {
                   movies={movies}
                   movelocal={moveLocalToMovie}
                 />
-              ) : (
+              ) : dis.value === "tv" ? (
                 <LineDragTv
                   tvs={tvs}
                   movelocal={moveLocalToEpisode}
                   disposition={dis}
+                />
+              ) : (
+                <LineDragOrphans
+                  moveLocal={moveLocalToOrphan}
+                  orphans={orphans}
                 />
               )}
             </>
@@ -357,6 +448,37 @@ function LineDragTv(props: {
       {renderTv.map((tv) => {
         return <RenderTv tv={tv} movelocal={props.movelocal} key={tv.id} />;
       })}
+    </div>
+  );
+}
+
+function LineDragOrphans(props: {
+  orphans: File[];
+  moveLocal: moveLocalToOrphan;
+}) {
+  return (
+    <div className="pt-4 overflow-auto">
+      <div className="text-center">
+        <div className="text-2xl">Orphans</div>
+      </div>
+      <div className="text-center">{props.orphans.length} Orphans</div>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData("id");
+          const sourceType = e.dataTransfer.getData("type");
+          move(id, "db@0", "orphan", null, null).then(() => {
+            props.moveLocal(parseInt(id), sourceType as "movie" | "tv");
+          });
+        }}
+        className="pl-2 mt-2"
+      >
+        {props.orphans.map((file) => {
+          return <RenderFile type="orphan" file={file} key={file.id} />;
+        })}
+      </div>
     </div>
   );
 }
@@ -585,7 +707,7 @@ function RenderMovie(props: {
     </div>
   );
 }
-function RenderFile(props: { file: File; type: "movie" | "tv" }) {
+function RenderFile(props: { file: File; type: "movie" | "tv" | "orphan" }) {
   return (
     <div
       draggable
