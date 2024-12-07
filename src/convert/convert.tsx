@@ -73,26 +73,17 @@ export function ConvertModal(props: {
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-50"></div>
       <div className="fixed z-10  rounded-lg p-4 bg-[#181818] flex flex-col ">
-        <div>Convert : {props.file.FILENAME}</div>
-        <button
-          className="bg-red-500 ml-4 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2"
-          onClick={() => {
-            console.log("close");
-            props.close();
-          }}
-        >
-          Close
-        </button>
+        <div className="text-2xl font-semibold">Convert File</div>
+        <div className="text-xs font-bold">{props.file.FILENAME}</div>
         <div className="flex justify-center mt-8">
           <div className="w-4/5">
-            <div className="w-full text-center">New Filename : </div>
             <select
               value={qualityIndex}
               onChange={(e) => setQualityIndex(parseInt(e.target.value))}
-              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
+              className="bg-[#181818] text-white border-b-2 border-white w-full p-2 rounded-md"
             >
               {convertInfo.Qualities.map((quality, i) => (
-                <option key={i} value={i}>
+                <option key={i} value={i} className="bg-[#181818] text-white">
                   {quality.Name}
                 </option>
               ))}
@@ -100,25 +91,27 @@ export function ConvertModal(props: {
             <select
               value={audioIndex}
               onChange={(e) => setAudioIndex(parseInt(e.target.value))}
-              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
+              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4 p-2 rounded-md"
             >
               {convertInfo.AudioTracks.map((audio, i) => (
-                <option key={i} value={i}>
+                <option key={i} value={i} className="bg-[#181818] text-white">
                   {audio.Name} {i}
                 </option>
               ))}
             </select>
 
-            <button
-              onClick={() => {
-                askChooseStorage
-                  ? setAskChooseStorage(false)
-                  : setAskChooseStorage(true);
-              }}
-              className="bg-[#181818] text-white border-b-2 border-white w-full mt-4"
-            >
-              Choose Storage & Convert
-            </button>
+            <div className="flex justify-center w-full">
+              <button
+                onClick={() => {
+                  askChooseStorage
+                    ? setAskChooseStorage(false)
+                    : setAskChooseStorage(true);
+                }}
+                className="bg-[#181818] w-1/2 text-white border-b-2 border-white mt-4"
+              >
+                Choose Storage & Convert
+              </button>
+            </div>
           </div>
         </div>
       </div>

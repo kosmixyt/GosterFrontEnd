@@ -672,7 +672,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
           {showFiles && (
             <div className="w-full h-full pt-4 items-center flex flex-col">
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowFiles(false);
                 }}
                 className={buttonStyle}
