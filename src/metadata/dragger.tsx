@@ -133,3 +133,52 @@ export function MoveMediaFile(props: { file: FileItem; close: () => void }) {
   }
   return <></>;
 }
+export function MoveSerie(props: { source: TVItem }) {
+  const [target, setTarget] = useState<TVItem | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (target) {
+      const form = new FormData();
+      form.append("source_id", props.source.ID);
+      form.append("target_id", target.ID);
+      fetch(`${app_url}/metadata/serie/move`, {
+        credentials: "include",
+        method: "POST",
+        body: form,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(data.error);
+          } else if (data.message) {
+            toast.success(data.message);
+          }
+          setOpen(false);
+          setTarget(null);
+        });
+    }
+  }, [target]);
+
+  if (!target && open) {
+    return (
+      <SearchRender
+        title={props.source.DISPLAY_NAME}
+        specificType="tv"
+        onselect={(e, j) => {
+          PlatformManager.DispatchCache(j.ID, j.TYPE).then((item) => {
+            setTarget(item as TVItem);
+          });
+        }}
+        close={() => {
+          setOpen(false);
+        }}
+        headTitle={props.source.DISPLAY_NAME}
+      />
+    );
+  }
+  if (!open) {
+    return <div onClick={() => setOpen(true)}>Move all files</div>;
+  }
+  throw new Error("Not Implemented");
+}

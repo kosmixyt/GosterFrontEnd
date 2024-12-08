@@ -20,7 +20,7 @@ import { RequestModal } from "../requests/requests";
 import { ShareModal } from "../me/landing";
 import { CgUnavailable } from "react-icons/cg";
 import { Loader } from "../component/loader/loader";
-import { MoveMediaFile } from "../metadata/dragger";
+import { MoveMediaFile, MoveSerie } from "../metadata/dragger";
 import { AvailableTorrrent } from "./available_torrent";
 import { ContextMenu } from "../component/contextMenu/file";
 
@@ -422,6 +422,9 @@ class Renderer extends React.Component<RendereProps> {
                           download={this.download.bind(this)}
                           stream={this.stream.bind(this)}
                         />
+                        {this.state.item.TYPE === "tv" && (
+                          <MoveSerie source={this.state.item} />
+                        )}
                         <div
                           className="cursor-pointer"
                           hidden={

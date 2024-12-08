@@ -209,10 +209,7 @@ export function UserLanding() {
         )}
       </div>
       <div>
-        <div
-          hidden={me.Torrents.length == 0}
-          className="ml-4 font-semibold text-2xl mb-4"
-        >
+        <div className="ml-4 font-semibold text-2xl mb-4">
           <div> Converts ({me.converts.length})</div>
           <div className="flex gap-2 mt-2">
             <Swiper spaceBetween={isMobile ? 10 : 20} slidesPerView={"auto"}>
