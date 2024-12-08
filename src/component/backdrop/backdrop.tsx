@@ -87,20 +87,32 @@ export class BackDrop extends React.Component<BackDropProps> {
             className="h-1 bg-red-800"
           ></div>
           <AnimatePresence>
-            {!this.state.isHovering && (
-              <motion.img
-                crossOrigin="anonymous"
-                onLoad={(e) => {
-                  this.base64Image = convertImageToBase64(
-                    e.target as HTMLImageElement
+            {/* {!this.state.isHovering && ( */}
+            <motion.img
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={(e) => {
+                if (this.props.watchingLine) {
+                  e.stopPropagation();
+                  this.props.nav(
+                    "/player?transcode=" +
+                      encodeURIComponent(this.props.TRANSCODE_URL)
                   );
-                }}
-                src={this.props.BACKDROP}
-                exit={{ opacity: 0 }}
-                className="object-fill"
-              />
-            )}
-            {this.state.isHovering && (
+                }
+              }}
+              crossOrigin="anonymous"
+              onLoad={(e) => {
+                this.base64Image = convertImageToBase64(
+                  e.target as HTMLImageElement
+                );
+              }}
+              src={this.props.BACKDROP}
+              exit={{ opacity: 0 }}
+              className="object-fill"
+            />
+            {/* )} */}
+            {/* {this.state.isHovering && (
               <motion.video
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -109,8 +121,11 @@ export class BackDrop extends React.Component<BackDropProps> {
                 src={`${app_url}/trailer?type=${this.props.TYPE}&id=${this.props.ID}#t=10`}
                 className="object-cover rounded-lg"
               ></motion.video>
-            )}
+            )} */}
           </AnimatePresence>
+          <div className="opacity-50 mt-1 font-medium text-center ">
+            {this.props.DisplayData}
+          </div>
           {this.state.isHovering && (
             <motion.div
               initial={{ opacity: 0 }}

@@ -127,14 +127,20 @@ export const Landing = () => {
 
 export const LineRender = (props: { line: Line_Render; disable_observer: boolean }, k: number) => {
   const nav = useNavigate();
-  var watchingLine = props.line.Title === "Continue Watching";
+  var watchingLine = props.line.Title === "Watching";
   const [swiper, setSwiper] = React.useState<any>(null);
-  const [PreviousHiddenIndex, setPreviousHiddenIndex] = React.useState<boolean>(true);
+  const [PreviousHiddenIndex, setPreviousHiddenIndex] =
+    React.useState<boolean>(true);
   if (props.line.Data.length === 0) return <></>;
 
   return (
     <div className={`${!isMobile ? "ml-2 mr-2 mt-6" : ""}`}>
-      <LineName className="ml-14" key={k} more="/" lineName={props.line.Title} />
+      <LineName
+        className="ml-14"
+        key={k}
+        more="/"
+        lineName={props.line.Title}
+      />
       <motion.div
         variants={{
           hidden: { opacity: 0 },
@@ -153,7 +159,7 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
           modules={[Pagination]}
           className=""
           slidesPerView={"auto"}
-          spaceBetween={!isMobile ? 5 : 1}
+          spaceBetween={!isMobile ? 10 : 1}
           onSwiper={(swiper: any) => setSwiper(swiper)}
         >
           {props.line.Data.map((item: SKINNY_RENDER, e: number) => (
@@ -161,7 +167,13 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
               {item.ID.startsWith("tmdb@") ? (
                 <PosterRenderer {...item} />
               ) : (
-                <BackDrop className={`${e === 0 ? "ml-0" : ""}`} watchingLine={watchingLine} key={e} nav={nav} {...item} />
+                <BackDrop
+                  className={`${e === 0 ? "ml-0" : ""}`}
+                  watchingLine={watchingLine}
+                  key={e}
+                  nav={nav}
+                  {...item}
+                />
               )}
             </SwiperSlide>
           ))}

@@ -50,6 +50,7 @@ export interface SKINNY_RENDER {
   LOGO: string;
   TRANSCODE_URL: string;
   PROVIDERS: PROVIDERItem[];
+  DisplayData: string;
 }
 export type InheritGo = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, item: SKINNY_RENDER) => void;
 

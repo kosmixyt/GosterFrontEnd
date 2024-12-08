@@ -57,6 +57,14 @@ export function UserLanding() {
       </div>
       <div className="flex justify-center gap-2">
         <div
+          className="p-4 bg-gray-800 mt-3 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+          onClick={() => {
+            nav("/admin");
+          }}
+        >
+          Admin Panel
+        </div>
+        <div
           onClick={() => {
             fetch(`${app_url}/logout`, { credentials: "include" }).then(() => {
               nav("/login");
