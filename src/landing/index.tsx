@@ -181,15 +181,25 @@ export function Bottom(props: { home: Api_Home }) {
   return (
     <div>
       <LineName more="/" lineName={"Providers"} />
-      <Swiper style={{ position: "relative", zIndex: 4 }} slidesPerView={"auto"} spaceBetween={7}>
+      <Swiper
+        style={{ position: "relative", zIndex: 4 }}
+        slidesPerView={"auto"}
+        spaceBetween={7}
+      >
         {props.home.Providers[0].Data.map((item, f) => {
           return (
             <SwiperSlide key={f} style={{ width: "fit-content" }}>
               <div
-                onClick={() => nav(`/browse/provider?provider=${item.PROVIDER_ID}`)}
+                onClick={() =>
+                  nav(`/browse/provider?provider=${item.PROVIDER_ID}`)
+                }
                 className="h-36 w-36 bg-white rounded-lg shadow-lg flex justify-center items-center"
               >
-                <img className="w-full h-full rounded-lg" src={item.URL} alt="" />
+                <img
+                  className="w-full h-full rounded-lg"
+                  src={item.URL}
+                  alt=""
+                />
               </div>
             </SwiperSlide>
           );
@@ -197,7 +207,6 @@ export function Bottom(props: { home: Api_Home }) {
       </Swiper>
       <div className="h-48 flex justify-center items-center">
         <div style={{ display: "block", textAlign: "center" }}>
-          <div onClick={() => window.open("https://kosmix.fr", "_blank")}>KOSMIX.FR</div>
           <div>AUCUN DROIT RESERVEE</div>
           <div
             onClick={(e) => {

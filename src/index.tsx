@@ -9,10 +9,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
 import { Head } from "./layout/layout";
-import fs from "fs";
-// export const app_url = "https://videos.kosmix.fr/api";
-// export const app_url = "http://[2a01:e0a:828:6510:da43:aeff:fe9b:afe4]:7575/api";
-// export const app_url = "http://localhost/api";
 export const app_url = "/api"
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLDivElement
