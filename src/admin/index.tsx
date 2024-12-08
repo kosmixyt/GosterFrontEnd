@@ -34,7 +34,7 @@ export default function Admin() {
           >
             File Manager
           </div>
-          <button
+          {/* <button
             onClick={() => {
               const pl = {
                 channel_id: 46,
@@ -53,7 +53,7 @@ export default function Admin() {
             }}
           >
             Request
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

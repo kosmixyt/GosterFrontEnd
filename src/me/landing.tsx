@@ -55,7 +55,7 @@ export function UserLanding() {
       <div className="text-3xl text-center mt-4 font-semibold font-roboto">
         Bienvenue {me.username}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-2">
         <div
           onClick={() => {
             fetch(`${app_url}/logout`, { credentials: "include" }).then(() => {
@@ -65,6 +65,14 @@ export function UserLanding() {
           className="p-4 bg-gray-800 mt-3 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
         >
           Logout
+        </div>
+        <div
+          onClick={() => {
+            UpdateToken();
+          }}
+          className="p-4 bg-gray-800 mt-3 hover:scale-105 transition-all text-lg font-semibold cursor-pointer rounded-lg text-white"
+        >
+          Update Token
         </div>
       </div>
       <div className="md:flex justify-center">
@@ -739,4 +747,25 @@ export interface TorrentItem {
     progress: number;
   }[];
   SKINNY: SKINNY_RENDER;
+}
+
+export function UpdateToken() {
+  const previous = prompt("Provide your current token to");
+  if (!previous) return;
+  const next = prompt("Provide your new token");
+  if (!next) return;
+  const form = new FormData();
+  form.append("previousToken", previous);
+  form.append("newToken", next);
+  fetch(`${app_url}/token`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  }).then((e) => {
+    if (e.ok) {
+      toast.success("Token updated");
+    } else {
+      toast.error("Token not updated");
+    }
+  });
 }
