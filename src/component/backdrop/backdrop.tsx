@@ -10,14 +10,16 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
 import { FaPlay } from "react-icons/fa6";
 import { motion } from "framer-motion";
-import { MdOutlineFileDownload } from "react-icons/md";
+import { MdDelete, MdOutlineFileDownload } from "react-icons/md";
 
 import { AnimatePresence } from "framer-motion";
 import "react-tooltip/dist/react-tooltip.css";
 import { WATCH_DATA } from "@/src/render/render";
+import { toast } from "react-toastify";
 
 export interface BackdropState {
   isHovering: boolean;
+  deleted: boolean;
 }
 
 var hightZindex = 4;
@@ -38,16 +40,19 @@ export class BackDrop extends React.Component<BackDropProps> {
   public hoverTimeout: any | null = null;
   state: BackdropState = {
     isHovering: false,
+    deleted: false,
   };
 
   public tempElement: HTMLVideoElement | null = null;
   public base64Image: string | null = null;
+
   public OpenTimeout: any | null = null;
   public video = React.createRef<HTMLVideoElement>();
   goRender() {
     this.props.nav("/render/" + this.props.TYPE + "/" + this.props.ID);
   }
   render() {
+    if (this.state.deleted) return <></>;
     return (
       <motion.div
         onClick={this.goRender.bind(this)}
@@ -87,7 +92,21 @@ export class BackDrop extends React.Component<BackDropProps> {
             className="h-1 bg-red-800"
           ></div>
           <AnimatePresence>
-            {/* {!this.state.isHovering && ( */}
+            {this.state.isHovering && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  DeleteFromWatching(this.props.ID, this.props.TYPE).then(
+                    () => {
+                      this.setState({ deleted: true });
+                    }
+                  );
+                }}
+                className="absolute bg-black bg-opacity-50 z-20 rounded-md"
+              >
+                {this.props.watchingLine ? <MdDelete size={25} /> : <></>}
+              </div>
+            )}
             <motion.img
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -168,4 +187,15 @@ function convertImageToBase64(imgElement: HTMLImageElement): string {
 
   // Extrait les données en base64
   return canvas.toDataURL("image/png"); // Remplace 'image/png' par un autre format si nécessaire
+}
+async function DeleteFromWatching(uuid: string, type: string) {
+  const res = await fetch(`${app_url}/continue?uuid=${uuid}&type=${type}`, {
+    credentials: "include",
+  });
+  const data = await res.json();
+  if ("status" in data) {
+    toast.success("Removed from watching list");
+  } else {
+    toast.error(`${data.error}`);
+  }
 }
