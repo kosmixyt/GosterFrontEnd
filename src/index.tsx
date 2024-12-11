@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { Iptv, UnorderedIptv } from "./iptv/iptv";
 import { Head } from "./layout/layout";
-export const app_url = "http://localhost:80/api";
+export const app_url = "http://localhost/api";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLDivElement
 );

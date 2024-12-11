@@ -78,9 +78,9 @@ export class Porenderer extends React.Component<PosterRendererProps> {
   onhoverImg = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {};
   onunhoverImg = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {};
   go(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (this.props.InheritGo) {
+    if (this.props.InheritGo)
       return this.props.InheritGo(event, this.props.render);
-    }
+    
     this.props.nav(`/render/${this.props.render.TYPE}/${this.props.render.ID}`);
   }
   play(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -102,7 +102,9 @@ export class Porenderer extends React.Component<PosterRendererProps> {
         className={`w-40 2xl:w-52 ${this.props.className}  lg:mt-4  lg:mb-4 lg:ml-1 lg:mr-1`}
       >
         <a
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => {
+            console.log("clicked");
+            e.preventDefault(); e.stopPropagation()}}
           href={`/render/${this.props.render.TYPE}/${this.props.render.ID}`}
         >
           <div className="relative border-2 border-transparent lg:hover:border-white rounded-xl h-auto cursor-pointer lg:hover:scale-110 duration-200 delay-100 transition-all ">

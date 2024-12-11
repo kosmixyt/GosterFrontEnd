@@ -155,6 +155,11 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
         viewport={{ once: true, amount: 0.2 }}
         whileInView="show" // Lance l'animation quand la div est dans la vue
       >
+        <div className="absolute left-0 z-40 w-24 -ml-2 h-full bg-gradient-to-r from-[#181818] to-transparent"></div>
+        <div
+          hidden={props.line.Data.length < 6}
+          className="absolute right-0 z-40 w-24 -ml-2 h-full bg-gradient-to-r from-transparent to-[#181818]"
+        ></div>{" "}
         <Swiper
           modules={[Pagination]}
           className=""

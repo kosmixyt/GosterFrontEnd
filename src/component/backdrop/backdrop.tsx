@@ -72,7 +72,7 @@ export class BackDrop extends React.Component<BackDropProps> {
             },
           },
         }}
-        className={`cursor-pointer relative pt-8 w-72 flex`}
+        className={`cursor-pointer relative pt-8 w-72 flex `}
         onHoverStart={() => {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.hoverTimeout = setTimeout(() => {
@@ -128,7 +128,7 @@ export class BackDrop extends React.Component<BackDropProps> {
               }}
               src={this.props.BACKDROP}
               exit={{ opacity: 0 }}
-              className="object-fill"
+              className="object-fill rounded-lg"
             />
             {/* )} */}
             {/* {this.state.isHovering && (

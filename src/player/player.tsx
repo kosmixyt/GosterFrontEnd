@@ -47,6 +47,9 @@ export const PlayerRender = (props: {}) => {
   if (!playerData) return <div>Load</div>;
   return <NewPlayer data={playerData} nav={nav} params={params} />;
 };
+interface ChunkLoadedInfo {
+  index: number;
+}
 
 class NewPlayer extends React.Component<PlayerProps> {
   private video = React.createRef<HTMLVideoElement>();
@@ -57,8 +60,7 @@ class NewPlayer extends React.Component<PlayerProps> {
   public hls = null as Hls;
   public Subtitles: Subtitle[] = this.props.data.subtitles;
   public stats = {
-    transfered: 0,
-    chunk_transfered: 0,
+    chunk_loaded: [] as ChunkLoadedInfo[],
     TtfbArr: [] as number[],
   };
   public state: {
