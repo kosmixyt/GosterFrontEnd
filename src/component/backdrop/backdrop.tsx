@@ -16,10 +16,13 @@ import { AnimatePresence } from "framer-motion";
 import "react-tooltip/dist/react-tooltip.css";
 import { WATCH_DATA } from "@/src/render/render";
 import { toast } from "react-toastify";
+import { CiBookmark } from "react-icons/ci";
+import { IoBookmark } from "react-icons/io5";
 
 export interface BackdropState {
   isHovering: boolean;
   deleted: boolean;
+  watchListed: boolean;
 }
 
 var hightZindex = 4;
@@ -41,6 +44,7 @@ export class BackDrop extends React.Component<BackDropProps> {
   state: BackdropState = {
     isHovering: false,
     deleted: false,
+    watchListed: this.props.WATCHLISTED,
   };
 
   public tempElement: HTMLVideoElement | null = null;
@@ -93,18 +97,46 @@ export class BackDrop extends React.Component<BackDropProps> {
           ></div>
           <AnimatePresence>
             {this.state.isHovering && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  DeleteFromWatching(this.props.ID, this.props.TYPE).then(
-                    () => {
-                      this.setState({ deleted: true });
-                    }
-                  );
-                }}
-                className="absolute bg-black bg-opacity-50 z-20 rounded-md"
-              >
-                {this.props.watchingLine ? <MdDelete size={25} /> : <></>}
+              <div className="absolute bg-black flex gap-1 p-1 bg-opacity-50 z-20 rounded-md">
+                {this.props.watchingLine ? (
+                  <MdDelete
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      DeleteFromWatching(this.props.ID, this.props.TYPE).then(
+                        () => {
+                          this.setState({ deleted: true });
+                        }
+                      );
+                    }}
+                    size={25}
+                  />
+                ) : (
+                  <></>
+                )}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("watchlist");
+                    Watchlist(
+                      this.state.watchListed ? "remove" : "add",
+                      this.props.ID,
+                      this.props.TYPE
+                    ).then((data) => {
+                      if (data) {
+                        this.setState({
+                          watchListed: !this.state.watchListed,
+                        });
+                      }
+                    });
+                  }}
+                >
+                  {this.state.watchListed ? (
+                    <IoBookmark size={25} />
+                  ) : (
+                    <CiBookmark size={25} />
+                  )}
+                  {}
+                </div>
               </div>
             )}
             <motion.img
@@ -197,5 +229,19 @@ async function DeleteFromWatching(uuid: string, type: string) {
     toast.success("Removed from watching list");
   } else {
     toast.error(`${data.error}`);
+  }
+}
+async function Watchlist(action: string, uuid: string, type: string) {
+  const res = await fetch(
+    `${app_url}/watchlist?action=${action}&type=${type}&id=${uuid}`,
+    {
+      credentials: "include",
+    }
+  );
+  const data = await res.json();
+  if ("error" in data) {
+    toast.error(data.error);
+  } else {
+    return data;
   }
 }

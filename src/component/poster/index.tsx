@@ -104,7 +104,8 @@ export class Porenderer extends React.Component<PosterRendererProps> {
         <a
           onClick={(e) => {
             console.log("clicked");
-            e.preventDefault(); e.stopPropagation()}}
+            e.preventDefault();
+          }}
           href={`/render/${this.props.render.TYPE}/${this.props.render.ID}`}
         >
           <div className="relative border-2 border-transparent lg:hover:border-white rounded-xl h-auto cursor-pointer lg:hover:scale-110 duration-200 delay-100 transition-all ">

@@ -78,7 +78,9 @@ export function landing_loader(request: any) {
 
 export const Landing = () => {
   const loader_data = useLoaderData() as Api_Home;
-  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(loader_data.Lines.slice(0, 6));
+  const [DisplayedData, setDisplayedData] = React.useState<Line_Render[]>(
+    loader_data.Lines.slice(0, 6)
+  );
   const [hasMore, setHasMore] = React.useState<boolean>(true);
   useEffect(() => {
     const onresize = () => {
@@ -92,8 +94,17 @@ export const Landing = () => {
   return (
     <div>
       {!isMobile ? (
-        <motion.div initial={{ opacity: 0 }} transition={{ duration: 0.5 }} animate={{ opacity: 1 }}>
-          <Swiper navigation={true} modules={[Autoplay]} slidesPerGroup={1} slidesPerView={1}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          animate={{ opacity: 1 }}
+        >
+          <Swiper
+            navigation={true}
+            modules={[Autoplay]}
+            slidesPerGroup={1}
+            slidesPerView={1}
+          >
             {loader_data.Recents.Data.map((e, i) => (
               <SwiperSlide key={i}>
                 <Full i={i} data={e} />
@@ -104,12 +115,19 @@ export const Landing = () => {
       ) : (
         <></>
       )}
-      <div className="relative z-40" style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}>
+      <div
+        className="relative z-40"
+        style={{ marginTop: `${isMobile ? "80px" : "-320px"}` }}
+      >
         <InfiniteScroll
           dataLength={DisplayedData.length}
           next={() => {
-            var next = [...DisplayedData, loader_data.Lines[DisplayedData.length]];
-            if (next.length > loader_data.Lines.length) return setHasMore(false);
+            var next = [
+              ...DisplayedData,
+              loader_data.Lines[DisplayedData.length],
+            ];
+            if (next.length > loader_data.Lines.length)
+              return setHasMore(false);
             else setDisplayedData(next);
           }}
           hasMore={hasMore}
@@ -125,7 +143,13 @@ export const Landing = () => {
   );
 };
 
-export const LineRender = (props: { line: Line_Render; disable_observer: boolean }, k: number) => {
+export const LineRender = (
+  props: {
+    line: Line_Render;
+    disable_observer: boolean;
+  },
+  k: number
+) => {
   const nav = useNavigate();
   var watchingLine = props.line.Title === "Watching";
   const [swiper, setSwiper] = React.useState<any>(null);
@@ -155,11 +179,6 @@ export const LineRender = (props: { line: Line_Render; disable_observer: boolean
         viewport={{ once: true, amount: 0.2 }}
         whileInView="show" // Lance l'animation quand la div est dans la vue
       >
-        <div className="absolute left-0 z-40 w-24 -ml-2 h-full bg-gradient-to-r from-[#181818] to-transparent"></div>
-        <div
-          hidden={props.line.Data.length < 6}
-          className="absolute right-0 z-40 w-24 -ml-2 h-full bg-gradient-to-r from-transparent to-[#181818]"
-        ></div>{" "}
         <Swiper
           modules={[Pagination]}
           className=""
