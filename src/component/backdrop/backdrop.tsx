@@ -140,6 +140,7 @@ export class BackDrop extends React.Component<BackDropProps> {
               </div>
             )}
             <motion.img
+              crossOrigin="use-credentials"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               whileHover={{ scale: 1.05 }}
@@ -152,7 +153,6 @@ export class BackDrop extends React.Component<BackDropProps> {
                   );
                 }
               }}
-              crossOrigin="anonymous"
               onLoad={(e) => {
                 this.base64Image = convertImageToBase64(
                   e.target as HTMLImageElement

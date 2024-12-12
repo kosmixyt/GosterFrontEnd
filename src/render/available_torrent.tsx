@@ -40,7 +40,7 @@ export function AvailableTorrrent(props: {
       if (data.error) {
         return setError(data.error);
       }
-      setTorrents(data.torrents);
+      setTorrents(data);
       console.log("Fetched in ", Date.now() - start);
     }
     fetchTorrents();
