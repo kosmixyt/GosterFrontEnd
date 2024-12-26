@@ -5,10 +5,12 @@ import { PosterRenderer, SKINNY_RENDER } from "../component/poster";
 import _ from "lodash";
 import { ChunkDisplay } from "../component/chunked_display/display";
 import { app_url } from "..";
-import { LineName } from "../component/lineName";
 import { toast } from "react-toastify";
 
-export async function browse_loader(url: string, actionStr: string): Promise<[SKINNY_RENDER[], string]> {
+export async function browse_loader(
+  url: string,
+  actionStr: string
+): Promise<[SKINNY_RENDER[], string]> {
   console.log(url);
   const uri = new URL(url);
   const action = actionStr;
@@ -69,7 +71,8 @@ export function BrowseFunc() {
   if (!data) return <div></div>;
   return (
     <div className="b-ctn">
-      <LineName className="flex justify-center mb-4 underline" lineName={data[1]} />
+      {/* <LineName className="flex justify-center mb-4 underline" lineName={data[1]} /> */}
+
       <ChunkDisplay key={action as string} items={data[0]} />
     </div>
   );

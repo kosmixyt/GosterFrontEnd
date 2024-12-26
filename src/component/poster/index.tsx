@@ -5,29 +5,12 @@ import { PiTelevisionSimpleDuotone } from "react-icons/pi";
 import { MdMovieCreation } from "react-icons/md";
 import { isMobile } from "react-device-detect";
 import { motion } from "framer-motion";
-// id = po
+import notfound from "./notfound.jpg";
 
-// type SKINNY_RENDER struct {
-// 	ID          int
-// 	PROVIDER    string
-// 	TYPE        string
-// 	NAME        string
-// 	POSTER      string
-// 	BACKDROP    string
-// 	DESCRIPTION string
-// 	YEAR        string
-// 	RUNTIME     int
-// }
 export interface GENRE {
   ID: number;
   NAME: string;
 }
-// type PROVIDERItem struct {
-// 	PROVIDER_ID      int
-// 	URL              string
-// 	PROVIDER_NAME    string
-// 	DISPLAY_PRIORITY int
-// }
 export interface PROVIDERItem {
   PROVIDER_ID: number;
   URL: string;
@@ -52,7 +35,10 @@ export interface SKINNY_RENDER {
   PROVIDERS: PROVIDERItem[];
   DisplayData: string;
 }
-export type InheritGo = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, item: SKINNY_RENDER) => void;
+export type InheritGo = (
+  event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+  item: SKINNY_RENDER
+) => void;
 
 export interface PosterRendererProps {
   render: SKINNY_RENDER;
@@ -68,7 +54,14 @@ export const PosterRenderer = (
 ) => {
   const nav = useNavigate();
   const history = useLocation();
-  return <Porenderer InheritGo={props.InheritGo} className={props.className} render={props} nav={nav} />;
+  return (
+    <Porenderer
+      InheritGo={props.InheritGo}
+      className={props.className}
+      render={props}
+      nav={nav}
+    />
+  );
 };
 export class Porenderer extends React.Component<PosterRendererProps> {
   public ic = React.createRef<HTMLDivElement>();
@@ -80,14 +73,19 @@ export class Porenderer extends React.Component<PosterRendererProps> {
   go(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (this.props.InheritGo)
       return this.props.InheritGo(event, this.props.render);
-    
+
     this.props.nav(`/render/${this.props.render.TYPE}/${this.props.render.ID}`);
   }
   play(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     event.stopPropagation();
-    this.props.nav(`/player?transcode=${encodeURIComponent(this.props.render.TRANSCODE_URL)}`);
+    this.props.nav(
+      `/player?transcode=${encodeURIComponent(this.props.render.TRANSCODE_URL)}`
+    );
   }
-  navigateProvider(event: React.MouseEvent<HTMLDivElement, MouseEvent>, f: PROVIDERItem) {
+  navigateProvider(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    f: PROVIDERItem
+  ) {
     event.stopPropagation();
     this.props.nav(`/browse/provider?provider=${f.PROVIDER_ID}`);
   }
@@ -169,7 +167,10 @@ export class Porenderer extends React.Component<PosterRendererProps> {
             </div>
             <img
               loading="lazy"
-              className="h-full w-full rounded-xl"
+              className="h-full w-full rounded-xl aspect-[2/3]"
+              onError={(e) => {
+                e.currentTarget.src = notfound;
+              }}
               src={this.props.render.POSTER}
               alt={this.props.render.NAME}
             />

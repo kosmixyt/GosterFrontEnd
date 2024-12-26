@@ -697,7 +697,8 @@ function TorrentItemRender(props: { torrent: TorrentItem }) {
                 {props.torrent.files.map((file, i) => {
                   return (
                     <div
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         document.location.href = `${app_url}/torrents/file?id=${props.torrent.id}&index=${i}`;
                       }}
                       key={i}

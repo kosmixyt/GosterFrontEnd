@@ -41,7 +41,7 @@ export function ContextMenu(props: { file?: FileItem | null }) {
       >
         File Options
       </div>
-      <div className=" absolute bg-slate-700 w-40 text-center z-40 rounded-lg">
+      <div className=" absolute bg-slate-700 w-40 text-center z-50 rounded-lg">
         <div
           className={`${style_case}`}
           onClick={() =>

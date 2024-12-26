@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { MovieItem, TVItem } from "./render";
 import { bytesToSize, SearchResults } from "../torrent";
 import { app_url } from "..";
+import { set } from "lodash";
 
 export function AvailableTorrrent(props: {
   item: MovieItem | TVItem;
   currentSeason: number;
-  download : (torrent_id : number) => void;
-  stream : (torrent_id : number) => void;
+  download: (torrent_id: number) => void;
+  stream: (torrent_id: number) => void;
 }) {
   const [torrents, setTorrents] = useState<SearchResults[]>([]);
   const [fetched, setFetched] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [hover, setHover] = useState<boolean>(false);
   useEffect(() => {
+    setFetched(false);
+    setTorrents([]);
     if (props.item.TYPE === "movie" && props.item.FILES.length > 0) return;
     if (props.item.TYPE === "tv") {
       const currentSeasonHaveFile =

@@ -2,7 +2,6 @@ import React, { CSSProperties, useEffect, useState } from "react";
 import { GENRE, SKINNY_RENDER } from "../poster";
 import { app_url, getMute, setMute } from "../..";
 import { miniaHeight, miniaWidth } from "../../landing";
-
 import * as rdd from "react-device-detect";
 
 import "./bc.css";
@@ -14,7 +13,7 @@ import { MdDelete, MdOutlineFileDownload } from "react-icons/md";
 
 import { AnimatePresence } from "framer-motion";
 import "react-tooltip/dist/react-tooltip.css";
-import { WATCH_DATA } from "@/src/render/render";
+import { setFallbackImage, WATCH_DATA } from "../../render/render";
 import { toast } from "react-toastify";
 import { CiBookmark } from "react-icons/ci";
 import { IoBookmark } from "react-icons/io5";
@@ -76,7 +75,7 @@ export class BackDrop extends React.Component<BackDropProps> {
             },
           },
         }}
-        className={`cursor-pointer relative pt-8 w-72 flex `}
+        className={`cursor-pointer relative pt-8 w-48 md:w-52 lg:w-72 flex `}
         onHoverStart={() => {
           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
           this.hoverTimeout = setTimeout(() => {
@@ -159,23 +158,13 @@ export class BackDrop extends React.Component<BackDropProps> {
                 );
               }}
               src={this.props.BACKDROP}
+              onError={setFallbackImage}
               exit={{ opacity: 0 }}
-              className="object-fill rounded-lg"
+              className="object-fill rounded-lg aspect-[500/281] w-full"
             />
-            {/* )} */}
-            {/* {this.state.isHovering && (
-              <motion.video
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                poster={this.base64Image as string}
-                autoPlay
-                src={`${app_url}/trailer?type=${this.props.TYPE}&id=${this.props.ID}#t=10`}
-                className="object-cover rounded-lg"
-              ></motion.video>
-            )} */}
           </AnimatePresence>
           <div className="opacity-50 mt-1 font-medium text-center ">
-            {this.props.DisplayData}
+            {this.props.DisplayData || this.props.NAME}
           </div>
           {this.state.isHovering && (
             <motion.div

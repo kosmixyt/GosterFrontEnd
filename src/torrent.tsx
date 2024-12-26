@@ -93,8 +93,12 @@ function DisplayList() {
     const event = new EventSource(`${app_url}/torrents/list`, {
       withCredentials: true,
     });
-    event.addEventListener("torrents", (data) => setTorrents(JSON.parse(data.data)));
-    event.addEventListener("error", (e) => toast.error("Erreur lors de la récupération des torrents"));
+    event.addEventListener("torrents", (data) =>
+      setTorrents(JSON.parse(data.data))
+    );
+    event.addEventListener("error", (e) =>
+      toast.error("Erreur lors de la récupération des torrents")
+    );
     return () => {
       event.close();
     };
@@ -106,7 +110,7 @@ function DisplayList() {
       <div onClick={() => setAddModal(!addModal)} className="text-center">
         Ajouter
       </div>
-      <table className="w-full min-w-96">
+      <table className="w-full ">
         <thead className="">
           <tr>
             <th>Name</th>
@@ -172,7 +176,10 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
   if (deleted) return <></>;
   return (
     <>
-      <tr className="mt-4 hover:bg-gray-600 rounded-lg" onClick={() => setshowed({ ...showed, accordion: !showed.accordion })}>
+      <tr
+        className="mt-4 hover:bg-gray-600 rounded-lg"
+        onClick={() => setshowed({ ...showed, accordion: !showed.accordion })}
+      >
         <td className="cursor-pointer">{props.torrent.name}</td>
         <td>
           <progress value={props.torrent.progress * 100} max={100}></progress>
@@ -184,11 +191,21 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
           {props.torrent.peers}/{props.torrent.maxpeers}
         </td>
         <td>{props.torrent.mediaOutput}</td>
-        <td className="cursor-pointer" onClick={() => nav(`/render/${props.torrent.mediaOutput}/${props.torrent.mediaOutputUuid}`)}>
+        <td
+          className="cursor-pointer"
+          onClick={() =>
+            nav(
+              `/render/${props.torrent.mediaOutput}/${props.torrent.mediaOutputUuid}`
+            )
+          }
+        >
           {props.torrent.mediaOutputUuid}
         </td>
         <td>{new Date(props.torrent.added).toLocaleString()}</td>
-        <td onMouseEnter={() => setshowed({ ...showed, tooltip: true })} onMouseLeave={() => setshowed({ ...showed, tooltip: false })}>
+        <td
+          onMouseEnter={() => setshowed({ ...showed, tooltip: true })}
+          onMouseLeave={() => setshowed({ ...showed, tooltip: false })}
+        >
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -198,13 +215,23 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
           >
             Zip
           </button>
-          <ToolTip text="Télécharger le dossier compressé" show={showed.tooltip}>
-            <div onClick={() => setshowed({ ...showed, moveTargetStorage: true })}>Move Target Storage</div>
+          <ToolTip
+            text="Télécharger le dossier compressé"
+            show={showed.tooltip}
+          >
+            <div
+              onClick={() => setshowed({ ...showed, moveTargetStorage: true })}
+            >
+              Move Target Storage
+            </div>
             <div
               onClick={(e) => {
-                fetch(`${app_url}/torrents/action?id=${props.torrent.id}&action=recheck`, {
-                  credentials: "include",
-                })
+                fetch(
+                  `${app_url}/torrents/action?id=${props.torrent.id}&action=recheck`,
+                  {
+                    credentials: "include",
+                  }
+                )
                   .then((e) => e.json())
                   .then((e) => toast.info(e.status));
               }}
@@ -213,9 +240,12 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
             </div>
             <div
               onClick={(e) => {
-                fetch(`${app_url}/torrents/action?id=${props.torrent.id}&action=download`, {
-                  credentials: "include",
-                })
+                fetch(
+                  `${app_url}/torrents/action?id=${props.torrent.id}&action=download`,
+                  {
+                    credentials: "include",
+                  }
+                )
                   .then((e) => e.json())
                   .then((e) => {
                     if (e.error) {
@@ -232,9 +262,16 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (confirm("Supprimer le torrent")) {
-                    fetch(`${app_url}/torrents/action?id=${props.torrent.id}&action=delete&deleteFiles=${confirm("Supprimer les fichiers")}`, {
-                      credentials: "include",
-                    })
+                    fetch(
+                      `${app_url}/torrents/action?id=${
+                        props.torrent.id
+                      }&action=delete&deleteFiles=${confirm(
+                        "Supprimer les fichiers"
+                      )}`,
+                      {
+                        credentials: "include",
+                      }
+                    )
                       .then((e) => e.json())
                       .then((e) => {
                         if (e.error) {
@@ -282,9 +319,14 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             onClick={(e) => {
               e.stopPropagation();
-              fetch(`${app_url}/torrents/action?action=${props.torrent.paused ? "resume" : "pause"}&id=${props.torrent.id}`, {
-                credentials: "include",
-              })
+              fetch(
+                `${app_url}/torrents/action?action=${
+                  props.torrent.paused ? "resume" : "pause"
+                }&id=${props.torrent.id}`,
+                {
+                  credentials: "include",
+                }
+              )
                 .then((e) => e.json())
                 .then((e) => toast.info(e.status));
             }}
@@ -300,15 +342,29 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
               <div className="w-3/12 text-left">
                 <div className="text-center">Download Info</div>
                 <div>
-                  <div onClick={() => setshowed({ ...showed, showpeers: !showed.showpeers })}>
+                  <div
+                    onClick={() =>
+                      setshowed({ ...showed, showpeers: !showed.showpeers })
+                    }
+                  >
                     <div>
-                      {showed.data.peers.length} Peers (click to {showed.showpeers ? "hide" : "show"})
+                      {showed.data.peers.length} Peers (click to{" "}
+                      {showed.showpeers ? "hide" : "show"})
                     </div>
                     <div hidden={!showed.showpeers} className="ml-4">
                       {showed.data.peers.map((peer) => {
                         return (
                           <div>
-                            <div onClick={() => window.open("https://ip-api.com/#" + peer.adress.split(":")[0])}>Adress : {peer.adress}</div>
+                            <div
+                              onClick={() =>
+                                window.open(
+                                  "https://ip-api.com/#" +
+                                    peer.adress.split(":")[0]
+                                )
+                              }
+                            >
+                              Adress : {peer.adress}
+                            </div>
                             <div>Dl : {bytesToSize(peer.download_speed)}/s</div>
                           </div>
                         );
@@ -319,24 +375,47 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                   <div></div>
                 </div>
                 <div>
-                  Downloaded : {showed.data?.total_downloaded} ({bytesToSize(showed.data?.total_downloaded)}) (
-                  {bytesToSize(showed.data.session_total_downloaded)} this session)
-                </div>
-                <div>Time to 1% : {Math.round(showed.data?.time_to_1_percent)}s</div>
-                <div>
-                  Uploaded : {showed.data.total_uploaded} ({bytesToSize(showed.data.total_uploaded)}) (
-                  {bytesToSize(showed.data.session_total_uploaded)} this session)
+                  Downloaded : {showed.data?.total_downloaded} (
+                  {bytesToSize(showed.data?.total_downloaded)}) (
+                  {bytesToSize(showed.data.session_total_downloaded)} this
+                  session)
                 </div>
                 <div>
-                  Progression : <progress value={showed.data.progress * 100} max={100}></progress>
+                  Time to 1% : {Math.round(showed.data?.time_to_1_percent)}s
                 </div>
-                <div>Ratio : {showed.data.total_downloaded / showed.data.total_uploaded}</div>
+                <div>
+                  Uploaded : {showed.data.total_uploaded} (
+                  {bytesToSize(showed.data.total_uploaded)}) (
+                  {bytesToSize(showed.data.session_total_uploaded)} this
+                  session)
+                </div>
+                <div>
+                  Progression :{" "}
+                  <progress
+                    value={showed.data.progress * 100}
+                    max={100}
+                  ></progress>
+                </div>
+                <div>
+                  Ratio :{" "}
+                  {showed.data.total_downloaded / showed.data.total_uploaded}
+                </div>
                 <div>En Partage : {showed.data.seeding ? "oui" : "non"}</div>
                 <div>Fini : {showed.data.completed ? "oui" : "non"}</div>
-                <div>Type de Média de Sortie : {showed.data.mediaoutput.toString()}</div>
+                <div>
+                  Type de Média de Sortie : {showed.data.mediaoutput.toString()}
+                </div>
                 <div>
                   Média de sortie : &nbsp;
-                  <button onClick={() => nav(`/render/${showed.data!.mediaoutput}/${showed.data!.media_output_uuid}`)}>
+                  <button
+                    onClick={() =>
+                      nav(
+                        `/render/${showed.data!.mediaoutput}/${
+                          showed.data!.media_output_uuid
+                        }`
+                      )
+                    }
+                  >
                     {showed.data.media_output_uuid}
                   </button>
                 </div>
@@ -344,9 +423,14 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
               <div className="w-3/12 text-left text-sm">
                 <div className="text-center">Torrent Info</div>
                 <div>Dl Path : {showed.data.dl_path}</div>
-                <div onClick={() => setshowed({ ...showed, showAnnounce: !showed.showAnnounce })}>
+                <div
+                  onClick={() =>
+                    setshowed({ ...showed, showAnnounce: !showed.showAnnounce })
+                  }
+                >
                   <div>
-                    {showed.data?.announce.length} Announce url (click to {showed.showAnnounce ? "hide" : "show"})
+                    {showed.data?.announce.length} Announce url (click to{" "}
+                    {showed.showAnnounce ? "hide" : "show"})
                   </div>
                   <div hidden={!showed.showAnnounce} className="ml-4">
                     {showed.data?.announce.map((e) => (
@@ -365,11 +449,18 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                   </a>
                 </div>
                 <div>Creator : {showed.data.creator}</div>
-                <div>Date De creation {new Date(showed.data.creation_date).toLocaleDateString()}</div>
-                <div>Commentaire : {showed.data.comment}</div>
-                <div>Ajouté le {new Date(showed.data.added * 1000).toLocaleDateString()}</div>
                 <div>
-                  Pieces : {showed.data.chunk_count} x {bytesToSize(showed.data.chunk_size).split(" ").join("")}
+                  Date De creation{" "}
+                  {new Date(showed.data.creation_date).toLocaleDateString()}
+                </div>
+                <div>Commentaire : {showed.data.comment}</div>
+                <div>
+                  Ajouté le{" "}
+                  {new Date(showed.data.added * 1000).toLocaleDateString()}
+                </div>
+                <div>
+                  Pieces : {showed.data.chunk_count} x{" "}
+                  {bytesToSize(showed.data.chunk_size).split(" ").join("")}
                 </div>
               </div>
               <div className="w-6/12 text-left">
@@ -389,7 +480,9 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
                           <tr
                             onClick={(e) => {
                               e.stopPropagation();
-                              document.location.href = `${app_url}/torrents/file?id=${showed.data!.id}&index=${i}`;
+                              document.location.href = `${app_url}/torrents/file?id=${
+                                showed.data!.id
+                              }&index=${i}`;
                             }}
                             className="hover:bg-slate-500 cursor-pointer"
                           >
@@ -415,10 +508,14 @@ function RenderLineArray(props: { torrent: TorrentItem }) {
   );
 }
 function DropArea(props: { children: React.ReactNode }) {
-  const [metadata, setmetadata] = useState<ReturnType<typeof ParseBencode> | null>(null);
+  const [metadata, setmetadata] = useState<ReturnType<
+    typeof ParseBencode
+  > | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [itemType, setitemType] = useState<"tv" | "movie" | null>(null);
-  var [item_selected, set_item_selected] = useState<MovieItem | TVItem | null>(null);
+  var [item_selected, set_item_selected] = useState<MovieItem | TVItem | null>(
+    null
+  );
   const [season, setSeason] = useState<number | null>(null);
   const [res, setRes] = useState<null | any>(null);
 
@@ -491,9 +588,16 @@ function DropArea(props: { children: React.ReactNode }) {
   }
   if (itemType === "tv" && season === null) {
     item_selected = item_selected as TVItem;
-    return <SeasonSelector seasons={item_selected.SEASONS} onselect={setSeason} />;
+    return (
+      <SeasonSelector seasons={item_selected.SEASONS} onselect={setSeason} />
+    );
   }
-  if (file != null && item_selected != null && itemType != null && season != null) {
+  if (
+    file != null &&
+    item_selected != null &&
+    itemType != null &&
+    season != null
+  ) {
     if (itemType === "tv" && season == null) {
       throw new Error("Season is null");
     }
@@ -505,10 +609,15 @@ function DropArea(props: { children: React.ReactNode }) {
   return <div></div>;
 }
 
-function SeasonSelector(props: { seasons: SEASON[]; onselect: (index: number) => void }) {
+function SeasonSelector(props: {
+  seasons: SEASON[];
+  onselect: (index: number) => void;
+}) {
   return (
     <div className={`h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0 `}>
-      <div className={`relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-stone-900 h-1/6 w-1/5 rounded-lg`}>
+      <div
+        className={`relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-stone-900 h-1/6 w-1/5 rounded-lg`}
+      >
         <div className={`flex justify-center items-center flex-row`}>
           <div className="ml-4 mr-4 text-center mt-4 mb-4">
             <div className="text-3xl underline mb-5">Choisissez la saison</div>
@@ -531,7 +640,12 @@ function SeasonSelector(props: { seasons: SEASON[]; onselect: (index: number) =>
   );
 }
 
-export function post_file_torrent(file: File | string, itemType: "tv" | "movie", item: MovieItem | TVItem, season_index: number) {
+export function post_file_torrent(
+  file: File | string,
+  itemType: "tv" | "movie",
+  item: MovieItem | TVItem,
+  season_index: number
+) {
   const form = new FormData();
   console.log(file);
   if (file instanceof File) {
@@ -699,10 +813,16 @@ export function AddModal(props: {
   const [search, setSearch] = useState(props.preload?.search);
   const [results, setResults] = useState<SearchResults[]>([]);
   const [torrentId, setTorrentId] = useState<string | null>(null);
-  const [finalType, setFinalType] = useState<"tv" | "movie" | null>(props.preload?.finalType ?? null);
-  const [item, setItem] = useState<MovieItem | TVItem | null>(props.preload?.item ?? null);
+  const [finalType, setFinalType] = useState<"tv" | "movie" | null>(
+    props.preload?.finalType ?? null
+  );
+  const [item, setItem] = useState<MovieItem | TVItem | null>(
+    props.preload?.item ?? null
+  );
   const searchButton = useRef<HTMLButtonElement>(null);
-  const [season, setSeason] = useState<number | null>(props.preload?.season ?? null);
+  const [season, setSeason] = useState<number | null>(
+    props.preload?.season ?? null
+  );
   useEffect(() => {
     if (item) {
       if ((season == null && finalType === "tv") || torrentId == null) {
@@ -710,7 +830,13 @@ export function AddModal(props: {
         return;
       }
       console.log("post", item, season, finalType);
-      post_file_torrent(torrentId as string, finalType as "tv" | "movie", item, season as number);
+      post_file_torrent(
+        torrentId as string,
+        finalType as "tv" | "movie",
+        item,
+        season as number
+      );
+      props.close();
     }
   }, [item, season, finalType, torrentId]);
   useEffect(() => {
@@ -724,42 +850,54 @@ export function AddModal(props: {
   }, []);
   if (torrentId == null) {
     return (
-      <div onClick={(e) => e.stopPropagation()} className="h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0">
-        <div className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#181818] w-3/4 min-w-[450px] h-5/6  rounded-lg flex-col flex justify-center">
-          <div className="flex items-center justify-center mb-6 h-[7%]">
-            <input className={`${SearchClass} mt-2 w-full`} value={search} onChange={(e) => setSearch(e.target.value)} />
-            <button
-              ref={searchButton}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 ml-4"
-              onClick={() => {
-                searchButton.current!.disabled = true;
-                fetch(`${app_url}/torrents/search?q=${search}`, {
-                  credentials: "include",
-                })
-                  .then((e) => e.json())
-                  .then((e) => {
-                    console.log(e);
-                    if (e.torrents.length === 0) {
-                      toast.info("Aucun résultat trouvé");
-                    }
-                    setResults(e.torrents);
-                    searchButton.current!.disabled = false;
-                  });
-              }}
-            >
-              Search
-            </button>
-            <button
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 ml-4"
-              onClick={() => {
-                console.log("close");
-                props.close();
-              }}
-            >
-              Close
-            </button>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="h-full w-full fixed z-20 backdrop-blur-lg top-0 left-0"
+      >
+        <div className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#181818] w-full h-full lg:w-3/4  lg:h-5/6  rounded-lg flex-col flex justify-center">
+          <div className="lg:flex items-center justify-center mb-6">
+            <div className="flex justify-center lg:block">
+              <input
+                className={`${SearchClass} mt-2 w-full`}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-center lg:block">
+              <button
+                ref={searchButton}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 ml-4"
+                onClick={() => {
+                  fetch(`${app_url}/torrents/search?q=${search}`, {
+                    credentials: "include",
+                  })
+                    .then((e) => e.json())
+                    .then((e) => {
+                      console.log(e);
+                      if (e.length === 0) {
+                        toast.info("Aucun résultat trouvé");
+                      }
+                      if (Object.keys(e).includes("error")) {
+                        return toast.error(e.error);
+                      }
+                      setResults(e);
+                    });
+                }}
+              >
+                Search
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 ml-4"
+                onClick={() => {
+                  console.log("close");
+                  props.close();
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
-          <div className="h-[93%] min-w-96 overflow-auto w-full">
+          <div className=" overflow-auto w-full">
             <table className="w-full">
               <thead className="">
                 <th>Provider</th>
@@ -775,7 +913,12 @@ export function AddModal(props: {
                     <td>{result.name}</td>
                     <td>{result.seed}</td>
                     <td>
-                      <a className="hover:underline cursor-pointer" target="_blank" rel="noreferrer" href={result.link}>
+                      <a
+                        className="hover:underline cursor-pointer"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={result.link}
+                      >
                         Link
                       </a>
                     </td>
@@ -821,7 +964,9 @@ export function AddModal(props: {
     );
   }
   if (finalType === "tv" && season === null) {
-    return <SeasonSelector seasons={(item as TVItem).SEASONS} onselect={setSeason} />;
+    return (
+      <SeasonSelector seasons={(item as TVItem).SEASONS} onselect={setSeason} />
+    );
   }
   return <div>You Selected</div>;
 }

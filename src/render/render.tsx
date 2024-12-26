@@ -576,26 +576,83 @@ class Renderer extends React.Component<RendereProps> {
               backgroundImage: `url('${this.state.item.BACKDROP}')`,
               backgroundSize: "cover",
             }}
-            className="bg-no-repeat bg-cover w-screen h-64"
+            className="bg-no-repeat bg-cover w-screen h-[22rem]"
           >
             <div
               className="
               bg-gradient-to-b
               from-transparent
+              backdrop-blur-sm
               to-[#181818]
               via-80%
-              flex justify-center items-end
+              flex justify-center
+              items-center
               to-100%
               h-full
               w-screen "
             >
-              {this.state.item.LOGO != "" ? (
-                <img src={this.state.item.LOGO} className="w-[80vw]" />
-              ) : (
-                <div className="text-4xl underline pb-2">
-                  {this.state.item.DISPLAY_NAME}
+              <div className="w-full flex justify-center gap-1 p-2">
+                <img src={this.state.item.POSTER} className="h-52 rounded-lg" />
+                <div className="h-52 pl-4">
+                  <div className="text-3xl mt-2 underline font-semibold">
+                    {this.state.item.DISPLAY_NAME}
+                  </div>
+                  <div>
+                    <div className="">
+                      {FormatRuntime(this.state.item.RUNTIME)}
+                    </div>
+                    <div>{this.state.item.YEAR}</div>
+                    <div>{this.state.item.AWARDS}</div>
+                  </div>
+                  {/* <div
+                    className="cursor-pointer bg-gray-800 p-2 rounded-lg"
+                    hidden={
+                      (this.state.item.TYPE === "movie" &&
+                        this.state.item.FILES.length > 0) ||
+                      (this.state.item.TYPE === "tv" &&
+                        this.state.item.SEASONS[
+                          this.state.season
+                        ].EPISODES.reduce((p, c) => {
+                          return p + c.FILES.length;
+                        }, 0) > 0)
+                    }
+                    onClick={() => this.setState({ requestModal: true })}
+                  >
+                    Request When Available
+                    {this.state.item.TYPE == "tv"
+                      ? `(Season ${
+                          this.state.item.SEASONS[this.state.season]
+                            .SEASON_NUMBER
+                        })`
+                      : ""}
+                  </div> */}
+                  <div
+                    hidden={
+                      this.state.item.TYPE === "tv" &&
+                      this.state.item.SEASONS[
+                        this.state.season
+                      ].EPISODES.reduce((p, c) => c.FILES.length + p, 0) > 0
+                    }
+                    className="cursor-pointer"
+                    onClick={() => this.setState({ addModal: true })}
+                  >
+                    Manualy add torrent
+                  </div>
+                  <div className="cursor-pointer">
+                    <ContextMenu file={this.currentFile} />
+                  </div>
+                  <div className="cursor-pointer">
+                    <AvailableTorrrent
+                      download={this.download.bind(this)}
+                      stream={this.stream.bind(this)}
+                      currentSeason={this.state.season}
+                      item={this.state.item}
+                    />
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* <img src={this.state.item.LOGO} className=" rounded-lg" /> */}
             </div>
 
             <div className="flex opacity-30 mt-1 justify-center">
@@ -609,86 +666,32 @@ class Renderer extends React.Component<RendereProps> {
                 </div>
               ))}
             </div>
-            <div className="flex justify-center gap-1">
-              {this.state.item.RUNTIME > 0 ? (
-                <div>{FormatRuntime(this.state.item.RUNTIME)}</div>
-              ) : (
-                <></>
-              )}
-              &nbsp;
-              {this.state.item.YEAR ? (
-                <div className="pl-4">{this.state.item.YEAR}</div>
-              ) : (
-                <></>
-              )}
-              &nbsp;
-              {this.state.item.Vote_Average > 0 ? (
-                <div>{this.state.item.Vote_Average}</div>
-              ) : (
-                <></>
-              )}
-              &nbsp;
-              {this.state.item.AWARDS != "" ? (
-                <div>({this.state.item.AWARDS})</div>
-              ) : (
-                <></>
-              )}
-              &nbsp;
-              <div
-                className="cursor-pointer"
-                onClick={() => this.setState({ addModal: true })}
-              >
-                Manualy add torrent
-              </div>
-              <AvailableTorrrent
-                download={this.download.bind(this)}
-                stream={this.stream.bind(this)}
-                currentSeason={this.state.season}
-                item={this.state.item}
-              />
-              <div
-                className="cursor-pointer"
-                hidden={
-                  (this.state.item.TYPE === "movie" &&
-                    this.state.item.FILES.length > 0) ||
-                  (this.state.item.TYPE === "tv" &&
-                    this.state.item.SEASONS[this.state.season].EPISODES.reduce(
-                      (p, c) => {
-                        return p + c.FILES.length;
-                      },
-                      0
-                    ) > 0)
-                }
-                onClick={() => this.setState({ requestModal: true })}
-              >
-                Request When Available
-                {this.state.item.TYPE == "tv"
-                  ? `(Season ${
-                      this.state.item.SEASONS[this.state.season].SEASON_NUMBER
-                    })`
-                  : ""}
-              </div>
-            </div>
+            {/*
+
+
+            </div> */}
             <div>
               <div className="mt-2 text-sm opacity-50 text-center font-semibold pl-2 pr-2">
                 {this.state.item.DESCRIPTION}
               </div>
               {this.state.item.TYPE === "movie" ? (
                 <div>
-                  <select
-                    hidden={this.state.item.FILES.length == 0}
-                    onChange={this.changeFile.bind(this)}
-                    className="mt-4  bg-opacity-50 w-screen rounded-lg text-white p-2"
-                  >
-                    {this.state.item.FILES.map((e, i) => (
-                      <option value={i}>{e.FILENAME}</option>
-                    ))}
-                  </select>
+                  <div className="flex justify-center">
+                    <select
+                      hidden={this.state.item.FILES.length == 0}
+                      onChange={this.changeFile.bind(this)}
+                      className="mt-4 bg-opacity-50 w-full max-w-[30rem] rounded-lg text-white p-2"
+                    >
+                      {this.state.item.FILES.map((e, i) => (
+                        <option value={i}>{e.FILENAME}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 flex gap-2 justify-center w-full">
                     <div
                       onClick={() => this.stream(-1)}
-                      className="cursor-pointer flex justify-center w-[90%] ml-[5%] items-center gap-2 bg-white text-[#181818] font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
+                      className="cursor-pointer flex justify-center w-[80%] max-w-80  items-center gap-2 bg-white text-[#181818] font-bold pt-2 pb-2 pl-10 pr-10 rounded-lg"
                     >
                       <FaPlay />
                       <div>
@@ -699,7 +702,7 @@ class Renderer extends React.Component<RendereProps> {
                     </div>
                     <div
                       onClick={() => this.download(-1)}
-                      className="cursor-pointer flex mt-4 w-[90%] ml-[5%] justify-center items-center gap-2  bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
+                      className="cursor-pointer flex w-[80%] justify-center max-w-80 items-center gap-2  bg-[#181818] font-bold pt-2 pb-2 pl-6 pr-6 rounded-lg"
                     >
                       <FaPlay />
                       <div>Télécharger</div>
@@ -720,57 +723,71 @@ class Renderer extends React.Component<RendereProps> {
                     className="bg-black bg-opacity-50 w-1/2 mt-3 rounded-lg text-white p-2"
                   >
                     {this.state.item.SEASONS.map((e, i) => (
-                      <option value={i}>{e.NAME}</option>
+                      <option value={i}>
+                        {e.NAME} (
+                        {e.EPISODES.reduce(
+                          (prev, cu) => prev + cu.FILES.length,
+                          0
+                        )}
+                        )
+                      </option>
                     ))}
                   </select>
                 </div>
-                <div className="flex justify-center flex-col mt-4">
-                  {this.state.item.SEASONS[this.state.season].EPISODES.map(
-                    (e, i) => (
-                      <div>
-                        <div className="flex w-full text-sm">
-                          <img
-                            src={e.STILL}
-                            className="w-44 xl:w-72 h-auto rounded-lg ml-2"
-                          />
-                          <div className="w-full flex items-center">
-                            <div className="w-full">
-                              <div className=" text-center text-base font-semibold">
-                                {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                <div className="w-full flex justify-center">
+                  <div className="flex-col mt-4 max-w-[40rem]  w-full">
+                    {this.state.item.SEASONS[this.state.season].EPISODES.map(
+                      (e, i) => (
+                        <div>
+                          <div className="flex w-full text-sm">
+                            <img
+                              src={e.STILL}
+                              onError={setFallbackImage}
+                              className="w-44 xl:w-72 h-auto rounded-lg ml-2"
+                            />
+                            <div className="w-full flex items-center">
+                              <div className="w-full">
+                                <div className=" text-center text-base font-semibold">
+                                  {e.EPISODE_NUMBER}&nbsp;-&nbsp;{e.NAME}
+                                </div>
+                                <div className="flex justify-center gap-2 ">
+                                  <div hidden={e.FILES.length == 0}>
+                                    ({e.FILES.length})
+                                  </div>
+                                  <div
+                                    onClick={(event) => this.epDl(event, e, -1)}
+                                  >
+                                    Télécharger
+                                  </div>
+                                  <div
+                                    onClick={(event) =>
+                                      this.epStr(event, e, -1)
+                                    }
+                                  >
+                                    Streamer
+                                  </div>
+                                </div>
+                                <div className="w-full flex justify-center mt-1">
+                                  <select
+                                    hidden={e.FILES.length == 0}
+                                    onChange={(event) => this.epDl(event, e, i)}
+                                    className="bg-opacity-50 rounded-lg mx-1 bg-transparent text-white p-1 w-full max-w-96"
+                                  >
+                                    {e.FILES.map((f, i) => (
+                                      <option value={i}>{f.FILENAME}</option>
+                                    ))}
+                                  </select>
+                                </div>
                               </div>
-                              <div className="flex justify-center gap-2 ">
-                                <div hidden={e.FILES.length == 0}>
-                                  ({e.FILES.length})
-                                </div>
-                                <div
-                                  onClick={(event) => this.epDl(event, e, -1)}
-                                >
-                                  Télécharger
-                                </div>
-                                <div
-                                  onClick={(event) => this.epStr(event, e, -1)}
-                                >
-                                  Streamer
-                                </div>
-                              </div>
-                              <select
-                                hidden={e.FILES.length == 0}
-                                onChange={(event) => this.epDl(event, e, i)}
-                                className="bg-opacity-50 rounded-lg text-white p-1 w-full"
-                              >
-                                {e.FILES.map((f, i) => (
-                                  <option value={i}>{f.FILENAME}</option>
-                                ))}
-                              </select>
                             </div>
                           </div>
+                          <div className="pl-1 pr-1 text-sm opacity-40 mt-1 mb-4 leading-4">
+                            {e.DESCRIPTION}
+                          </div>
                         </div>
-                        <div className="pl-1 pr-1 text-sm opacity-40 mt-1 mb-4 leading-4">
-                          {e.DESCRIPTION}
-                        </div>
-                      </div>
-                    )
-                  )}
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (

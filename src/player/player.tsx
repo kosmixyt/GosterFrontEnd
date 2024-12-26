@@ -106,6 +106,7 @@ class NewPlayer extends React.Component<PlayerProps> {
     } else {
       this.video.current!.src = this.props.data.manifest;
     }
+    this.Container.current!.requestFullscreen()
   }
   shouldComponentUpdate(
     nextProps: Readonly<PlayerProps>,
@@ -332,6 +333,7 @@ class NewPlayer extends React.Component<PlayerProps> {
   render() {
     return (
       <div
+        className="w-screen h-screen relative"
         onMouseMove={this.on_leave.bind(this)}
         onMouseEnter={this.on_enter.bind(this)}
         onMouseLeave={this.on_leave.bind(this)}
@@ -389,8 +391,8 @@ class NewPlayer extends React.Component<PlayerProps> {
             }}
           >
             <motion.div
-              initial={{ marginTop: this.state.hideBottomBar ? 30 : -100 }}
-              animate={{ marginTop: this.state.hideBottomBar ? -100 : 30 }}
+              initial={{ marginTop: this.state.hideBottomBar ? 30 : -200 }}
+              animate={{ marginTop: this.state.hideBottomBar ? -200 : 30 }}
               transition={{ duration: 0.3 }}
               className={`
             
